@@ -50,7 +50,7 @@ npm install -g mocha
 
 
 # Build package
-if !(npm install; npm audit fix --force; npm audit fix); then
+if !(npm install --legacy-peer-deps; npm audit fix --force; npm audit fix); then
     echo "------------------$PACKAGE_NAME:build_fails-------------------------------------"
     echo "$PACKAGE_URL $PACKAGE_NAME"
     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Build_Fails"
