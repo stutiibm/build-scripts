@@ -25,11 +25,17 @@ PACKAGE_VERSION=${1:-v7.16.4}
 PACKAGE_URL=https://github.com/jupyter/nbconvert
 HOME_DIR=${PWD}
 
-yum install -y git python3 python3-devel gcc-c++
+yum install -y wget git python3 python3-devel gcc gcc-c++
 
-# Install pip and activate venv
-python3 -m ensurepip --upgrade
-export PATH=$PATH:/usr/local/bin
+# miniconda installation 
+wget https://repo.anaconda.com/miniconda/Miniconda3-py39_23.10.0-1-Linux-ppc64le.sh -O miniconda.sh 
+bash miniconda.sh -b -p $HOME/miniconda
+export PATH="$HOME/miniconda/bin:$PATH"
+conda create -n $PACKAGE_NAME python=3.9 -y
+eval "$(conda shell.bash hook)"
+conda activate $PACKAGE_NAME
+python3 -m pip install -U pip
+conda install --yes -c conda-forge hatch
 
 # Clone package repository
 cd $HOME_DIR
@@ -37,12 +43,7 @@ git clone $PACKAGE_URL
 cd $PACKAGE_NAME
 git checkout $PACKAGE_VERSION
 
-pip3 install jupyter
-export JUPYTER_PLATFORM_DIRS=1
-jupyter --paths
-JUPYTER_PATH=/usr/local/share/jupyter
 python3 -m pip install --upgrade pip
-
 
 # Install
 if ! python3 -m pip install -e .; then
@@ -52,9 +53,11 @@ if ! python3 -m pip install -e .; then
 	exit 1
 fi
 
+pip install -e ".[test]"
+export JUPYTER_PATH=/usr/share/jupyter
+
 # Test
-python3 -m pip install nbconvert[test]
-if ! pytest; then
+if ! hatch run test:nowarn; then
 	echo "------------------$PACKAGE_NAME:install_success_but_test_fails---------------------"
 	echo "$PACKAGE_URL $PACKAGE_NAME"
 	echo "$PACKAGE_NAME  | $PACKAGE_VERSION | $OS_NAME | GitHub | Fail |  Install_success_but_test_Fails"
