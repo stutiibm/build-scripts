@@ -49,8 +49,6 @@ export JUPYTER_PLATFORM_DIRS=1
 jupyter notebook --generate-config
 find / -name jupyter*config.py
 jupyter --paths
-export JUPYTER_PATH=/root/.config/jupyter
-
 
 # Install
 if ! python3 -m pip install -e .; then
@@ -61,6 +59,7 @@ if ! python3 -m pip install -e .; then
 fi
 
 pip install -e ".[test]"
+export JUPYTER_PATH=/root/.config/jupyter
 
 # Test
 if ! hatch run test:nowarn; then
