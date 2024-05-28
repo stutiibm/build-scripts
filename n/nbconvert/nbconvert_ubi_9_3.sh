@@ -44,6 +44,10 @@ cd $PACKAGE_NAME
 git checkout $PACKAGE_VERSION
 
 python3 -m pip install --upgrade pip
+pip install jupyter
+export JUPYTER_PLATFORM_DIRS=1
+jupyter notebook --generate-config
+jupyter --paths
 
 # Install
 if ! python3 -m pip install -e .; then
