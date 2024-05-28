@@ -47,7 +47,10 @@ python3 -m pip install --upgrade pip
 pip install jupyter
 export JUPYTER_PLATFORM_DIRS=1
 jupyter notebook --generate-config
+find / -name jupyter*config.py
+jupyter notebook --config=/root/.jupyter/jupyter_notebook_config.py
 jupyter --paths
+
 
 # Install
 if ! python3 -m pip install -e .; then
