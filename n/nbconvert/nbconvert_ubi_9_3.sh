@@ -25,13 +25,13 @@ PACKAGE_VERSION=${1:-v7.16.4}
 PACKAGE_URL=https://github.com/jupyter/nbconvert
 HOME_DIR=${PWD}
 
-yum install -y wget git python3 python3-devel gcc gcc-c++
+yum install -y wget git python3 python3-devel gcc gcc-c++ install texlive-plain-generic inkscape texlive-xetex latexmk xvfb x11-utils libxkbcommon-x11-0 libxcb-xinerama0 python3-pyqt5
 
 # miniconda installation 
-wget https://repo.anaconda.com/miniconda/Miniconda3-py39_23.10.0-1-Linux-ppc64le.sh -O miniconda.sh 
+wget https://repo.anaconda.com/miniconda/Miniconda3-py311_23.10.0-1-Linux-ppc64le.sh -O miniconda.sh 
 bash miniconda.sh -b -p $HOME/miniconda
 export PATH="$HOME/miniconda/bin:$PATH"
-conda create -n $PACKAGE_NAME python=3.9 -y
+conda create -n $PACKAGE_NAME python=3.11 -y
 eval "$(conda shell.bash hook)"
 conda activate $PACKAGE_NAME
 python3 -m pip install -U pip
@@ -57,7 +57,7 @@ if ! python3 -m pip install -e .; then
 	exit 1
 fi
 
-pip install -e ".[test]"
+python3 -m pip install nbconvert[test]
 export JUPYTER_PATH=/root/.config/jupyter
 
 # Test
