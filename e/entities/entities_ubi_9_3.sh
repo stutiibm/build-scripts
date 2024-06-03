@@ -31,7 +31,7 @@ export NODE_OPTIONS="--dns-result-order=ipv4first"
 
 #Install dependencies
 #yum -y update
-yum install -y yum-utils wget git gcc gcc-c++ make python39-devel
+yum install -y yum-utils wget git gcc gcc-c++ make python3-devel
 
 #Installing node
 cd $HOME_DIR
