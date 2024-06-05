@@ -22,7 +22,7 @@
 set -ex
 
 # Variables
-PACKAGE_NAME="spdx-expression-parse-js"
+PACKAGE_NAME="spdx-expression-parse.js"
 PACKAGE_VERSION=${1:-"v4.0.0"}
 PACKAGE_URL=https://github.com/jslicense/spdx-expression-parse.js
 NODE_VERSION=${NODE_VERSION:-"18.17.0"}
@@ -42,7 +42,7 @@ node -v
 
 # Clone the repository
 cd $HOME_DIR
-git clone $PACKAGE_URL spdx-expression-parse-js
+git clone $PACKAGE_URL
 cd $PACKAGE_NAME
 git checkout $PACKAGE_VERSION
 
