@@ -54,8 +54,6 @@ if ! R -e "install.packages('$PACKAGE_NAME', dependencies = TRUE, repos = 'http:
     exit 1
 fi
 
-R -e "install.packages('asciicast', dependencies = TRUE, repos = 'http://cran.rstudio.com/')"
-
 #Note: vignettes are disabled
 #Refer to https://r-pkgs.org/vignettes.html
 
