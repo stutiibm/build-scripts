@@ -4,7 +4,7 @@
 # Package	      : opentelemetry-collector-contrib
 # Version	      : v0.102.0 
 # Source repo	  : https://github.com/open-telemetry/opentelemetry-collector-contrib
-# Tested on  	  : ubi 9.3
+# Tested on  	  : ubi:9.3
 # Language        : GO
 # Travis-Check    : True
 # Script License  : Apache License 2.0
