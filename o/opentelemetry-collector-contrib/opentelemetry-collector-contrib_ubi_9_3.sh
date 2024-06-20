@@ -44,8 +44,8 @@ rm -f go"$GO_VERSION".linux-ppc64le.tar.gz
 
 #cloning repository
 cd $HOME_DIR
-git clone "$PACKAGE_URL" "$PACKAGE_SOURCE_ROOT"/"$PACKAGE_NAME"
-cd "$PACKAGE_SOURCE_ROOT"/"$PACKAGE_NAME"
+git clone "$PACKAGE_URL" 
+cd "$PACKAGE_NAME"
 git checkout "$PACKAGE_VERSION" || exit 1
 export GO111MODULE=on
 export MAKEFLAGS="-j$(nproc)"
