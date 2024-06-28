@@ -55,7 +55,7 @@ if ! pip3 install -e . ; then
 fi
 
 #Test package
-if ! tox -e py3.11 ; then
+if ! pytest ; then
     echo "------------------$PACKAGE_NAME:install_success_but_test_fails---------------------"
     echo "$PACKAGE_URL $PACKAGE_NAME"
     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_success_but_test_Fails"
