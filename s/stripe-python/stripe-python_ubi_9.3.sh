@@ -20,7 +20,8 @@
  
 PACKAGE_NAME=stripe-python
 PACKAGE_VERSION=${1:-v9.7.0}
-PACKAGE_URL=https:https://github.com/stripe/stripe-python.git
+PACKAGE_URL=https://github.com/stripe/stripe-python.git
+
  
 yum install -y git python3 python3-devel.ppc64le gcc gcc-c++ make wget sudo
 yum install -y openssl-devel bzip2-devel libffi-devel zlib-devel
@@ -38,8 +39,7 @@ cargo  -V
 cd ../
  
 # Clone the repository
-git clone $PACKAGE_URL $PACKAGE_NAME
- 
+git clone $PACKAGE_URL
 cd $PACKAGE_NAME
 git checkout $PACKAGE_VERSION
  
