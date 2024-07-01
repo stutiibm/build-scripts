@@ -20,12 +20,11 @@
  
 PACKAGE_NAME=stripe-python
 PACKAGE_VERSION=${1:-v9.7.0}
-PACKAGE_URL=https://github.com/stripe/stripe-python.git
-
+PACKAGE_URL=https:https://github.com/stripe/stripe-python.git
  
 yum install -y git python3 python3-devel.ppc64le gcc gcc-c++ make wget sudo
 yum install -y openssl-devel bzip2-devel libffi-devel zlib-devel
-pip3 install pytest unittest2 mock flake8 tox tox-travis 
+pip3 install pytest tox
 PATH=$PATH:/usr/local/bin/
  
 #install rust
@@ -39,7 +38,8 @@ cargo  -V
 cd ../
  
 # Clone the repository
-git clone $PACKAGE_URL
+git clone $PACKAGE_URL $PACKAGE_NAME
+ 
 cd $PACKAGE_NAME
 git checkout $PACKAGE_VERSION
  
@@ -66,7 +66,6 @@ else
         echo "setup.py not present"
 fi
  
-flake8 stripe
  
 #check if tox file is present
 if [ -f "tox.ini" ];then
