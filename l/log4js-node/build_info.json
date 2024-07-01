@@ -9,13 +9,7 @@
   "docker_build": false,
   "validate_build_script": true,
   "use_non_root_user": false,
-  "v6.9.*": {
-    "build_script": "log4js-node_ubi_9_3.sh"
-  },
-  "v6.8.0": {
-    "build_script": "log4js-node_ubi_9_3.sh"
-  },
-  "v6.7.*": {
+  "v6.*.*": {
     "build_script": "log4js-node_ubi_9_3.sh"
   }
 }
