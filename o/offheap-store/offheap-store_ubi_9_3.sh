@@ -41,7 +41,7 @@ PATH=$CWD/apache-maven-${MAVEN_VERSION}/bin:$PATH
 mvn --version
 
 #copying toolchains.xml file to .m2 folder needed to build and test
-wget https://raw.githubusercontent.com/ppc64le/build-scripts/master/o/offheap-store/toolchains.xml
+wget https://raw.githubusercontent.com/stutiibm/build-scripts/master/o/offheap-store/toolchains.xml
 mkdir ~/.m2
 cp toolchains.xml ~/.m2/
 
