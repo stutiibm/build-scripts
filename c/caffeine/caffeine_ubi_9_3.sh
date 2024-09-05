@@ -22,6 +22,9 @@
 PACKAGE_NAME=caffeine
 PACKAGE_URL=https://github.com/ben-manes/caffeine.git
 PACKAGE_VERSION=${1:-v3.1.8}
+export LC_ALL=C.UTF-8
+export LANG=en_US.UTF-8
+export LANGUAGE=en_US.UTF-8
 
 #dependencies
 yum install -y git wget java-11-openjdk-devel.ppc64le
