@@ -37,9 +37,10 @@ java --version
 wget https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz
 tar xvf apache-maven-${MAVEN_VERSION}-bin.tar.gz
 rm -rf apache-maven-${MAVEN_VERSION}-bin.tar.gz
-PATH=$CWD/apache-maven-${MAVEN_VERSION}/bin:$PATH
+mv /usr/local/apache-maven-${MAVEN_VERSION} /usr/local/maven
+export M2_HOME=/usr/local/maven
+export PATH=$PATH:$M2_HOME/bin
 mvn --version
-
 
 # Cloning the repository from remote to local
 git clone $PACKAGE_URL
