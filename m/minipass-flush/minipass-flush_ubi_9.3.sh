@@ -21,21 +21,16 @@
 PACKAGE_NAME=minipass-flush
 PACKAGE_VERSION=${1:-main}
 PACKAGE_URL=https://github.com/isaacs/minipass-flush
+export NODE_VERSION=${NODE_VERSION:-16}
 
 yum install -y yum-utils git wget tar gzip python3 python3-devel gcc gcc-c++ make cmake
 
 #Installing Nodejs 
-cd $HOME_DIR
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash
-export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-source ~/.bashrc
-nvm install 16
-nvm use 16
-node -v
-npm -v
-
-
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+source "$HOME"/.bashrc
+echo "installing nodejs $NODE_VERSION"
+nvm install "$NODE_VERSION" >/dev/null
+nvm use $NODE_VERSION
 
 #Cloning repo
 cd $HOME_DIR
