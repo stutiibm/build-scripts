@@ -22,6 +22,7 @@ PACKAGE_NAME=minipass-flush
 PACKAGE_VERSION=${1:-main}
 PACKAGE_URL=https://github.com/isaacs/minipass-flush
 
+
 yum install -y yum-utils git wget tar gzip python3 python3-devel gcc gcc-c++ make cmake
 
 #Installing Nodejs 
