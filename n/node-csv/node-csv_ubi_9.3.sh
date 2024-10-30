@@ -26,7 +26,7 @@ PACKAGE_NAME=node-csv
 PACKAGE_VERSION=${1:-csv-stringify@6.5.1}
 PACKAGE_URL=https://github.com/adaltas/node-csv
 
-export NODE_VERSION=${NODE_VERSION:-18}
+export NODE_VERSION=${NODE_VERSION:-16}
 
 yum install -y yum-utils git wget tar gzip python3 python3-devel gcc gcc-c++ make cmake
 
