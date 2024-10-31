@@ -24,7 +24,6 @@ set -ex
 PACKAGE_NAME=needle
 PACKAGE_VERSION=${1:-v3.3.0}
 PACKAGE_URL=https://github.com/tomas/needle
-HOME_DIR=${PWD}
 
 export LC_ALL=C.UTF-8
 export LANG=en_US.UTF-8
@@ -36,7 +35,7 @@ sudo yum install -y yum-utils git wget tar gzip python3 python3-devel gcc gcc-c+
 
 #Installing Nodejs 
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-source "$HOME"/.bashrc
+source ./.bashrc
 echo "installing nodejs $NODE_VERSION"
 nvm install "$NODE_VERSION" >/dev/null
 nvm use $NODE_VERSION
