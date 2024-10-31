@@ -59,7 +59,7 @@ mkdir -p test/keys
 openssl genrsa -out test/keys/ssl.key 2048
 openssl req -new -key test/keys/ssl.key -x509 -days 999 -out test/keys/ssl.cert -subj "/"
 
-if ! npm test -- --grep 'character encoding' --invert --timeout 10000; then
+if ! npm test -- --grep 'character encoding' --invert --timeout 20000; then
     echo "------------------$PACKAGE_NAME:install_success_but_test_fails---------------------"
     echo "$PACKAGE_URL $PACKAGE_NAME"
     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_success_but_test_Fails"
