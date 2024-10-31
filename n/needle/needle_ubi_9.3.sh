@@ -32,7 +32,7 @@ export LANGUAGE=en_US.UTF-8
 
 export NODE_VERSION=${NODE_VERSION:-14}
 
-yum install -y yum-utils git wget tar gzip python3 python3-devel gcc gcc-c++ make cmake
+sudo yum install -y yum-utils git wget tar gzip python3 python3-devel gcc gcc-c++ make cmake
 
 #Installing Nodejs 
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
