@@ -51,6 +51,9 @@ cd icu/source
 make
 make install
 
+echo "MYYYYYYYYYYYYYYY------->"
+echo $HOME_DIR
+echo "pppppppppppppppppppppppppppp"
 echo $PWD
 cd ../..
 echo "-------------------------------------"
@@ -58,8 +61,8 @@ echo $PWD
 echo "++++++++++++++++++++++++++++++++++++++++++"
 ls
 export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-export LD_LIBRARY_PATH=/phantomjs/bin:$LD_LIBRARY_PATH
-export PATH=/phantomjs/bin:$PATH
+export LD_LIBRARY_PATH=$HOME_DIR/phantomjs/bin:$LD_LIBRARY_PATH
+export PATH=$HOME_DIR/phantomjs/bin:$PATH
 
 phantomjs --version
 
