@@ -19,7 +19,7 @@
 #
 # ----------------------------------------------------------------------------
 
-set -e
+set -ex
 
 
 PACKAGE_NAME=shelljs
@@ -32,7 +32,12 @@ sudo yum install -y yum-utils git wget tar gzip python3 python3-devel gcc gcc-c+
 
 #Installing Nodejs 
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+echo "------------------------------------------"
+ls
+echo "------------------------------------------"
+echo "$HOME"
 source "$HOME"/.bashrc
+echo "------------------------------------------"
 echo "installing nodejs $NODE_VERSION"
 nvm install "$NODE_VERSION" >/dev/null
 nvm use $NODE_VERSION
