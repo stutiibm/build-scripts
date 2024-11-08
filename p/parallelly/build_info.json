@@ -1,5 +1,5 @@
 {
-   "maintainer": "shubham-garud",
+   "maintainer": "stutiibm",
    "package_name": "parallelly",
    "github_url": "https://github.com/cran/parallelly",
    "version": "1.37.1",
@@ -8,5 +8,8 @@
    "package_dir": "p/parallelly",
    "docker_build": false,
    "validate_build_script": true,
-   "use_non_root_user": false
+   "use_non_root_user": false,
+   "*.*.*": {
+    "build_script": ""parallelly_ubi_9.3.sh""
+  } 
 }
