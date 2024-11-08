@@ -22,7 +22,7 @@
 PACKAGE_NAME=shelljs
 PACKAGE_VERSION=${1:-master}
 PACKAGE_URL=https://github.com/shelljs/shelljs
-export NODE_VERSION=${NODE_VERSION:-20}
+export NODE_VERSION=${NODE_VERSION:-20.18.0}
 HOME_DIR=${PWD}
 
 sudo yum install -y yum-utils git wget tar gzip python3 python3-devel gcc gcc-c++ make cmake libcurl-devel
