@@ -40,7 +40,7 @@ rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-Official
 yum install --nodocs -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
 
 
-yum install -y wget git gcc gcc-c++ python3 python3-devel llvm14 llvm14-devel llvm14-static clang openblas openblas-devel gcc-gfortran
+yum install -y wget git gcc gcc-c++ python3 python3-devel llvm14 llvm14-devel llvm14-static clang openblas openblas-devel gcc-gfortran blas blas-devel
 export PATH=$PATH:/usr/lib64/llvm14/bin
 export LLVM_CONFIG=$(which llvm-config)
 which llvm-config
