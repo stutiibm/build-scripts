@@ -35,7 +35,7 @@ yum install -y yum-utils git wget tar gzip python3 python3-devel gcc gcc-c++ mak
 
 #Installing Nodejs 
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-source ./.bashrc
+source "$HOME"/.bashrc
 echo "installing nodejs $NODE_VERSION"
 nvm install "$NODE_VERSION" >/dev/null
 nvm use $NODE_VERSION
