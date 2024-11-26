@@ -57,10 +57,10 @@ cd flow
 git checkout v0.135.0
 make CC_FLAGS=""
 echo "------------------------------------flow built--------------------------------------------"
-find / -name flow
 echo "------------------------------------flow built locations--------------------------------------------"
 ls $HOME_DIR/flow/bin/flow
 export PATH=$PATH:$HOME_DIR/flow/bin
+echo "-----------------------------------flow version -------------------------------------------------------"
 flow --version
 cd ..
 
