@@ -23,6 +23,7 @@ PACKAGE_VERSION=${1:-v0.16.11}
 PACKAGE_URL=https://github.com/KaTeX/KaTeX
 PACKAGE_NAME=KaTeX
 export NODE_VERSION=${NODE_VERSION:-18}
+HOME_DIR=${PWD}
 
 #installing dependencies
 yum install -y yum-utils git wget tar gzip python3 python3-devel gcc gcc-c++ make cmake diffutils g++  m4 unzip patch bzip2
@@ -58,8 +59,8 @@ make CC_FLAGS=""
 echo "------------------------------------flow built--------------------------------------------"
 find / -name flow
 echo "------------------------------------flow built locations--------------------------------------------"
-ls /flow/bin/flow
-export PATH=$PATH:/flow/bin
+ls $HOME_DIR/flow/bin/flow
+export PATH=$PATH:$HOME_DIR/flow/bin
 flow --version
 cd ..
 
