@@ -67,38 +67,38 @@ cd ..
 
 
 #Cloning repo
-#git clone $PACKAGE_URL
-#cd $PACKAGE_NAME/
-#git checkout $PACKAGE_VERSION
+git clone $PACKAGE_URL
+cd $PACKAGE_NAME/
+git checkout $PACKAGE_VERSION
 
-#corepack enable
+corepack enable
 
-#if ! (yes y | yarn install); then
-#    echo "------------------$PACKAGE_NAME:install_fails-------------------------------------"
-#    echo "$PACKAGE_URL $PACKAGE_NAME"
-#    echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_Fails"
-#    exit 1
-#fi
-#
-#yes y |npx update-browserslist-db@latest
+if ! (yes y | yarn install); then
+    echo "------------------$PACKAGE_NAME:install_fails-------------------------------------"
+    echo "$PACKAGE_URL $PACKAGE_NAME"
+    echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_Fails"
+    exit 1
+fi
 
-#mkdir /KaTeX/.yarn/unplugged/flow-bin-npm-0.135.0-653649e23c/node_modules/flow-bin/flow-linuxppc64-v0.135.0
-#cp /flow/bin/flow /KaTeX/.yarn/unplugged/flow-bin-npm-0.135.0-653649e23c/node_modules/flow-bin/flow-linuxppc64-v0.135.0/flow
-#readlink /KaTeX/.yarn/unplugged/flow-bin-npm-0.135.0-653649e23c/node_modules/flow-bin/flow-linuxppc64-v0.135.0
-#flow init
+yes y |npx update-browserslist-db@latest
 
-#FILE_PATH="/KaTeX/.yarn/unplugged/flow-bin-npm-0.135.0-653649e23c/node_modules/flow-bin/cli.js"
-#sed -i "s|var bin = require('./');|var bin = __dirname + '/flow-linuxppc64-v0.135.0/flow';|" "$FILE_PATH"
-#
-#if ! yarn test; then
-#    echo "------------------$PACKAGE_NAME:install_success_but_test_fails---------------------"
-#    echo "$PACKAGE_URL $PACKAGE_NAME"
-#    echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_success_but_test_Fails"
-#    exit 2
-#else
-#    echo "------------------$PACKAGE_NAME:install_&_test_both_success-------------------------"
-#    echo "$PACKAGE_URL $PACKAGE_NAME"
-#    echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub  | Pass |  Both_Install_and_Test_Success"
-#    exit 0
-#fi
+mkdir $HOME_DIR/KaTeX/.yarn/unplugged/flow-bin-npm-0.135.0-653649e23c/node_modules/flow-bin/flow-linuxppc64-v0.135.0
+cp $HOME_DIR/flow/bin/flow $HOME_DIR/KaTeX/.yarn/unplugged/flow-bin-npm-0.135.0-653649e23c/node_modules/flow-bin/flow-linuxppc64-v0.135.0/flow
+readlink $HOME_DIR/KaTeX/.yarn/unplugged/flow-bin-npm-0.135.0-653649e23c/node_modules/flow-bin/flow-linuxppc64-v0.135.0
+flow init
+
+FILE_PATH="${HOME_DIR}/KaTeX/.yarn/unplugged/flow-bin-npm-0.135.0-653649e23c/node_modules/flow-bin/cli.js"
+sed -i "s|var bin = require('./');|var bin = __dirname + '/flow-linuxppc64-v0.135.0/flow';|" "$FILE_PATH"
+
+if ! yarn test; then
+    echo "------------------$PACKAGE_NAME:install_success_but_test_fails---------------------"
+    echo "$PACKAGE_URL $PACKAGE_NAME"
+    echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_success_but_test_Fails"
+    exit 2
+else
+    echo "------------------$PACKAGE_NAME:install_&_test_both_success-------------------------"
+    echo "$PACKAGE_URL $PACKAGE_NAME"
+    echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub  | Pass |  Both_Install_and_Test_Success"
+    exit 0
+fi
 
