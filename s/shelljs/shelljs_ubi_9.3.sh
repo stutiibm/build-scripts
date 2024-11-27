@@ -22,18 +22,17 @@
 PACKAGE_NAME=shelljs
 PACKAGE_VERSION=${1:-v0.8.5}
 PACKAGE_URL=https://github.com/shelljs/shelljs
-export NODE_VERSION=${NODE_VERSION:-8}
+export NODE_VERSION=${NODE_VERSION:-v8.17.0}
 HOME_DIR=${PWD}
 
 sudo yum install -y yum-utils git wget tar gzip python3 python3-devel gcc gcc-c++ make cmake libcurl-devel
 
 #Installing Nodejs 
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-source "$HOME"/.bashrc
-echo "installing nodejs $NODE_VERSION"
-nvm install "$NODE_VERSION" >/dev/null
-nvm use $NODE_VERSION
+wget https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-ppc64le.tar.gz
+tar -xzf node-v${NODE_VERSION}-linux-ppc64le.tar.gz
+export PATH=$HOME_DIR/node-v${NODE_VERSION}-linux-ppc64le/bin:$PATH
 node -v
+
 
 #Cloning repo
 git clone $PACKAGE_URL
