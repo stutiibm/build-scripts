@@ -22,7 +22,7 @@
 PACKAGE_VERSION=${1:-v0.16.11}
 PACKAGE_URL=https://github.com/KaTeX/KaTeX
 PACKAGE_NAME=KaTeX
-export NODE_VERSION=${NODE_VERSION:-18}
+export NODE_VERSION=${NODE_VERSION:-20}
 HOME_DIR=${PWD}
 
 #installing dependencies
