@@ -1,11 +1,11 @@
 #!/bin/bash -e
 # -----------------------------------------------------------------------------
 #
-# Package          : dlib
-# Version          : v19.24.6
-# Source repo      : https://github.com/davisking/dlib.git
+# Package          : jqTree
+# Version          : 1.8.7
+# Source repo      : https://github.com/mbraak/jqTree.git
 # Tested on        : UBI:9.3
-# Language         : C++
+# Language         : JavaScript
 # Travis-Check     : True
 # Script License   : Apache License, Version 2 or later
 # Maintainer       : Vipul Ajmera <Vipul.Ajmera@ibm.com>
@@ -19,24 +19,30 @@
 # ----------------------------------------------------------------------------
 
 #variables
-PACKAGE_NAME=dlib
-PACKAGE_VERSION=${1:-v19.24.6}
-PACKAGE_URL=https://github.com/davisking/dlib.git
+PACKAGE_NAME=jqTree
+PACKAGE_VERSION=${1:-1.8.7}
+PACKAGE_URL=https://github.com/mbraak/jqTree.git
+
+export NODE_VERSION=${NODE_VERSION:-20}
 
 #install dependencies
-yum install -y git gcc gcc-c++ cmake libX11-devel libwebp-devel libpng-devel 
+yum install -y python3.11 python3.11-devel git gcc gcc-c++ libffi make
 
-#clone repository
+#installing nvm
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+source "$HOME"/.bashrc
+echo "installing nodejs $NODE_VERSION"
+nvm install "$NODE_VERSION" >/dev/null
+nvm use $NODE_VERSION
+
+npm install -g pnpm
+
 git clone $PACKAGE_URL
-cd  $PACKAGE_NAME
+cd $PACKAGE_NAME 
 git checkout $PACKAGE_VERSION
 
-#build
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-
-if ! cmake --build . --config Release ; then
+#install
+if ! pnpm install ; then
     echo "------------------$PACKAGE_NAME:install_fails-------------------------------------"
     echo "$PACKAGE_URL $PACKAGE_NAME"
     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_Fails"
@@ -44,14 +50,7 @@ if ! cmake --build . --config Release ; then
 fi
 
 #test
-cd ../dlib/test
-sed -i 's/max(abs(subm(mat(imout),rect) - subm(out,rect))) < 1e-7/max(abs(subm(mat(imout),rect) - subm(out,rect))) < 1e-5/' image.cpp
-mkdir build
-cd build
-cmake ..
-cmake --build . --config Release 
-
-if ! ./dtest --runall ; then
+if ! pnpm run jest ; then
     echo "------------------$PACKAGE_NAME:install_success_but_test_fails---------------------"
     echo "$PACKAGE_URL $PACKAGE_NAME"
     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_success_but_test_Fails"
