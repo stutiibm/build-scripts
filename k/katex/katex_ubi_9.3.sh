@@ -90,10 +90,10 @@ echo $?
 cp $HOME_DIR/flow/bin/flow $HOME_DIR/KaTeX/.yarn/unplugged/flow-bin-npm-0.135.0-653649e23c/node_modules/flow-bin/flow-linuxppc64-v0.135.0/flow
 echo "----------mkdir then cp-----------------------"
 echo $?
-readlink $HOME_DIR/KaTeX/.yarn/unplugged/flow-bin-npm-0.135.0-653649e23c/node_modules/flow-bin/flow-linuxppc64-v0.135.0
-echo "----------mkdir then cp then readlink-----------------------"
-echo $?
 flow init
+echo "----------mkdir then cp then flow init-----------------------"
+echo $?
+
 
 FILE_PATH="${HOME_DIR}/KaTeX/.yarn/unplugged/flow-bin-npm-0.135.0-653649e23c/node_modules/flow-bin/cli.js"
 sed -i "s|var bin = require('./');|var bin = __dirname + '/flow-linuxppc64-v0.135.0/flow';|" "$FILE_PATH"
