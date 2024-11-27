@@ -82,9 +82,17 @@ fi
 
 yes y |npx update-browserslist-db@latest
 
+echo "-------------b4r mkdir----------------"
+echo $?
 mkdir $HOME_DIR/KaTeX/.yarn/unplugged/flow-bin-npm-0.135.0-653649e23c/node_modules/flow-bin/flow-linuxppc64-v0.135.0
+echo "----------mkdir ------------------------"
+echo $?
 cp $HOME_DIR/flow/bin/flow $HOME_DIR/KaTeX/.yarn/unplugged/flow-bin-npm-0.135.0-653649e23c/node_modules/flow-bin/flow-linuxppc64-v0.135.0/flow
+echo "----------mkdir then cp-----------------------"
+echo $?
 readlink $HOME_DIR/KaTeX/.yarn/unplugged/flow-bin-npm-0.135.0-653649e23c/node_modules/flow-bin/flow-linuxppc64-v0.135.0
+echo "----------mkdir then cp then readlink-----------------------"
+echo $?
 flow init
 
 FILE_PATH="${HOME_DIR}/KaTeX/.yarn/unplugged/flow-bin-npm-0.135.0-653649e23c/node_modules/flow-bin/cli.js"
