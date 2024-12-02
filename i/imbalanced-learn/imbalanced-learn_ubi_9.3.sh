@@ -2,7 +2,7 @@
 # ----------------------------------------------------------------------------
 # 
 # Package       : imbalanced-learn
-# Version       : 0.12.2
+# Version       : 0.12.4
 # Source repo   : https://github.com/scikit-learn-contrib/imbalanced-learn.git
 # Tested on     : UBI:9.3
 # Language      : Python
@@ -20,7 +20,7 @@
 
 #variables
 PACKAGE_NAME=imbalanced-learn
-PACKAGE_VERSION=${1:-0.12.2}
+PACKAGE_VERSION=${1:-0.12.4}
 PACKAGE_URL=https://github.com/scikit-learn-contrib/imbalanced-learn.git
 
 yum install -y gcc gcc-c++ gcc-gfortran git make openblas atlas diffutils patch  python-devel openssl-devel openssl
