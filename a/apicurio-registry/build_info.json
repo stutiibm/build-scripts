@@ -2,7 +2,7 @@
   "maintainer": "stutiibm",
   "package_name": "apicurio-registry",
   "github_url": "https://github.com/Apicurio/apicurio-registry",
-  "version": "2.5.10.Final",
+  "version": "v3.0.5",
   "default_branch": "main",
   "package_dir": "a/apicurio-registry",
   "build_script": "apicurio-registry_ubi_9_3.sh",
@@ -11,5 +11,8 @@
   "use_non_root_user": false,
   "2.*.*.Final": {
     "build_script": "apicurio-registry_ubi_9_3.sh"
-  } 
+  },
+  "v3.*.*": {
+    "build_script": "apicurio-registry_ubi_9_3.sh"
+  }
 }
