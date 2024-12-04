@@ -25,7 +25,7 @@ PACKAGE_VERSION=${1:-v3.0.5}
 PACKAGE_URL=https://github.com/Apicurio/apicurio-registry
 HOME_DIR=${PWD}
 
-yum install -y git java-17-openjdk-devel wget make
+yum install -y git java-17-openjdk-devel wget make unzip
 export JAVA_HOME=/usr/lib/jvm/$(ls /usr/lib/jvm/ | grep -P '^(?=.*java-17)(?=.*ppc64le)')
 export PATH=$JAVA_HOME/bin:$PATH
 
