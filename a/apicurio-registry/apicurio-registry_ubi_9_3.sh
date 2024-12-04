@@ -83,7 +83,7 @@ sed -i '/if \[\[ ! -f \$SCRIPT_DIR\/target\/kiota_tmp\/kiota \]\]/,/# fi/s|curl 
 #pom.xml
 sed -i 's|<phase>generate-resources</phase>|<phase>package</phase>|' ${HOME_DIR}/apicurio-registry/app/pom.xml
 
-if ! mvn install -DskipTests=true ; then
+if ! mvn install -DskipTests=true -fae; then
     echo "------------------$PACKAGE_NAME:install_fails-------------------------------------"
     echo "$PACKAGE_URL $PACKAGE_NAME"
     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_Fails"
