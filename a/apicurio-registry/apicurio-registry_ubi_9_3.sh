@@ -1,5 +1,5 @@
 
-#!/bin/bash -e
+#!/bin/bash -ex
 # -----------------------------------------------------------------------------
 #
 # Package       : apicurio-registry
@@ -23,6 +23,7 @@ set -e
 PACKAGE_NAME=apicurio-registry
 PACKAGE_VERSION=${1:-v3.0.5}
 PACKAGE_URL=https://github.com/Apicurio/apicurio-registry
+HOME_DIR=${PWD}
 
 yum install -y git java-17-openjdk-devel wget make
 export JAVA_HOME=/usr/lib/jvm/$(ls /usr/lib/jvm/ | grep -P '^(?=.*java-17)(?=.*ppc64le)')
