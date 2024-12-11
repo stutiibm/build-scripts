@@ -130,6 +130,9 @@ install_requires = "importlib-metadata ~= 1.0 ; python_version < '3.8'"
 openblas = ["lib/*", "include/*", "lib/pkgconfig/*", "lib/cmake/openblas/*"]
 EOF
 
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+ls
+
 # Run test cases
 if !(make -C utest all); then
     echo "------------------$PACKAGE_NAME:install_success_but_test_fails---------------------"
