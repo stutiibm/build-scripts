@@ -1,9 +1,9 @@
 
-#!/bin/bash -e
+#!/bin/bash -ex
 # -----------------------------------------------------------------------------
 #
 # Package       : apicurio-registry
-# Version       : 2.5.10.Final
+# Version       : v3.0.5
 # Source repo   : https://github.com/Apicurio/apicurio-registry
 # Tested on     : UBI 9.3
 # Language      : Java
@@ -21,9 +21,10 @@
 
 set -e
 PACKAGE_NAME=apicurio-registry
-PACKAGE_VERSION=${1:-2.5.10.Final}
+PACKAGE_VERSION=${1:-v3.0.5}
 PACKAGE_URL=https://github.com/Apicurio/apicurio-registry
 HOME_DIR=${PWD}
+
 
 yum install -y wget yum-utils
 
@@ -35,8 +36,8 @@ mv RPM-GPG-KEY-CentOS-Official /etc/pki/rpm-gpg/.
 rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-Official
 
 dnf install --nodocs -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+yum install -y git java-17-openjdk-devel wget make unzip
 
-yum install -y git java-17-openjdk-devel wget make 
 export JAVA_HOME=/usr/lib/jvm/$(ls /usr/lib/jvm/ | grep -P '^(?=.*java-17)(?=.*ppc64le)')
 export PATH=$JAVA_HOME/bin:$PATH
 java --version
@@ -58,6 +59,7 @@ export GOPATH=$HOME
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 go version
 
+
 #kiota
 git clone https://github.com/microsoft/kiota.git
 cd kiota
@@ -66,7 +68,6 @@ dnf install -y dotnet-sdk-8.0
 dotnet build src/kiota/kiota.csproj -c Release /p:SignAssembly=false
 chmod +x ${HOME_DIR}/kiota/src/kiota/bin/Release/net8.0/kiota
 export PATH=$PATH:${HOME_DIR}/kiota/src/kiota/bin/Release/net8.0
-
 echo ${HOME_DIR}/kiota/src/kiota/bin/Release/net8.0
 kiota --version
 cd ..
@@ -76,6 +77,13 @@ git clone $PACKAGE_URL
 cd $PACKAGE_NAME
 git checkout $PACKAGE_VERSION
 
+#java-sdk
+sed -i '/<\/properties>/i \    <kiota.local.path>/kiota/src/kiota/bin/Release/net8.0/kiota</kiota.local.path>' ${HOME_DIR}/apicurio-registry/java-sdk/pom.xml
+sed -i '0,/<configuration>/s|<configuration>|\0\n          <kiotaPath>${kiota.local.path}</kiotaPath>\n          <logLevel>Debug</logLevel>\n          <useSystemKiota>true</useSystemKiota>|' ${HOME_DIR}/apicurio-registry/java-sdk/pom.xml
+
+#java-sdk-v2
+sed -i '/<\/properties>/i \    <kiota.local.path>/kiota/src/kiota/bin/Release/net8.0/kiota</kiota.local.path>' ${HOME_DIR}/apicurio-registry/java-sdk-v2/pom.xml
+sed -i '0,/<configuration>/s|<configuration>|\0\n              <kiotaPath>${kiota.local.path}</kiotaPath>\n              <logLevel>Debug</logLevel>\n              <useSystemKiota>true</useSystemKiota>|' ${HOME_DIR}/apicurio-registry/java-sdk-v2/pom.xml
 
 #java-sdk
 sed -i '/<\/properties>/i \    <kiota.local.path>/kiota/src/kiota/bin/Release/net8.0/kiota</kiota.local.path>' ${HOME_DIR}/apicurio-registry/java-sdk/pom.xml
@@ -97,6 +105,7 @@ if ! mvn install -DskipTests=true ; then
     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_Fails"
     exit 1
 fi
+
 
 #Skipping App tests as those are in parity with intel
 if ! mvn test -DskipAppTests=true ; then
