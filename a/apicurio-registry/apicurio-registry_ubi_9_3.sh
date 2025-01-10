@@ -74,51 +74,51 @@ echo "Kiota version ------------------------------------------------------------
 kiota --version
 cd ..
 
-# # Cloning the repository 
-# git clone $PACKAGE_URL
-# cd $PACKAGE_NAME
-# git checkout $PACKAGE_VERSION
+# Cloning the repository 
+git clone $PACKAGE_URL
+cd $PACKAGE_NAME
+git checkout $PACKAGE_VERSION
 
-# #java-sdk
-# sed -i '/<\/properties>/i \    <kiota.local.path>/kiota/src/kiota/bin/Release/net8.0/kiota</kiota.local.path>' ${HOME_DIR}/apicurio-registry/java-sdk/pom.xml
-# sed -i '0,/<configuration>/s|<configuration>|\0\n          <kiotaPath>${kiota.local.path}</kiotaPath>\n          <logLevel>Debug</logLevel>\n          <useSystemKiota>true</useSystemKiota>|' ${HOME_DIR}/apicurio-registry/java-sdk/pom.xml
+#java-sdk
+sed -i '/<\/properties>/i \    <kiota.local.path>/kiota/src/kiota/bin/Release/net8.0/kiota</kiota.local.path>' ${HOME_DIR}/apicurio-registry/java-sdk/pom.xml
+sed -i '0,/<configuration>/s|<configuration>|\0\n          <kiotaPath>${kiota.local.path}</kiotaPath>\n          <logLevel>Debug</logLevel>\n          <useSystemKiota>true</useSystemKiota>|' ${HOME_DIR}/apicurio-registry/java-sdk/pom.xml
 
-# #java-sdk-v2
-# sed -i '/<\/properties>/i \    <kiota.local.path>/kiota/src/kiota/bin/Release/net8.0/kiota</kiota.local.path>' ${HOME_DIR}/apicurio-registry/java-sdk-v2/pom.xml
-# sed -i '0,/<configuration>/s|<configuration>|\0\n              <kiotaPath>${kiota.local.path}</kiotaPath>\n              <logLevel>Debug</logLevel>\n              <useSystemKiota>true</useSystemKiota>|' ${HOME_DIR}/apicurio-registry/java-sdk-v2/pom.xml
+#java-sdk-v2
+sed -i '/<\/properties>/i \    <kiota.local.path>/kiota/src/kiota/bin/Release/net8.0/kiota</kiota.local.path>' ${HOME_DIR}/apicurio-registry/java-sdk-v2/pom.xml
+sed -i '0,/<configuration>/s|<configuration>|\0\n              <kiotaPath>${kiota.local.path}</kiotaPath>\n              <logLevel>Debug</logLevel>\n              <useSystemKiota>true</useSystemKiota>|' ${HOME_DIR}/apicurio-registry/java-sdk-v2/pom.xml
 
-# #java-sdk
-# sed -i '/<\/properties>/i \    <kiota.local.path>/kiota/src/kiota/bin/Release/net8.0/kiota</kiota.local.path>' ${HOME_DIR}/apicurio-registry/java-sdk/pom.xml
-# sed -i '0,/<configuration>/s|<configuration>|\0\n          <kiotaPath>${kiota.local.path}</kiotaPath>\n          <logLevel>Debug</logLevel>\n          <useSystemKiota>true</useSystemKiota>|' ${HOME_DIR}/apicurio-registry/java-sdk/pom.xml
+#java-sdk
+sed -i '/<\/properties>/i \    <kiota.local.path>/kiota/src/kiota/bin/Release/net8.0/kiota</kiota.local.path>' ${HOME_DIR}/apicurio-registry/java-sdk/pom.xml
+sed -i '0,/<configuration>/s|<configuration>|\0\n          <kiotaPath>${kiota.local.path}</kiotaPath>\n          <logLevel>Debug</logLevel>\n          <useSystemKiota>true</useSystemKiota>|' ${HOME_DIR}/apicurio-registry/java-sdk/pom.xml
 
-# #java-sdk-v2
-# sed -i '/<\/properties>/i \    <kiota.local.path>/kiota/src/kiota/bin/Release/net8.0/kiota</kiota.local.path>' ${HOME_DIR}/apicurio-registry/java-sdk-v2/pom.xml
-# sed -i '0,/<configuration>/s|<configuration>|\0\n              <kiotaPath>${kiota.local.path}</kiotaPath>\n              <logLevel>Debug</logLevel>\n              <useSystemKiota>true</useSystemKiota>|' ${HOME_DIR}/apicurio-registry/java-sdk-v2/pom.xml
+#java-sdk-v2
+sed -i '/<\/properties>/i \    <kiota.local.path>/kiota/src/kiota/bin/Release/net8.0/kiota</kiota.local.path>' ${HOME_DIR}/apicurio-registry/java-sdk-v2/pom.xml
+sed -i '0,/<configuration>/s|<configuration>|\0\n              <kiotaPath>${kiota.local.path}</kiotaPath>\n              <logLevel>Debug</logLevel>\n              <useSystemKiota>true</useSystemKiota>|' ${HOME_DIR}/apicurio-registry/java-sdk-v2/pom.xml
 
-# #go-sdk
-# sed -i '/if \[\[ ! -f \$SCRIPT_DIR\/target\/kiota_tmp\/kiota \]\]/,/# fi/s|curl -sL \$URL > \$SCRIPT_DIR/target/kiota_tmp/kiota.zip|cp -r /kiota/src/kiota/bin/Release/net8.0/* \$SCRIPT_DIR/target/kiota_tmp/|' ${HOME_DIR}/apicurio-registry/go-sdk/generate.sh
+#go-sdk
+sed -i '/if \[\[ ! -f \$SCRIPT_DIR\/target\/kiota_tmp\/kiota \]\]/,/# fi/s|curl -sL \$URL > \$SCRIPT_DIR/target/kiota_tmp/kiota.zip|cp -r /kiota/src/kiota/bin/Release/net8.0/* \$SCRIPT_DIR/target/kiota_tmp/|' ${HOME_DIR}/apicurio-registry/go-sdk/generate.sh
 
-# #pom.xml
-# sed -i 's|<phase>generate-resources</phase>|<phase>package</phase>|' ${HOME_DIR}/apicurio-registry/app/pom.xml
+#pom.xml
+sed -i 's|<phase>generate-resources</phase>|<phase>package</phase>|' ${HOME_DIR}/apicurio-registry/app/pom.xml
 
-# if ! mvn install -DskipTests=true ; then
-#     echo "------------------$PACKAGE_NAME:install_fails-------------------------------------"
-#     echo "$PACKAGE_URL $PACKAGE_NAME"
-#     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_Fails"
-#     exit 1
-# fi
+if ! mvn install -DskipTests=true ; then
+    echo "------------------$PACKAGE_NAME:install_fails-------------------------------------"
+    echo "$PACKAGE_URL $PACKAGE_NAME"
+    echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_Fails"
+    exit 1
+fi
 
 
 #Skipping App tests as those are in parity with intel
-# if ! mvn test -DskipAppTests=true ; then
-#     echo "------------------$PACKAGE_NAME:install_success_but_test_fails---------------------"
-#     echo "$PACKAGE_URL $PACKAGE_NAME"
-#     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_success_but_test_Fails"
-#     exit 2
-# else
-#     echo "------------------$PACKAGE_NAME:install_&_test_both_success-------------------------"
-#     echo "$PACKAGE_URL $PACKAGE_NAME"
-#     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub  | Pass |  Both_Install_and_Test_Success"
-#     exit 0
-# fi
+if ! mvn test -DskipAppTests=true ; then
+    echo "------------------$PACKAGE_NAME:install_success_but_test_fails---------------------"
+    echo "$PACKAGE_URL $PACKAGE_NAME"
+    echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_success_but_test_Fails"
+    exit 2
+else
+    echo "------------------$PACKAGE_NAME:install_&_test_both_success-------------------------"
+    echo "$PACKAGE_URL $PACKAGE_NAME"
+    echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub  | Pass |  Both_Install_and_Test_Success"
+    exit 0
+fi
 
