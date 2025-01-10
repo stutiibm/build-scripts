@@ -96,7 +96,7 @@ sed -i '/<\/properties>/i \    <kiota.local.path>/kiota/src/kiota/bin/Release/ne
 sed -i '0,/<configuration>/s|<configuration>|\0\n              <kiotaPath>${kiota.local.path}</kiotaPath>\n              <logLevel>Debug</logLevel>\n              <useSystemKiota>true</useSystemKiota>|' ${HOME_DIR}/apicurio-registry/java-sdk-v2/pom.xml
 
 #go-sdk
-sed -i '/if \[\[ ! -f \$SCRIPT_DIR\/target\/kiota_tmp\/kiota \]\]/,/# fi/s|curl -sL \$URL > \$SCRIPT_DIR/target/kiota_tmp/kiota.zip|cp -r /kiota/src/kiota/bin/Release/net8.0/* \$SCRIPT_DIR/target/kiota_tmp/|' ${HOME_DIR}/apicurio-registry/go-sdk/generate.sh
+sed -i '/if \[\[ ! -f \$SCRIPT_DIR\/target\/kiota_tmp\/kiota \]\]/,/# fi/s|curl -sL \$URL > \$SCRIPT_DIR/target/kiota_tmp/kiota.zip|cp -r ${HOME_DIR}/kiota/src/kiota/bin/Release/net8.0/* \$SCRIPT_DIR/target/kiota_tmp/|' ${HOME_DIR}/apicurio-registry/go-sdk/generate.sh
 
 #pom.xml
 sed -i 's|<phase>generate-resources</phase>|<phase>package</phase>|' ${HOME_DIR}/apicurio-registry/app/pom.xml
