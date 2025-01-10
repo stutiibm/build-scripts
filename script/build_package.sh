@@ -56,7 +56,7 @@ then
     then
        cat build_log
     else
-       tail -100 build_log
+       tail -1000 build_log
     fi
     exit 1
 else
