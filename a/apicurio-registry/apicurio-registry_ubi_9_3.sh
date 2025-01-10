@@ -1,9 +1,8 @@
-
 #!/bin/bash -ex
 # -----------------------------------------------------------------------------
 #
 # Package       : apicurio-registry
-# Version       : v3.0.5
+# Version       : v3.0.6
 # Source repo   : https://github.com/Apicurio/apicurio-registry
 # Tested on     : UBI 9.3
 # Language      : Java
@@ -21,7 +20,7 @@
 
 set -e
 PACKAGE_NAME=apicurio-registry
-PACKAGE_VERSION=${1:-v3.0.5}
+PACKAGE_VERSION=${1:-v3.0.6}
 PACKAGE_URL=https://github.com/Apicurio/apicurio-registry
 HOME_DIR=${PWD}
 
