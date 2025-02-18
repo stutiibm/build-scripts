@@ -1,0 +1,16 @@
+{
+  "maintainer": "stutiibm",
+  "package_name": "demo",
+  "github_url": "https://github.com/demo",
+  "version": "v1.1.1",
+  "wheel_build" : true,
+  "package_dir": "d/demo",
+  "default_branch": "master",
+  "build_script": "demo_ubi_9.3.sh",
+  "docker_build": false,
+  "validate_build_script": true,
+  "use_non_root_user": "false",
+  "v*.*.*":{
+    "build_script":"demo_ubi_9.3.sh"
+  }
+}
