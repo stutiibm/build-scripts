@@ -57,7 +57,7 @@ cd $PACKAGE_NAME
 git checkout $PACKAGE_VERSION
 git submodule update --init
 
-wget https://raw.githubusercontent.com/stutiibm/build-scripts/refs/heads/sbm-re2-py-replica/o/openblas/LICENSE
+wget https://raw.githubusercontent.com/stutiibm/build-scripts/refs/heads/sbm-re2-py-replica/o/openblas/pyproject.toml
 sed -i "s/{PACKAGE_VERSION}/$(echo $PACKAGE_VERSION | sed 's/^v//')/g" pyproject.toml
 echo "--------------------------replaced version in pyproject.toml--------------------------"
 
