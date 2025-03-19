@@ -6,7 +6,7 @@ language: shell
 branches:
   only:
     - master
-    - python-ecosystem
+    - sbm-re2-py-replica
 
 env:
   global:
