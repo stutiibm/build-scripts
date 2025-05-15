@@ -23,6 +23,7 @@ PACKAGE_VERSION=${1:-0.1}
 PACKAGE_URL=https://github.com/tylerlaberge/Jasper
 PACKAGE_DIR="$(pwd)/$PACKAGE_NAME"
 
+#installed deps
 yum install -y git  python3 python3-devel.ppc64le gcc gcc-c++ make wget sudo cmake
 pip3 install pytest tox nox
 PATH=$PATH:/usr/local/bin/
