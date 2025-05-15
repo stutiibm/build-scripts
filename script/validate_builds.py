@@ -26,10 +26,14 @@ def trigger_basic_validation_checks(file_name):
         "# Travis-Check": "travis_check"
     }
     matched_keys = []
+    print(f"Here are file name : {file_name}-------------------------------------")
     # Check if apache license file exists
     file_parts = file_name.split('/')
+    print(f"Here are file parts : {file_parts}-------------------------------------")
     licence_file = "{}/{}/LICENSE".format(HOME, "/".join(file_parts[:-1]))
+    print(f"Here are licence_file : {licence_file}-------------------------------------")
     if not os.path.exists(licence_file):
+        print("[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]")
         raise ValueError("License file cannot be not found.")
 
     # Check if components of Doc string are available.
