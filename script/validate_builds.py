@@ -151,6 +151,7 @@ def validate_build_info_file(file_name):
         raise e
 
 def trigger_build_validation_travis(pr_number):
+    print("------------------------------------------Inside trigger_build_validation_travis----------------------------------------")
     pull_request_file_url = "https://api.github.com/repos/{}/{}/pulls/{}/files".format(
         GITHUB_BUILD_SCRIPT_BASE_OWNER,
         GITHUB_BUILD_SCRIPT_BASE_REPO,
@@ -162,11 +163,12 @@ def trigger_build_validation_travis(pr_number):
     ordered_files = []
     build_info = [file for file in response if 'build_info.json' in file.get('filename')]
     other_files = [file for file in response if 'build_info.json' not in file.get('filename')]
+    print(f"-------------------------------Other files : {other_files}----------------------------------------------------------")
 
     ordered_files = build_info + other_files
     for file in ordered_files:
         filename = file.get('filename', "")
-        print(f"{filename}")
+        print(f"--------------------------filename : {filename}----------------------------------------------------")
         
     # Trigger validation for all shell scripts
     for i in ordered_files:
