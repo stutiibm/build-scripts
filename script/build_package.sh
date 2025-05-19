@@ -1,5 +1,15 @@
  #!/bin/bash -e
 
+# Debug: Print incoming environment variables
+echo "==== DEBUG: Incoming Variables ===="
+echo "PKG_DIR_PATH: $PKG_DIR_PATH"
+echo "BUILD_SCRIPT: $BUILD_SCRIPT"
+echo "VERSION: $VERSION"
+echo "TESTED_ON: $TESTED_ON"
+echo "NON_ROOT_BUILD: $NON_ROOT_BUILD"
+echo "==================================="
+
+
 sudo apt update -y && sudo apt-get install file -y
 #pip3 install --upgrade requests
 pip3 install --force-reinstall -v "requests==2.31.0"
