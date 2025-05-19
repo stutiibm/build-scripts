@@ -30,6 +30,13 @@ on:
         description: 'Enable Grype scan'
         required: true
         default: 'true'
+      package_name:
+        description: 'Name of the package'
+        required: true
+      version:
+        description: 'Version of the package'
+        required: true
+
 
 env:
   ENABLE_TRIVY: ${{ inputs.enable_trivy }}
