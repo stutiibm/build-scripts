@@ -97,24 +97,6 @@ jobs:
         with:
           name: variable-sh
 
-      - name: Show contents of downloaded variable.sh
-        run: |
-          echo "===== Downloaded variable.sh ====="
-          cat variable.sh
-          echo "=================================="
-
-
-      - name: Source variables and print them
-        run: |
-          echo "Sourcing variable.sh ..........................................."
-          source variable.sh
-          echo "VERSION=$VERSION"
-          echo "BUILD_SCRIPT=$BUILD_SCRIPT"
-          echo "IMAGE_NAME=$IMAGE_NAME"
-          echo "NON_ROOT_BUILD=$NON_ROOT_BUILD"
-          echo "Sourced variable.sh ..........................................."
-
-
       - name: Install Docker
         run: |
           echo "Installing docker ..........................................."
@@ -142,6 +124,13 @@ jobs:
 
       - name: Build Package
         run: |
+          echo "Sourcing variable.sh ..........................................."
+          source variable.sh
+          echo "VERSION=$VERSION"
+          echo "BUILD_SCRIPT=$BUILD_SCRIPT"
+          echo "IMAGE_NAME=$IMAGE_NAME"
+          echo "NON_ROOT_BUILD=$NON_ROOT_BUILD"
+          echo "Sourced variable.sh ..........................................."
           mkdir package-cache
           sudo mv variable.sh package-cache
           chmod +x ./script/build_package.sh
