@@ -60,16 +60,19 @@ jobs:
 
       - name: Install system packages
         run: |
+          echo "Installing system packages..."
           sudo apt update -y
           sudo apt install -y jq file
 
       - name: Install Python dependencies
         run: |
+          echo "Installing Python dependencies..."
           pip3 install --force-reinstall -v "requests==2.31.0"
           pip3 install --upgrade docker
 
       - name: Get Build Info
         run: |
+          echo "Getting build_info..."
           chmod +x ./script/read_buildinfo.sh
           bash ./script/read_buildinfo.sh
           echo "VARIABLE_SH_CONTENT<<EOF" >> $GITHUB_ENV
