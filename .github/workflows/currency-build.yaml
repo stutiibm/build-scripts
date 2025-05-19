@@ -73,6 +73,12 @@ jobs:
           chmod +x ./script/read_buildinfo.sh
           bash ./script/read_buildinfo.sh
 
+      - name: Show contents of variable.sh
+        run: |
+          echo "===== variable.sh ====="
+          cat variable.sh
+          echo "======================="
+
       - name: Upload variable.sh
         uses: actions/upload-artifact@v4
         with:
