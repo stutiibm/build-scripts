@@ -58,8 +58,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-
-
       - name: Install system packages
         run: |
           sudo apt update -y
@@ -77,6 +75,12 @@ jobs:
           echo "VARIABLE_SH_CONTENT<<EOF" >> $GITHUB_ENV
           cat variable.sh >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
+
+      - name: Upload variable.sh as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: variable-sh-file
+          path: variable.sh
 
   build:
     needs: build_info
@@ -109,10 +113,15 @@ jobs:
             exit 1
           fi
 
+      - name: Download variable.sh artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: variable-sh-file
+          path: ./path/to/destination
+
       - name: Load Variables
         run: |
-          echo "$VARIABLE_SH_CONTENT" > variable.sh
-          source variable.sh
+          source ./path/to/destination/variable.sh
 
       - name: Build Package
         run: |
@@ -142,15 +151,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Download variable.sh artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: variable-sh-file
+          path: ./path/to/destination
+
+      - name: Load Variables
+        run: |
+          source ./path/to/destination/variable.sh
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Load Variables
-        run: |
-          echo "$VARIABLE_SH_CONTENT" > variable.sh
-          source variable.sh
 
       - name: Build Wheel
         run: |
@@ -167,10 +181,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Download variable.sh artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: variable-sh-file
+          path: ./path/to/destination
+
       - name: Load Variables
         run: |
-          echo "$VARIABLE_SH_CONTENT" > variable.sh
-          source variable.sh
+          source ./path/to/destination/variable.sh
 
       - name: Run Trivy Scan
         if: ${{ inputs.enable_trivy == 'true' }}
@@ -213,10 +232,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Download variable.sh artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: variable-sh-file
+          path: ./path/to/destination
+
       - name: Load Variables
         run: |
-          echo "$VARIABLE_SH_CONTENT" > variable.sh
-          source variable.sh
+          source ./path/to/destination/variable.sh
 
       - name: Build Docker Image
         run: |
@@ -236,10 +260,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Download variable.sh artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: variable-sh-file
+          path: ./path/to/destination
+
       - name: Load Variables
         run: |
-          echo "$VARIABLE_SH_CONTENT" > variable.sh
-          source variable.sh
+          source ./path/to/destination/variable.sh
 
       - name: Load Docker Image
         run: |
