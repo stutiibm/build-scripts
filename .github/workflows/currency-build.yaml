@@ -58,11 +58,39 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Environment
+      - name: Install Docker
+        run: |
+          curl -fsSL https://get.docker.com -o get-docker.sh
+          sudo sh get-docker.sh
+
+      - name: Start Docker with vfs storage driver
+        run: |
+          sudo systemctl stop docker || true
+          sudo killall dockerd || true
+          echo '{"storage-driver":"vfs"}' | sudo tee /etc/docker/daemon.json > /dev/null
+          sudo dockerd > /tmp/dockerd.log 2>&1 &
+          for i in {1..10}; do
+            if docker info > /dev/null 2>&1; then
+              echo "Docker is up"
+              break
+            fi
+            sleep 3
+          done
+          if ! docker info > /dev/null 2>&1; then
+            echo "Docker failed to start. Dumping logs:"
+            cat /tmp/dockerd.log
+            exit 1
+          fi
+
+      - name: Install system packages
         run: |
           sudo apt update -y
-          sudo apt install -y jq
-          jq --version
+          sudo apt install -y jq file
+
+      - name: Install Python dependencies
+        run: |
+          pip3 install --force-reinstall -v "requests==2.31.0"
+          pip3 install --upgrade docker
 
       - name: Get Build Info
         run: |
