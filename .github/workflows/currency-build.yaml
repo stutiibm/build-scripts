@@ -3,9 +3,15 @@ name: Currency Build
 on:
   workflow_dispatch:
     branches:
-      - master  # Specify the branch for triggering this workflow
+      - master
       - replica-master
     inputs:
+      package_name:
+        description: 'Name of the package to build'
+        required: true
+      version:
+        description: 'Version of the package'
+        required: true
       validate_build_script:
         description: 'Run build validation script'
         required: true
@@ -30,13 +36,6 @@ on:
         description: 'Enable Grype scan'
         required: true
         default: 'true'
-      package_name:
-        description: 'Name of the package'
-        required: true
-      version:
-        description: 'Version of the package'
-        required: true
-
 
 env:
   ENABLE_TRIVY: ${{ inputs.enable_trivy }}
@@ -46,6 +45,15 @@ env:
 jobs:
   build_info:
     runs-on: ubuntu-24.04-ppc64le
+    env:
+      PACKAGE_NAME: ${{ inputs.package_name }}
+      VERSION: ${{ inputs.version }}
+      VALIDATE_BUILD_SCRIPT: ${{ inputs.validate_build_script }}
+      WHEEL_BUILD: ${{ inputs.wheel_build }}
+      BUILD_DOCKER: ${{ inputs.docker_build }}
+      ENABLE_TRIVY: ${{ inputs.enable_trivy }}
+      ENABLE_SYFT: ${{ inputs.enable_syft }}
+      ENABLE_GRYPE: ${{ inputs.enable_grype }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -69,8 +77,7 @@ jobs:
     if: ${{ inputs.validate_build_script == 'true' }}
     runs-on: ubuntu-24.04-ppc64le
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Load Variables
         run: |
@@ -88,7 +95,6 @@ jobs:
           echo "export CLONED_PACKAGE=\"$cloned_package\"" >> package-cache/variable.sh
           cd package-cache
           sudo chown $USER:$USER -R .
-          ls -ltr
           chmod +x ../script/pre_process.sh
           bash ../script/pre_process.sh
           cd $GITHUB_WORKSPACE
@@ -104,8 +110,7 @@ jobs:
       matrix:
         python-version: [3.9, 3.10, 3.11, 3.12, 3.13]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -130,8 +135,7 @@ jobs:
     if: ${{ inputs.validate_build_script == 'true' }}
     runs-on: ubuntu-24.04-ppc64le
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Load Variables
         run: |
@@ -177,8 +181,7 @@ jobs:
     if: ${{ inputs.docker_build == 'true' }}
     runs-on: ubuntu-24.04-ppc64le
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Load Variables
         run: |
@@ -189,7 +192,6 @@ jobs:
         run: |
           chmod +x ./script/build_docker.sh
           bash ./script/build_docker.sh
-          echo "printing docker images"
           docker images
 
       - name: Upload Docker Image
@@ -202,8 +204,7 @@ jobs:
     if: ${{ inputs.docker_build == 'true' }}
     runs-on: ubuntu-24.04-ppc64le
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Load Variables
         run: |
