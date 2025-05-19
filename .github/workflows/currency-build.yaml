@@ -93,10 +93,13 @@ jobs:
 
       - name: Source variables
         run: |
+          echo "Sourcing variable.sh ..........................................."
           source variable.sh
+          echo "Sourced variables.sh ..........................................."
 
       - name: Install Docker
         run: |
+          echo "Installing docker ..........................................."
           curl -fsSL https://get.docker.com -o get-docker.sh
           sudo sh get-docker.sh
 
