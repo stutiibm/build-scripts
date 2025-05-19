@@ -58,8 +58,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-
-
       - name: Install system packages
         run: |
           sudo apt update -y
@@ -70,13 +68,16 @@ jobs:
           pip3 install --force-reinstall -v "requests==2.31.0"
           pip3 install --upgrade docker
 
-      - name: Get Build Info
+      - name: Get Build Info and Save Variables
         run: |
           chmod +x ./script/read_buildinfo.sh
           bash ./script/read_buildinfo.sh
-          echo "VARIABLE_SH_CONTENT<<EOF" >> $GITHUB_ENV
-          cat variable.sh >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+
+      - name: Upload variable.sh
+        uses: actions/upload-artifact@v3
+        with:
+          name: variable-sh
+          path: variable.sh
 
   build:
     needs: build_info
@@ -84,6 +85,15 @@ jobs:
     runs-on: ubuntu-24.04-ppc64le
     steps:
       - uses: actions/checkout@v4
+
+      - name: Download variable.sh
+        uses: actions/download-artifact@v3
+        with:
+          name: variable-sh
+
+      - name: Source variables
+        run: |
+          source variable.sh
 
       - name: Install Docker
         run: |
@@ -108,11 +118,6 @@ jobs:
             cat /tmp/dockerd.log
             exit 1
           fi
-
-      - name: Load Variables
-        run: |
-          echo "$VARIABLE_SH_CONTENT" > variable.sh
-          source variable.sh
 
       - name: Build Package
         run: |
@@ -147,10 +152,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Load Variables
-        run: |
-          echo "$VARIABLE_SH_CONTENT" > variable.sh
-          source variable.sh
+      - name: Download variable.sh
+        uses: actions/download-artifact@v3
+        with:
+          name: variable-sh
+
+      - name: Source variables
+        run: source variable.sh
 
       - name: Build Wheel
         run: |
@@ -167,10 +175,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Load Variables
-        run: |
-          echo "$VARIABLE_SH_CONTENT" > variable.sh
-          source variable.sh
+      - name: Download variable.sh
+        uses: actions/download-artifact@v3
+        with:
+          name: variable-sh
+
+      - name: Source variables
+        run: source variable.sh
 
       - name: Run Trivy Scan
         if: ${{ inputs.enable_trivy == 'true' }}
@@ -213,10 +224,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Load Variables
-        run: |
-          echo "$VARIABLE_SH_CONTENT" > variable.sh
-          source variable.sh
+      - name: Download variable.sh
+        uses: actions/download-artifact@v3
+        with:
+          name: variable-sh
+
+      - name: Source variables
+        run: source variable.sh
 
       - name: Build Docker Image
         run: |
@@ -236,10 +250,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Load Variables
-        run: |
-          echo "$VARIABLE_SH_CONTENT" > variable.sh
-          source variable.sh
+      - name: Download variable.sh
+        uses: actions/download-artifact@v3
+        with:
+          name: variable-sh
+
+      - name: Source variables
+        run: source variable.sh
 
       - name: Load Docker Image
         run: |
