@@ -121,7 +121,7 @@ jobs:
             cat /tmp/dockerd.log
             exit 1
           fi
-
+    
       - name: Build Package
         run: |
           echo "Sourcing variable.sh ..........................................."
@@ -146,6 +146,12 @@ jobs:
           gzip build_log
           #chmod +x ./script/upload-scripts/upload_file.sh
           #bash ./script/upload-scripts/upload_file.sh build_log.gz
+
+      - name: Upload package-cache
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-cache
+          path: package-cache
 
   wheel_build:
     needs: build
@@ -184,14 +190,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download variable.sh
+      - name: Download package-cache
         uses: actions/download-artifact@v4
         with:
-          name: variable-sh
+          name: package-cache
 
       - name: Run Trivy Scan
         if: ${{ inputs.enable_trivy == 'true' }}
         run: |
+          echo "Checking for package-cache download------------------------------"
+          echo "--------------------PWD------------------------------------------"
+          echo $pwd
+          echo "---------------------ls-----------------------------------------"
+          ls
+          echo "----------------------------ls inside package-cache-------------"
+          cd package-cache
+          ls
+          echo $pwd
           echo "Sourcing variable.sh ..........................................."
           source variable.sh
           chmod +x ./script/scanner-scripts/trivy_code_scan.sh
