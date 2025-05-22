@@ -66,8 +66,8 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          python3 -m pip install --force-reinstall -v "requests==2.31.0"
-          python3 -m pip install --upgrade docker
+          python3 -m ensurepip install --force-reinstall -v "requests==2.31.0"
+          python3 -m ensurepip install --upgrade docker
 
       - name: Get Build Info and Save Variables
         run: |
