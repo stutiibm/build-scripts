@@ -155,9 +155,10 @@ jobs:
           path: package-cache
 
   wheel_build:
+    needs: build
     name: Create Wheel for Python ${{ matrix.python-version }}
     if: ${{ inputs.wheel_build == 'true' }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04-ppc64le
     strategy:
       matrix:
         include:
@@ -188,7 +189,7 @@ jobs:
           sudo lsb_release -a 2>/dev/null || echo "lsb_release not available"
           sudo echo "=== Kernel ==="
           sudo uname -a
-          sudo apt install -y jq file python${{ matrix.python-version }}-dev python${{ matrix.python-version }}-pip
+          #sudo apt install -y jq file python${{ matrix.python-version }}-dev python${{ matrix.python-version }}-pip
 
       - name: Download variable.sh from previous step
         uses: actions/download-artifact@v4
@@ -199,11 +200,18 @@ jobs:
         run: |
           chmod +x variable.sh
           source variable.sh
-
-          python${{ matrix.python-version }} -m pip install --upgrade pip setuptools wheel
+          
+          #python${{ matrix.python-version }} -m pip install --upgrade pip setuptools wheel
 
           chmod +x ./script/build_wheels.sh
           bash ./script/build_wheels.sh
+          sudo apt update -y
+          sudo echo "=== OS Release ==="
+          sudo cat /etc/os-release || echo "/etc/os-release not found"
+          sudo echo "=== LSB Release ==="
+          sudo lsb_release -a 2>/dev/null || echo "lsb_release not available"
+          sudo echo "=== Kernel ==="
+          sudo uname -a
         continue-on-error: ${{ matrix.allow-failure }}
 
       - name: Upload wheel artifact using custom script
