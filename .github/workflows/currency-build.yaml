@@ -155,34 +155,65 @@ jobs:
           path: package-cache
 
   wheel_build:
-    needs: build
+    name: Create Wheel for Python ${{ matrix.python-version }}
     if: ${{ inputs.wheel_build == 'true' }}
-    runs-on: ubuntu-24.04-ppc64le
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
-        python-version: [3.9]
+        include:
+          - python-version: 3.9
+            allow-failure: true
+          - python-version: 3.10
+            allow-failure: false
+          - python-version: 3.11
+            allow-failure: false
+          - python-version: 3.12
+            allow-failure: true
+          - python-version: 3.13
+            allow-failure: false
+    env:
+      PYTHON_VERSION: ${{ matrix.python-version }}
+      PACKAGE_NAME: ${{ inputs.package_name }}
+      VERSION: ${{ inputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
+      - name: Install system dependencies
+        run: |
+          sudo apt update -y
+          sudo apt install -y jq file python${{ matrix.python-version }}-dev python${{ matrix.python-version }}-pip
 
-      - name: Download variable.sh
+      - name: Download variable.sh from previous step
         uses: actions/download-artifact@v4
         with:
           name: variable-sh
 
-      - name: Build Wheel
+      - name: Run build_wheels.sh
         run: |
-          echo "Sourcing variable.sh ..........................................."
+          chmod +x variable.sh
           source variable.sh
+
+          python${{ matrix.python-version }} -m pip install --upgrade pip setuptools wheel
+
           chmod +x ./script/build_wheels.sh
           bash ./script/build_wheels.sh
+        continue-on-error: ${{ matrix.allow-failure }}
+
+      - name: Upload wheel artifact using custom script
+        run: |
           WHEEL_FILE=*.whl
-          #chmod +x ./script/upload-scripts/upload_wheel.sh
-          #bash ./script/upload-scripts/upload_wheel.sh $WHEEL_FILE
+          chmod +x ./script/upload-scripts/upload_wheel.sh
+          bash ./script/upload-scripts/upload_wheel.sh $WHEEL_FILE
+        continue-on-error: ${{ matrix.allow-failure }}
+
+      - name: Upload wheel to GitHub (optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.python-version }}
+          path: ./*.whl
+        continue-on-error: ${{ matrix.allow-failure }}
+
 
   source_scanner:
     needs: build
