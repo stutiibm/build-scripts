@@ -36,6 +36,8 @@ on:
         description: 'Enable Grype scan'
         required: true
         default: 'true'
+
+run-name: Currency Build ${{ inputs.package_name }}
     
 
 env:
