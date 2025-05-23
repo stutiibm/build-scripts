@@ -162,15 +162,15 @@ jobs:
     strategy:
       matrix:
         include:
-          - python-version: 3.9
+          - python-version: "3.9"
             allow-failure: true
-          - python-version: 3.10
+          - python-version: "3.10"
             allow-failure: false
-          - python-version: 3.11
+          - python-version: "3.11"
             allow-failure: false
-          - python-version: 3.12
+          - python-version: "3.12"
             allow-failure: true
-          - python-version: 3.13
+          - python-version: "3.13"
             allow-failure: false
     env:
       PYTHON_VERSION: ${{ matrix.python-version }}
@@ -212,23 +212,17 @@ jobs:
           sudo lsb_release -a 2>/dev/null || echo "lsb_release not available"
           sudo echo "=== Kernel ==="
           sudo uname -a
+          sudo echo "**********************************Before cancel************************"
         continue-on-error: ${{ matrix.allow-failure }}
 
-      - name: Upload wheel artifact using custom script
-        run: |
-          WHEEL_FILE=*.whl
-          chmod +x ./script/upload-scripts/upload_wheel.sh
-          bash ./script/upload-scripts/upload_wheel.sh $WHEEL_FILE
-        continue-on-error: ${{ matrix.allow-failure }}
+      # - name: Upload wheel artifact using custom script
+      #   run: |
+      #     WHEEL_FILE=*.whl
+      #     chmod +x ./script/upload-scripts/upload_wheel.sh
+      #     bash ./script/upload-scripts/upload_wheel.sh $WHEEL_FILE
+      #   continue-on-error: ${{ matrix.allow-failure }}
 
-      - name: Upload wheel to GitHub (optional)
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheels-${{ matrix.python-version }}
-          path: ./*.whl
-        continue-on-error: ${{ matrix.allow-failure }}
-
-
+      
   source_scanner:
     needs: build
     if: ${{ inputs.validate_build_script == 'true' }}
