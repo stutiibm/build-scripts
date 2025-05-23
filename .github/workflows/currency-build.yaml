@@ -182,6 +182,12 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt update -y
+          sudo echo "=== OS Release ==="
+          sudo cat /etc/os-release || echo "/etc/os-release not found"
+          sudo echo "=== LSB Release ==="
+          sudo lsb_release -a 2>/dev/null || echo "lsb_release not available"
+          sudo echo "=== Kernel ==="
+          sudo uname -a
           sudo apt install -y jq file python${{ matrix.python-version }}-dev python${{ matrix.python-version }}-pip
 
       - name: Download variable.sh from previous step
