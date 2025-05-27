@@ -254,7 +254,8 @@ jobs:
           cd ..
           
           export VALIDATE_BUILD_SCRIPT="$validate_build_script"
-          export CLONED_PACKAGE="$cloned_package
+          export CLONED_PACKAGE="$cloned_package"
+          echo "--------------------After export-------------------------"
           
           chmod +x ./script/scanner-scripts/trivy_code_scan.sh
           bash ./script/scanner-scripts/trivy_code_scan.sh
