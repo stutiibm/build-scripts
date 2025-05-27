@@ -240,6 +240,12 @@ jobs:
       - name: Run Trivy Scan
         if: ${{ inputs.enable_trivy == 'true' }}
         run: |
+
+          export VALIDATE_BUILD_SCRIPT="$validate_build_script"
+          export CLONED_PACKAGE="$cloned_package"
+          echo "--------------------After early export-------------------------"
+          echo "Here is VALIDATE_BUILD_SCRIPT : ${VALIDATE_BUILD_SCRIPT}------------------------"
+          
           echo "Checking for package-cache download------------------------------"
           echo "--------------------PWD------------------------------------------"
           echo $pwd
@@ -253,9 +259,7 @@ jobs:
           source variable.sh
           cd ..
           
-          export VALIDATE_BUILD_SCRIPT="$validate_build_script"
-          export CLONED_PACKAGE="$cloned_package"
-          echo "--------------------After export-------------------------"
+          
           
           chmod +x ./script/scanner-scripts/trivy_code_scan.sh
           bash ./script/scanner-scripts/trivy_code_scan.sh
