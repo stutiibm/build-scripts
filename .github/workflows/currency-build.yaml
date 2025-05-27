@@ -252,6 +252,10 @@ jobs:
           echo "Sourcing variable.sh ..........................................."
           source variable.sh
           cd ..
+          
+          export VALIDATE_BUILD_SCRIPT="$validate_build_script"
+          export CLONED_PACKAGE="$cloned_package
+          
           chmod +x ./script/scanner-scripts/trivy_code_scan.sh
           bash ./script/scanner-scripts/trivy_code_scan.sh
           mkdir source_trivy
