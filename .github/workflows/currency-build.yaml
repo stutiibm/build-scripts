@@ -249,14 +249,14 @@ jobs:
           echo "BUILD_SCRIPT=$BUILD_SCRIPT"
           echo "IMAGE_NAME=$IMAGE_NAME"
           echo "NON_ROOT_BUILD=$NON_ROOT_BUILD"
-          echo "validate_build_script=$validate_build_script"
           echo "Sourced variable.sh ..........................................."
           sudo cat package-cache/variable.sh
           echo "================vied variable.sh==========================="
           ls script
           echo "-------------------------between----------------------------"
           # Export these so child scripts can use them
-          export VALIDATE_BUILD_SCRIPT=inputs.validate_build_script
+          VALIDATE_BUILD_SCRIPT="${{ inputs.validate_build_script }}"
+          export VALIDATE_BUILD_SCRIPT=$VALIDATE_BUILD_SCRIPT
           export CLONED_PACKAGE=$CLONED_PACKAGE
 
           echo "validate_build_script=$VALIDATE_BUILD_SCRIPT" 
