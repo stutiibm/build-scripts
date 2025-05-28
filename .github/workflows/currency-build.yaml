@@ -238,26 +238,21 @@ jobs:
           name: package-cache
 
       - name: Run Trivy Scan
-        if: ${{ inputs.enable_trivy == 'true' }}
+        if: ${{ inputs.enable_trivy == 'true' && inputs.validate_build_script == 'true' }}
         run: |
 
-          export VALIDATE_BUILD_SCRIPT="$validate_build_script"
-          export CLONED_PACKAGE="$cloned_package"
-          echo "--------------------After early export-------------------------"
-          echo "Here is VALIDATE_BUILD_SCRIPT : ${VALIDATE_BUILD_SCRIPT}------------------------"
-          
-          echo "Checking for package-cache download------------------------------"
-          echo "--------------------PWD------------------------------------------"
-          echo $pwd
           echo "---------------------ls-----------------------------------------"
           ls
           echo "----------------------------ls inside package-cache-------------"
           cd package-cache
           ls
-          echo $pwd
           echo "Sourcing variable.sh ..........................................."
           source variable.sh
-          cd ..
+          echo "VERSION=$VERSION"
+          echo "BUILD_SCRIPT=$BUILD_SCRIPT"
+          echo "IMAGE_NAME=$IMAGE_NAME"
+          echo "NON_ROOT_BUILD=$NON_ROOT_BUILD"
+          echo "Sourced variable.sh ..........................................."
           
           
           
