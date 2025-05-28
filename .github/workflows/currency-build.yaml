@@ -249,11 +249,10 @@ jobs:
           echo "BUILD_SCRIPT=$BUILD_SCRIPT"
           echo "IMAGE_NAME=$IMAGE_NAME"
           echo "NON_ROOT_BUILD=$NON_ROOT_BUILD"
+          echo "validate_build_script=$validate_build_script"
           echo "Sourced variable.sh ..........................................."
           ls script
           echo "-------------------------between----------------------------"
-          ls script/scanner-scripts
-
           chmod +x ./script/scanner-scripts/trivy_code_scan.sh
           bash ./script/scanner-scripts/trivy_code_scan.sh;
           mkdir source_trivy
