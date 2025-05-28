@@ -40,23 +40,23 @@ on:
 run-name: Currency Build ${{ inputs.package_name }}
     
 
-env:
-  ENABLE_TRIVY: ${{ inputs.enable_trivy }}
-  ENABLE_SYFT: ${{ inputs.enable_syft }}
-  ENABLE_GRYPE: ${{ inputs.enable_grype }}
+# env:
+#   ENABLE_TRIVY: ${{ inputs.enable_trivy }}
+#   ENABLE_SYFT: ${{ inputs.enable_syft }}
+#   ENABLE_GRYPE: ${{ inputs.enable_grype }}
 
 jobs:
   build_info:
     runs-on: ubuntu-24.04-ppc64le
-    env:
-      PACKAGE_NAME: ${{ inputs.package_name }}
-      VERSION: ${{ inputs.version }}
-      VALIDATE_BUILD_SCRIPT: ${{ inputs.validate_build_script }}
-      WHEEL_BUILD: ${{ inputs.wheel_build }}
-      BUILD_DOCKER: ${{ inputs.docker_build }}
-      ENABLE_TRIVY: ${{ inputs.enable_trivy }}
-      ENABLE_SYFT: ${{ inputs.enable_syft }}
-      ENABLE_GRYPE: ${{ inputs.enable_grype }}
+    # env:
+    #   PACKAGE_NAME: ${{ inputs.package_name }}
+    #   VERSION: ${{ inputs.version }}
+    #   VALIDATE_BUILD_SCRIPT: ${{ inputs.validate_build_script }}
+    #   WHEEL_BUILD: ${{ inputs.wheel_build }}
+    #   BUILD_DOCKER: ${{ inputs.docker_build }}
+    #   ENABLE_TRIVY: ${{ inputs.enable_trivy }}
+    #   ENABLE_SYFT: ${{ inputs.enable_syft }}
+    #   ENABLE_GRYPE: ${{ inputs.enable_grype }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -82,11 +82,23 @@ jobs:
           cat variable.sh
           echo "======================="
 
-      - name: Upload variable.sh
+      - name: Create scanner-env.sh
+        run: |
+          echo "Creating scanner-env.sh ..."
+          echo "export VALIDATE_BUILD_SCRIPT='${{ inputs.validate_build_script }}'" > scanner-env.sh
+          echo "export CLONED_PACKAGE='$CLONED_PACKAGE'" >> scanner-env.sh
+          echo "export DOCKER_BUILD='${{ inputs.docker_build }}'" >> scanner-env.sh
+          echo "scanner-env.sh content:"
+          cat scanner-env.sh
+          
+
+      - name: Upload variable.sh and scanner-env.sh
         uses: actions/upload-artifact@v4
         with:
           name: variable-sh
-          path: variable.sh
+          path: |
+                variable.sh 
+                scanner-env.sh
 
   build:
     needs: build_info
@@ -136,6 +148,7 @@ jobs:
           echo "Sourced variable.sh ..........................................."
           mkdir package-cache
           sudo mv variable.sh package-cache
+          sudo mv scanner-env.sh package-cache
           chmod +x ./script/build_package.sh
           bash ./script/build_package.sh
           cloned_package=$(ls -td -- */ | head -n 1)
@@ -237,13 +250,14 @@ jobs:
         run: |
           echo "Sourcing variable.sh..."
           source package-cache/variable.sh
+          source package-cache/scanner-env.sh
 
-          # Write exports to a file that can be sourced in every scan step
-          echo "export VALIDATE_BUILD_SCRIPT='${{ inputs.validate_build_script }}'" > scanner-env.sh
-          echo "export CLONED_PACKAGE='$CLONED_PACKAGE'" >> scanner-env.sh
+          # # Write exports to a file that can be sourced in every scan step
+          # echo "export VALIDATE_BUILD_SCRIPT='${{ inputs.validate_build_script }}'" > scanner-env.sh
+          # echo "export CLONED_PACKAGE='$CLONED_PACKAGE'" >> scanner-env.sh
 
           echo "scanner-env.sh created with:"
-          cat scanner-env.sh
+          cat package-cache/scanner-env.sh
 
 
       - name: Run Trivy Scan
@@ -251,8 +265,9 @@ jobs:
         run: |
 
           echo ".................Sourcing variable.sh and scanner-env.sh...................."
-          source package-cache/variable.sh;
-          source scanner-env.sh
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
+          
           
           echo "validate_build_script=$VALIDATE_BUILD_SCRIPT" 
           echo "cloned_package=$CLONED_PACKAGE"
@@ -267,8 +282,8 @@ jobs:
         if: ${{ inputs.enable_syft == 'true' }}
         run: |
           echo ".................Sourcing variable.sh and scanner-env.sh...................."
-          source package-cache/variable.sh;
-          source scanner-env.sh
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
           chmod +x ./script/scanner-scripts/syft_code_scan.sh
           bash ./script/scanner-scripts/syft_code_scan.sh
           mkdir source_syft
@@ -278,8 +293,8 @@ jobs:
         if: ${{ inputs.enable_grype == 'true' }}
         run: |
           echo ".................Sourcing variable.sh and scanner-env.sh...................."
-          source package-cache/variable.sh;
-          source scanner-env.sh
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
           chmod +x ./script/scanner-scripts/grype_code_scan.sh
           bash ./script/scanner-scripts/grype_code_scan.sh
           mkdir source_grype
