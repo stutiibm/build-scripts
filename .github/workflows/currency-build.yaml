@@ -242,19 +242,20 @@ jobs:
         run: |
 
           echo "---------------------ls-----------------------------------------"
-          ls
-          echo "----------------------------ls inside package-cache-------------"
-          cd package-cache
-          ls
+          ls package-cache
           echo "Sourcing variable.sh ..........................................."
-          source variable.sh
+          source package-cache/variable.sh;
           echo "VERSION=$VERSION"
           echo "BUILD_SCRIPT=$BUILD_SCRIPT"
           echo "IMAGE_NAME=$IMAGE_NAME"
           echo "NON_ROOT_BUILD=$NON_ROOT_BUILD"
           echo "Sourced variable.sh ..........................................."
+          ls script
+          echo "-------------------------between----------------------------"
+          ls script/scanner-scripts
 
-          sudo find / -name trivy_code_scan.sh
+          chmod +x ./script/scanner-scripts/trivy_code_scan.sh
+          bash ./script/scanner-scripts/trivy_code_scan.sh;
           
           
           
