@@ -208,13 +208,9 @@ jobs:
           chmod +x ./script/build_wheels.sh
           bash ./script/build_wheels.sh
           sudo apt update -y
-          sudo echo "=== OS Release ==="
-          sudo cat /etc/os-release || echo "/etc/os-release not found"
-          sudo echo "=== LSB Release ==="
           sudo lsb_release -a 2>/dev/null || echo "lsb_release not available"
-          sudo echo "=== Kernel ==="
           sudo uname -a
-          sudo echo "**********************************Before cancel************************"
+          
         continue-on-error: ${{ matrix.allow-failure }}
 
       # - name: Upload wheel artifact using custom script
@@ -237,42 +233,48 @@ jobs:
         with:
           name: package-cache
 
+      - name: Prepare scanner environment
+        run: |
+          echo "Sourcing variable.sh..."
+          source package-cache/variable.sh
+
+          # Write exports to a file that can be sourced in every scan step
+          echo "export VALIDATE_BUILD_SCRIPT='${{ inputs.validate_build_script }}'" > scanner-env.sh
+          echo "export CLONED_PACKAGE='$CLONED_PACKAGE'" >> scanner-env.sh
+
+          echo "scanner-env.sh created with:"
+          cat scanner-env.sh
+
+
       - name: Run Trivy Scan
-        if: ${{ inputs.enable_trivy == 'true' && inputs.validate_build_script == 'true' }}
+        if: ${{ inputs.enable_trivy == 'true' }}
         run: |
 
-          echo "---------------------ls-----------------------------------------"
-          ls package-cache
-          echo "Sourcing variable.sh ..........................................."
+          echo ".................Sourcing variable.sh and scanner-env.sh...................."
           source package-cache/variable.sh;
-          echo "VERSION=$VERSION"
-          echo "BUILD_SCRIPT=$BUILD_SCRIPT"
-          echo "IMAGE_NAME=$IMAGE_NAME"
-          echo "NON_ROOT_BUILD=$NON_ROOT_BUILD"
-          echo "Sourced variable.sh ..........................................."
-          sudo cat package-cache/variable.sh
-          echo "================vied variable.sh==========================="
-          ls script
-          echo "-------------------------between----------------------------"
-          # Export these so child scripts can use them
-          VALIDATE_BUILD_SCRIPT="${{ inputs.validate_build_script }}"
-          export VALIDATE_BUILD_SCRIPT=$VALIDATE_BUILD_SCRIPT
-          export CLONED_PACKAGE=$CLONED_PACKAGE
+          source scanner-env.sh
+          
+          # # Export these so child scripts can use them
+          # VALIDATE_BUILD_SCRIPT="${{ inputs.validate_build_script }}"
+          # export VALIDATE_BUILD_SCRIPT=$VALIDATE_BUILD_SCRIPT
+          # export CLONED_PACKAGE=$CLONED_PACKAGE
 
           echo "validate_build_script=$VALIDATE_BUILD_SCRIPT" 
           echo "cloned_package=$CLONED_PACKAGE"
           echo "Sourced and exported ..........................................."
+          
           chmod +x ./script/scanner-scripts/trivy_code_scan.sh
           bash ./script/scanner-scripts/trivy_code_scan.sh;
           mkdir source_trivy
-          echo "---------------------------------pkg-cache-after-ls---------------------------"
-          ls package-cache
           echo "---------------------------------done---------------------------"
           mv package-cache/trivy_source_vulnerabilities_results.json package-cache/trivy_source_sbom_results.cyclonedx source_trivy
 
       - name: Run Syft Scan
         if: ${{ inputs.enable_syft == 'true' }}
         run: |
+          echo ".................Sourcing variable.sh and scanner-env.sh...................."
+          source package-cache/variable.sh;
+          source scanner-env.sh
           chmod +x ./script/scanner-scripts/syft_code_scan.sh
           bash ./script/scanner-scripts/syft_code_scan.sh
           mkdir source_syft
@@ -281,6 +283,9 @@ jobs:
       - name: Run Grype Scan
         if: ${{ inputs.enable_grype == 'true' }}
         run: |
+          echo ".................Sourcing variable.sh and scanner-env.sh...................."
+          source package-cache/variable.sh;
+          source scanner-env.sh
           chmod +x ./script/scanner-scripts/grype_code_scan.sh
           bash ./script/scanner-scripts/grype_code_scan.sh
           mkdir source_grype
