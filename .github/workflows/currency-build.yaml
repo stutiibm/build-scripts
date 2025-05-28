@@ -256,13 +256,11 @@ jobs:
 
           chmod +x ./script/scanner-scripts/trivy_code_scan.sh
           bash ./script/scanner-scripts/trivy_code_scan.sh;
-          
-          
-          
-          # chmod +x ./script/scanner-scripts/trivy_code_scan.sh
-          # bash ./script/scanner-scripts/trivy_code_scan.sh
-          # mkdir source_trivy
-          # mv package-cache/trivy_source_vulnerabilities_results.json package-cache/trivy_source_sbom_results.cyclonedx source_trivy
+          mkdir source_trivy
+          echo "---------------------------------pkg-cache-after-ls---------------------------"
+          ls package-cache
+          echo "---------------------------------done---------------------------"
+          mv package-cache/trivy_source_vulnerabilities_results.json package-cache/trivy_source_sbom_results.cyclonedx source_trivy
 
       - name: Run Syft Scan
         if: ${{ inputs.enable_syft == 'true' }}
