@@ -254,7 +254,7 @@ jobs:
           echo "NON_ROOT_BUILD=$NON_ROOT_BUILD"
           echo "Sourced variable.sh ..........................................."
 
-          find / -name trivy_code_scan.sh
+          sudo find / -name trivy_code_scan.sh
           
           
           
