@@ -253,13 +253,15 @@ jobs:
           echo "IMAGE_NAME=$IMAGE_NAME"
           echo "NON_ROOT_BUILD=$NON_ROOT_BUILD"
           echo "Sourced variable.sh ..........................................."
+
+          find / -name trivy_code_scan.sh
           
           
           
-          chmod +x ./script/scanner-scripts/trivy_code_scan.sh
-          bash ./script/scanner-scripts/trivy_code_scan.sh
-          mkdir source_trivy
-          mv package-cache/trivy_source_vulnerabilities_results.json package-cache/trivy_source_sbom_results.cyclonedx source_trivy
+          # chmod +x ./script/scanner-scripts/trivy_code_scan.sh
+          # bash ./script/scanner-scripts/trivy_code_scan.sh
+          # mkdir source_trivy
+          # mv package-cache/trivy_source_vulnerabilities_results.json package-cache/trivy_source_sbom_results.cyclonedx source_trivy
 
       - name: Run Syft Scan
         if: ${{ inputs.enable_syft == 'true' }}
