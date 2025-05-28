@@ -251,8 +251,17 @@ jobs:
           echo "NON_ROOT_BUILD=$NON_ROOT_BUILD"
           echo "validate_build_script=$validate_build_script"
           echo "Sourced variable.sh ..........................................."
+          sudo vi package-cache/variable.sh
+          echo "================vied variable.sh==========================="
           ls script
           echo "-------------------------between----------------------------"
+          # Export these so child scripts can use them
+          export VALIDATE_BUILD_SCRIPT=$VALIDATE_BUILD_SCRIPT
+          export CLONED_PACKAGE=$CLONED_PACKAGE
+
+          echo "validate_build_script=$VALIDATE_BUILD_SCRIPT" 
+          echo "cloned_package=$CLONED_PACKAGE"
+          echo "Sourced and exported ..........................................."
           chmod +x ./script/scanner-scripts/trivy_code_scan.sh
           bash ./script/scanner-scripts/trivy_code_scan.sh;
           mkdir source_trivy
