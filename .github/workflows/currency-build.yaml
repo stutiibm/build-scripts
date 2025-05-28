@@ -256,7 +256,7 @@ jobs:
           ls script
           echo "-------------------------between----------------------------"
           # Export these so child scripts can use them
-          export VALIDATE_BUILD_SCRIPT=$VALIDATE_BUILD_SCRIPT
+          export VALIDATE_BUILD_SCRIPT=inputs.validate_build_script
           export CLONED_PACKAGE=$CLONED_PACKAGE
 
           echo "validate_build_script=$VALIDATE_BUILD_SCRIPT" 
