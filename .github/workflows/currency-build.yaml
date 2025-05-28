@@ -254,15 +254,9 @@ jobs:
           source package-cache/variable.sh;
           source scanner-env.sh
           
-          # # Export these so child scripts can use them
-          # VALIDATE_BUILD_SCRIPT="${{ inputs.validate_build_script }}"
-          # export VALIDATE_BUILD_SCRIPT=$VALIDATE_BUILD_SCRIPT
-          # export CLONED_PACKAGE=$CLONED_PACKAGE
-
           echo "validate_build_script=$VALIDATE_BUILD_SCRIPT" 
           echo "cloned_package=$CLONED_PACKAGE"
-          echo "Sourced and exported ..........................................."
-          
+                   
           chmod +x ./script/scanner-scripts/trivy_code_scan.sh
           bash ./script/scanner-scripts/trivy_code_scan.sh;
           mkdir source_trivy
