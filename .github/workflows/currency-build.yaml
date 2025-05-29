@@ -226,7 +226,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: updated-package-cache
-          path: .
+          path: package-cache
 
       - name: Run build_wheels.sh
         run: |
