@@ -98,6 +98,7 @@ jobs:
           sudo mv scanner-env.sh package-cache
           echo "Moved scanner-env.sh and variable.sh into package-cache............"
           ls
+          ls package-cache
           
 
       - name: Upload variable.sh and scanner-env.sh via package-cache
@@ -118,7 +119,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: package-cache
-          path: .
+          path: package-cache
 
       # - name: Install Docker
       #   run: |
