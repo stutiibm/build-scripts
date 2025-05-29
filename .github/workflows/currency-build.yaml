@@ -48,15 +48,15 @@ run-name: Currency Build ${{ inputs.package_name }}
 jobs:
   build_info:
     runs-on: ubuntu-24.04-ppc64le
-    # env:
-    #   PACKAGE_NAME: ${{ inputs.package_name }}
-    #   VERSION: ${{ inputs.version }}
-    #   VALIDATE_BUILD_SCRIPT: ${{ inputs.validate_build_script }}
-    #   WHEEL_BUILD: ${{ inputs.wheel_build }}
-    #   BUILD_DOCKER: ${{ inputs.docker_build }}
-    #   ENABLE_TRIVY: ${{ inputs.enable_trivy }}
-    #   ENABLE_SYFT: ${{ inputs.enable_syft }}
-    #   ENABLE_GRYPE: ${{ inputs.enable_grype }}
+    env:
+      PACKAGE_NAME: ${{ inputs.package_name }}
+      VERSION: ${{ inputs.version }}
+      VALIDATE_BUILD_SCRIPT: ${{ inputs.validate_build_script }}
+      WHEEL_BUILD: ${{ inputs.wheel_build }}
+      BUILD_DOCKER: ${{ inputs.docker_build }}
+      ENABLE_TRIVY: ${{ inputs.enable_trivy }}
+      ENABLE_SYFT: ${{ inputs.enable_syft }}
+      ENABLE_GRYPE: ${{ inputs.enable_grype }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -84,21 +84,25 @@ jobs:
 
       - name: Create scanner-env.sh
         run: |
-          echo "Creating scanner-env.sh ..."
+          echo "Creating package-cache........."
+          mkdir package-cache
+          echo "Creating scanner-env.sh ......."
           echo "export VALIDATE_BUILD_SCRIPT='${{ inputs.validate_build_script }}'" > scanner-env.sh
           echo "export CLONED_PACKAGE='$CLONED_PACKAGE'" >> scanner-env.sh
           echo "export DOCKER_BUILD='${{ inputs.docker_build }}'" >> scanner-env.sh
           echo "scanner-env.sh content:"
           cat scanner-env.sh
+          echo "Moving scanner-env.sh and variable.sh into package-cache............"
+          sudo mv variable.sh package-cache
+          sudo mv scanner-env.sh package-cache
           
 
-      - name: Upload variable.sh and scanner-env.sh
+      - name: Upload variable.sh and scanner-env.sh via package-cache
         uses: actions/upload-artifact@v4
         with:
-          name: variable-sh
-          path: |
-                variable.sh 
-                scanner-env.sh
+          name: package-cache
+          path: package-cache
+                
 
   build:
     needs: build_info
@@ -107,10 +111,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download variable.sh
+      - name: Download package-cache
         uses: actions/download-artifact@v4
         with:
-          name: variable-sh
+          name: package-cache
+          path: .
 
       # - name: Install Docker
       #   run: |
@@ -139,21 +144,25 @@ jobs:
     
       - name: Build Package
         run: |
-          echo "Sourcing variable.sh ..........................................."
-          source variable.sh
-          echo "VERSION=$VERSION"
-          echo "BUILD_SCRIPT=$BUILD_SCRIPT"
-          echo "IMAGE_NAME=$IMAGE_NAME"
-          echo "NON_ROOT_BUILD=$NON_ROOT_BUILD"
-          echo "Sourced variable.sh ..........................................."
-          mkdir package-cache
-          sudo mv variable.sh package-cache
-          sudo mv scanner-env.sh package-cache
+          echo "Sourcing variable.sh and scanner-env.sh..........................................."
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
+          # echo "VERSION=$VERSION"
+          # echo "BUILD_SCRIPT=$BUILD_SCRIPT"
+          # echo "IMAGE_NAME=$IMAGE_NAME"
+          # echo "NON_ROOT_BUILD=$NON_ROOT_BUILD"
+          echo "Cat variable.sh ..........................................."
+          cat package-cache/variable.sh
+          echo "Cat scanner-env.sh ..........................................."
+          cat package-cache/scanner-env.sh
+          # mkdir package-cache
+          # sudo mv variable.sh package-cache
+          # sudo mv scanner-env.sh package-cache
           chmod +x ./script/build_package.sh
           bash ./script/build_package.sh
           cloned_package=$(ls -td -- */ | head -n 1)
           sudo mv "$cloned_package" package-cache
-          echo "export CLONED_PACKAGE=\"$cloned_package\"" >> package-cache/variable.sh
+          # echo "export CLONED_PACKAGE=\"$cloned_package\"" >> package-cache/variable.sh
           cd package-cache
           sudo chown $USER:$USER -R .
           chmod +x ../script/pre_process.sh
@@ -163,10 +172,10 @@ jobs:
           #chmod +x ./script/upload-scripts/upload_file.sh
           #bash ./script/upload-scripts/upload_file.sh build_log.gz
 
-      - name: Upload package-cache
+      - name: Upload updated package-cache
         uses: actions/upload-artifact@v4
         with:
-          name: package-cache
+          name: updated-package-cache
           path: .
 
   wheel_build:
@@ -206,15 +215,17 @@ jobs:
           sudo uname -a
           #sudo apt install -y jq file python${{ matrix.python-version }}-dev python${{ matrix.python-version }}-pip
 
-      - name: Download variable.sh from previous step
+      - name: Download package-cache from previous step
         uses: actions/download-artifact@v4
         with:
-          name: variable-sh
+          name: updated-package-cache
+          path: .
 
       - name: Run build_wheels.sh
         run: |
           chmod +x variable.sh
-          source variable.sh
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
           
           #python${{ matrix.python-version }} -m pip install --upgrade pip setuptools wheel
 
@@ -245,6 +256,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: package-cache
+          path: package-cache
 
       - name: Prepare scanner environment
         run: |
