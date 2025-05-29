@@ -183,7 +183,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: updated-package-cache
-          path: .
+          path: package-cache
 
   wheel_build:
     needs: build
@@ -230,6 +230,9 @@ jobs:
 
       - name: Run build_wheels.sh
         run: |
+          ls
+          echo "---------------------updated cache-----------------------"
+          ls package-cache
           chmod +x package-cache/variable.sh
           chmod +x package-cache/scanner-env.sh
           source package-cache/variable.sh
@@ -341,10 +344,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: package-cache
+          path: package-cache
 
       - name: Build Docker Image
         run: |
           echo "................................Sourcing scanner-env.sh............................."
+          ls
+          echo "---------"
+          ls package-cache
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
           chmod +x ./script/build_docker.sh
