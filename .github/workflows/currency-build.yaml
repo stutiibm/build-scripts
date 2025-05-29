@@ -86,6 +86,7 @@ jobs:
         run: |
           echo "Creating package-cache........."
           mkdir package-cache
+          ls
           echo "Creating scanner-env.sh ......."
           echo "export VALIDATE_BUILD_SCRIPT='${{ inputs.validate_build_script }}'" > scanner-env.sh
           echo "export CLONED_PACKAGE='$CLONED_PACKAGE'" >> scanner-env.sh
@@ -95,6 +96,8 @@ jobs:
           echo "Moving scanner-env.sh and variable.sh into package-cache............"
           sudo mv variable.sh package-cache
           sudo mv scanner-env.sh package-cache
+          echo "Moved scanner-env.sh and variable.sh into package-cache............"
+          ls
           
 
       - name: Upload variable.sh and scanner-env.sh via package-cache
