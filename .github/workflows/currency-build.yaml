@@ -89,7 +89,6 @@ jobs:
           ls
           echo "Creating scanner-env.sh ......."
           echo "export VALIDATE_BUILD_SCRIPT='${{ inputs.validate_build_script }}'" > scanner-env.sh
-          echo "export CLONED_PACKAGE='$CLONED_PACKAGE'" >> scanner-env.sh
           echo "export BUILD_DOCKER='${{ inputs.build_docker }}'" >> scanner-env.sh
           echo "scanner-env.sh content:"
           cat scanner-env.sh
@@ -169,7 +168,10 @@ jobs:
           bash ./script/build_package.sh
           cloned_package=$(ls -td -- */ | head -n 1)
           sudo mv "$cloned_package" package-cache
-          # echo "export CLONED_PACKAGE=\"$cloned_package\"" >> package-cache/variable.sh
+          echo "export CLONED_PACKAGE=\"$cloned_package\"" >> package-cache/scanner-env.sh
+          echo "-------------updated scanner-env.sh-----------------------"
+          cat scanner-env.sh
+          echo "---------------------------------------------"
           cd package-cache
           sudo chown $USER:$USER -R .
           chmod +x ../script/pre_process.sh
