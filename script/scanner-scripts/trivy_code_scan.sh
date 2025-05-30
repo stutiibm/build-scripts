@@ -16,6 +16,8 @@ if [ $validate_build_script == true ];then
         chmod +x trivy
         sudo mv trivy /usr/bin
 	echo "Executing trivy scanner"
+        echo "clomed-pkg inside .sh ================= ${cloned_package}"
+	echo "validate_build_script inside .sh ================= ${validate_build_script}"
 	sudo trivy -q fs --timeout 30m -f json ${cloned_package} > trivy_source_vulnerabilities_results.json
         echo "Running: trivy $@----------------------------------------------------------"
  	#cat trivy_source_vulnerabilities_results.json
