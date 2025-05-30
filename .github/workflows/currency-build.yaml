@@ -268,7 +268,7 @@ jobs:
       - name: Download package-cache
         uses: actions/download-artifact@v4
         with:
-          name: package-cache
+          name: updated-package-cache
           path: package-cache
 
       - name: Prepare scanner environment
@@ -276,6 +276,8 @@ jobs:
           echo "Sourcing variable.sh..."
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
+          echo "---------updated scanner-env.sh cat----------------"
+          cat package-cache/scanner-env.sh
 
           # # Write exports to a file that can be sourced in every scan step
           # echo "export VALIDATE_BUILD_SCRIPT='${{ inputs.validate_build_script }}'" > scanner-env.sh
@@ -292,7 +294,8 @@ jobs:
           echo ".................Sourcing variable.sh and scanner-env.sh...................."
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
-          
+          cat package-cache/scanner-env.sh
+          echo "--------catted----------------"
           
           echo "validate_build_script=$VALIDATE_BUILD_SCRIPT" 
           echo "cloned_package=$CLONED_PACKAGE"
