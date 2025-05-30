@@ -299,6 +299,8 @@ jobs:
           bash ./script/scanner-scripts/trivy_code_scan.sh;
           mkdir source_trivy
           echo "---------------------------------done---------------------------"
+          ls
+          echo "----------------------------------------------------------------"
           mv package-cache/trivy_source_vulnerabilities_results.json package-cache/trivy_source_sbom_results.cyclonedx source_trivy
 
       - name: Run Syft Scan
