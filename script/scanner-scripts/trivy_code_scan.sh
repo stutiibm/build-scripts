@@ -22,8 +22,8 @@ if [ $validate_build_script == true ];then
         echo "Running: trivy $@----------------------------------------------------------"
  	#cat trivy_source_vulnerabilities_results.json
 	sudo trivy -q fs --timeout 30m -f cyclonedx ${cloned_package} > trivy_source_sbom_results.cyclonedx
-        echo "Running: trivy $@----------------------------------------------------------""
+        echo "Running: trivy $@----------------------------------------------------------"
  	#cat trivy_source_sbom_results.cyclonedx
  fi
 
- echo "+++++++++++++++++++++++++++outside if+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "+++++++++++++++++++++++++++outside if+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
