@@ -20,7 +20,7 @@ on:
         description: 'Create wheel for different Python versions'
         required: true
         default: 'false'
-      docker_build:
+      build_docker:
         description: 'Build docker image'
         required: true
         default: 'false'
@@ -53,7 +53,7 @@ jobs:
       VERSION: ${{ inputs.version }}
       VALIDATE_BUILD_SCRIPT: ${{ inputs.validate_build_script }}
       WHEEL_BUILD: ${{ inputs.wheel_build }}
-      DOCKER_BUILD: ${{ inputs.docker_build }}
+      build_docker: ${{ inputs.build_docker }}
       ENABLE_TRIVY: ${{ inputs.enable_trivy }}
       ENABLE_SYFT: ${{ inputs.enable_syft }}
       ENABLE_GRYPE: ${{ inputs.enable_grype }}
@@ -90,7 +90,7 @@ jobs:
           echo "Creating scanner-env.sh ......."
           echo "export VALIDATE_BUILD_SCRIPT='${{ inputs.validate_build_script }}'" > scanner-env.sh
           echo "export CLONED_PACKAGE='$CLONED_PACKAGE'" >> scanner-env.sh
-          echo "export DOCKER_BUILD='${{ inputs.docker_build }}'" >> scanner-env.sh
+          echo "export BUILD_DOCKER='${{ inputs.build_docker }}'" >> scanner-env.sh
           echo "scanner-env.sh content:"
           cat scanner-env.sh
           echo "Moving scanner-env.sh and variable.sh into package-cache............"
@@ -335,9 +335,9 @@ jobs:
           #chmod +x ./script/upload-scripts/upload_file.sh
           #bash ./script/upload-scripts/upload_file.sh source_scanner.tar.gz
 
-  docker_build:
+  build_docker:
     needs: build
-    if: ${{ inputs.docker_build == 'true' }}
+    if: ${{ inputs.build_docker == 'true' }}
     runs-on: ubuntu-24.04-ppc64le
     steps:
       - uses: actions/checkout@v4
@@ -356,6 +356,7 @@ jobs:
           ls package-cache
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
+          echo "--------clonedpkg========== ${CLONED_PACKAGE}--------------------"
           chmod +x ./script/build_docker.sh
           bash ./script/build_docker.sh
           docker images
@@ -366,8 +367,8 @@ jobs:
           #bash ./script/upload-scripts/upload_docker_image.sh
 
   image_scanner:
-    needs: docker_build
-    if: ${{ inputs.docker_build == 'true' }}
+    needs: build_docker
+    if: ${{ inputs.build_docker == 'true' }}
     runs-on: ubuntu-24.04-ppc64le
     steps:
       - uses: actions/checkout@v4
