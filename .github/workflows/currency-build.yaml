@@ -170,7 +170,7 @@ jobs:
           sudo mv "$cloned_package" package-cache
           echo "export CLONED_PACKAGE=\"$cloned_package\"" >> package-cache/scanner-env.sh
           echo "-------------updated scanner-env.sh-----------------------"
-          cat scanner-env.sh
+          cat  package-cache/scanner-env.sh
           echo "---------------------------------------------"
           cd package-cache
           sudo chown $USER:$USER -R .
