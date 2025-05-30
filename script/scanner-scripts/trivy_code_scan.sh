@@ -1,4 +1,5 @@
 #!/bin/bash -e
+set -x  
 
 echo "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$-inside trivy_code_scan.sh$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
 validate_build_script=$VALIDATE_BUILD_SCRIPT
@@ -16,8 +17,10 @@ if [ $validate_build_script == true ];then
         sudo mv trivy /usr/bin
 	echo "Executing trivy scanner"
 	sudo trivy -q fs --timeout 30m -f json ${cloned_package} > trivy_source_vulnerabilities_results.json
+        echo "Running: trivy $@----------------------------------------------------------"
  	#cat trivy_source_vulnerabilities_results.json
 	sudo trivy -q fs --timeout 30m -f cyclonedx ${cloned_package} > trivy_source_sbom_results.cyclonedx
+        echo "Running: trivy $@----------------------------------------------------------""
  	#cat trivy_source_sbom_results.cyclonedx
  fi
 
