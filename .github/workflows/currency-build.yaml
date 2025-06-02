@@ -370,6 +370,8 @@ jobs:
           echo "-----------------validate_build_script===========   $VALIDATE_BUILD_SCRIPT  ------------------------"
           echo "--------clonedpkg========== $CLONED_PACKAGE --------------------"
           echo "--------travis-repo-slug : $TRAVIS_REPO_SLUG --------------------"
+          OUTPUT_DIR="$GITHUB_WORKSPACE/docker-output/$TRAVIS_REPO_SLUG"
+          mkdir -p "$OUTPUT_DIR"
           chmod +x ./script/build_docker.sh
           bash ./script/build_docker.sh
           docker images
