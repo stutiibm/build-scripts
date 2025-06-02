@@ -361,7 +361,12 @@ jobs:
           ls package-cache
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
-          echo "--------clonedpkg========== ${CLONED_PACKAGE}--------------------"
+          echo "------------------cating variable.sh-------------------------"
+          cat package-cache/variable.sh
+          echo "------------------cating scanner-env.sh-------------------------"
+          cat package-cache/scanner-env.sh
+          echo "-----------------validate_build_script===========   $VALIDATE_BUILD_SCRIPT  ------------------------"
+          echo "--------clonedpkg========== $CLONED_PACKAGE --------------------"
           chmod +x ./script/build_docker.sh
           bash ./script/build_docker.sh
           docker images
