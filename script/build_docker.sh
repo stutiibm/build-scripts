@@ -54,10 +54,12 @@ if [ $build_docker != false ];then
     #docker rmi -f ${basename}
     echo "Building docker image"
     echo "sudo docker build $build_args -t $image_name $docker_builddir"
+    echo "HOME inside script is: $HOME"
     echo "*************************************************************************************"
     ls $HOME
     echo "*************************************************************************************"
     echo "______________ TRAVIS_REPO_SLUG = ${TRAVIS_REPO_SLUG} _________________________________"
+    sudo mkdir -p "$HOME/build/$TRAVIS_REPO_SLUG" 
     sudo docker build $build_args -t $image_name $docker_builddir
     docker save -o "$HOME/build/$TRAVIS_REPO_SLUG/image.tar" $image_name
 else
