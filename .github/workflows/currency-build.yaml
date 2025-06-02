@@ -354,6 +354,8 @@ jobs:
           path: package-cache
 
       - name: Build Docker Image
+        env:
+          TRAVIS_REPO_SLUG: ${{ github.repository }}
         run: |
           echo "................................Sourcing scanner-env.sh............................."
           ls
@@ -367,6 +369,7 @@ jobs:
           cat package-cache/scanner-env.sh
           echo "-----------------validate_build_script===========   $VALIDATE_BUILD_SCRIPT  ------------------------"
           echo "--------clonedpkg========== $CLONED_PACKAGE --------------------"
+          echo "--------travis-repo-slug : $TRAVIS_REPO_SLUG --------------------"
           chmod +x ./script/build_docker.sh
           bash ./script/build_docker.sh
           docker images
