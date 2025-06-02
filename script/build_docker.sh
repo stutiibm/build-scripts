@@ -59,9 +59,9 @@ if [ $build_docker != false ];then
     ls $HOME
     echo "*************************************************************************************"
     echo "______________ TRAVIS_REPO_SLUG = ${TRAVIS_REPO_SLUG} _________________________________"
-    sudo mkdir -p "$HOME/build/$TRAVIS_REPO_SLUG" 
+    echo "______________ OUTPUT_DIR = ${OUTPUT_DIR} _________________________________"
     sudo docker build $build_args -t $image_name $docker_builddir
-    docker save -o "$HOME/build/$TRAVIS_REPO_SLUG/image.tar" $image_name
+    docker save -o "$OUTPUT_DIR/image.tar" $image_name
 else
     echo "Docker image is not supported"
 fi
