@@ -389,16 +389,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download variable.sh
+      - name: Download package-cache
         uses: actions/download-artifact@v4
         with:
-          name: variable-sh
+          name: updated-package-cache
+          path: package-cache
 
       - name: Load Docker Image
         run: |
           echo "Sourcing variable.sh ..........................................."
-          source variable.sh
-          docker load -i "$HOME/build/$GITHUB_REPOSITORY/image.tar"
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
+          docker load -i "$OUTPUT_DIR/image.tar"
 
       - name: Run Trivy Image Scan
         if: ${{ inputs.enable_trivy == 'true' }}
