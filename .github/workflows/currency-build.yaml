@@ -382,6 +382,12 @@ jobs:
           #chmod +x ./script/upload-scripts/upload_docker_image.sh
           #bash ./script/upload-scripts/upload_docker_image.sh
 
+      - name: Upload package-cache with image.tar
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-cache-with-image
+          path: package-cache
+
   image_scanner:
     needs: build_docker
     if: ${{ inputs.build_docker == 'true' }}
@@ -392,7 +398,7 @@ jobs:
       - name: Download package-cache
         uses: actions/download-artifact@v4
         with:
-          name: updated-package-cache
+          name: package-cache-with-image
           path: package-cache
 
       - name: Load Docker Image
@@ -400,7 +406,8 @@ jobs:
           echo "Sourcing variable.sh ..........................................."
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
-          docker load -i "$OUTPUT_DIR/image.tar"
+          echo ".......................Loading iamge.tar ............................"
+          docker load -i "package-cache/image.tar"
 
       - name: Run Trivy Image Scan
         if: ${{ inputs.enable_trivy == 'true' }}
