@@ -434,6 +434,9 @@ jobs:
       - name: Run Grype Image Scan
         if: ${{ inputs.enable_grype == 'true' }}
         run: |
+          echo ".................Sourcing variable.sh and scanner-env.sh...................."
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
           chmod +x ./script/scanner-scripts/grype_image_scan.sh
           bash ./script/scanner-scripts/grype_image_scan.sh
           mkdir image_grype
