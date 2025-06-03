@@ -369,10 +369,13 @@ jobs:
           echo "--------clonedpkg========== $CLONED_PACKAGE --------------------"
           chmod +x ./script/build_docker.sh
           bash ./script/build_docker.sh
+          echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Lets see package-cache ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+          ls package-cache/
           echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Lets see image now ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+          docker save -o package-cache/image.tar "$CLONED_PACKAGE"
           docker images
           echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ let's see the content now ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-          ls
+          ls package-cache/
 
       - name: Upload Docker Image
         run: |
