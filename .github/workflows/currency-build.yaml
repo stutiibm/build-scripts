@@ -168,6 +168,7 @@ jobs:
           bash ./script/build_package.sh
           cloned_package=$(ls -td -- */ | head -n 1)
           sudo mv "$cloned_package" package-cache
+          export CLONED_PACKAGE="$cloned_package"
           echo "export CLONED_PACKAGE=\"$cloned_package\"" >> package-cache/scanner-env.sh
           echo "-------------updated scanner-env.sh-----------------------"
           cat  package-cache/scanner-env.sh
