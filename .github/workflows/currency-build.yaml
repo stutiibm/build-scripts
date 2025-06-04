@@ -92,8 +92,6 @@ jobs:
           sudo mv variable.sh package-cache
           sudo mv scanner-env.sh package-cache
           echo "Moved scanner-env.sh and variable.sh into package-cache............"
-          ls
-          ls package-cache
           
 
       - name: Upload variable.sh and scanner-env.sh via package-cache
@@ -142,33 +140,21 @@ jobs:
       #     fi
     
       - name: Build Package
-        env:
-          CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.CURRENCY_SERVICE_ID_API_KEY }}
+        #env:
+          #CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.CURRENCY_SERVICE_ID_API_KEY }}
         run: |
           echo "Sourcing variable.sh and scanner-env.sh..........................................."
-          ls
-          echo "...............pwd........................"
-          echo $pwd
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
-          # echo "VERSION=$VERSION"
-          # echo "BUILD_SCRIPT=$BUILD_SCRIPT"
-          # echo "IMAGE_NAME=$IMAGE_NAME"
-          # echo "NON_ROOT_BUILD=$NON_ROOT_BUILD"
-          echo "Cat variable.sh ..........................................."
+          echo "===== variable.sh ====="
           cat package-cache/variable.sh
-          echo "Cat scanner-env.sh ..........................................."
+          echo "===== scanner-env.sh ====="
           cat package-cache/scanner-env.sh
-          # mkdir package-cache
-          # sudo mv variable.sh package-cache
-          # sudo mv scanner-env.sh package-cache
           chmod +x ./script/build_package.sh
           bash ./script/build_package.sh
           cloned_package=$(ls -td -- */ | head -n 1)
           sudo mv "$cloned_package" package-cache
-          export PACKAGE_NAME="${cloned_package%/}"
           echo "export CLONED_PACKAGE=\"$cloned_package\"" >> package-cache/scanner-env.sh
-          echo "export PACKAGE_NAME=\"$PACKAGE_NAME\"" >> package-cache/scanner-env.sh
           echo "-------------updated scanner-env.sh-----------------------"
           cat  package-cache/scanner-env.sh
           echo "---------------------------------------------"
@@ -178,10 +164,8 @@ jobs:
           bash ../script/pre_process.sh
           cd $GITHUB_WORKSPACE
           gzip build_log
-          echo "~~~~~~~~~~~~~~~~~~~~~~ Before file upload ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-          chmod +x ./script/upload-scripts/upload_file.sh
-          bash ./script/upload-scripts/upload_file.sh build_log.gz
-          echo "~~~~~~~~~~~~~~~~~ Scripts uploaded successfully ~~~~~~~~~~~~~~~~~~~~~~~~~"
+          #chmod +x ./script/upload-scripts/upload_file.sh
+          #bash ./script/upload-scripts/upload_file.sh build_log.gz
 
       - name: Upload updated package-cache
         uses: actions/upload-artifact@v4
@@ -218,12 +202,6 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt update -y
-          sudo echo "=== OS Release ==="
-          sudo cat /etc/os-release || echo "/etc/os-release not found"
-          sudo echo "=== LSB Release ==="
-          sudo lsb_release -a 2>/dev/null || echo "lsb_release not available"
-          sudo echo "=== Kernel ==="
-          sudo uname -a
           #sudo apt install -y jq file python${{ matrix.python-version }}-dev python${{ matrix.python-version }}-pip
 
       - name: Download package-cache from previous step
@@ -297,17 +275,10 @@ jobs:
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
           cat package-cache/scanner-env.sh
-          echo "--------catted----------------"
-          
-          echo "validate_build_script=$VALIDATE_BUILD_SCRIPT" 
-          echo "cloned_package=$CLONED_PACKAGE"
-                   
+                         
           chmod +x ./script/scanner-scripts/trivy_code_scan.sh
           bash ./script/scanner-scripts/trivy_code_scan.sh;
           mkdir source_trivy
-          echo "---------------------------------done---------------------------"
-          ls
-          echo "----------------------------------------------------------------"
           mv package-cache/trivy_source_vulnerabilities_results.json package-cache/trivy_source_sbom_results.cyclonedx source_trivy
 
       - name: Run Syft Scan
@@ -358,27 +329,14 @@ jobs:
       - name: Build Docker Image
         run: |
           echo "................................Sourcing scanner-env.sh............................."
-          ls
-          echo "---------"
           ls package-cache
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
-          echo "------------------cating variable.sh-------------------------"
-          cat package-cache/variable.sh
-          echo "------------------cating scanner-env.sh-------------------------"
-          cat package-cache/scanner-env.sh
-          echo "-----------------validate_build_script===========   $VALIDATE_BUILD_SCRIPT  ------------------------"
-          echo "--------clonedpkg========== $CLONED_PACKAGE --------------------"
           chmod +x ./script/build_docker.sh
           bash ./script/build_docker.sh
-          echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Lets see package-cache ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-          ls package-cache/
-          echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Lets see image now ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
           docker save -o package-cache/image.tar "$IMAGE_NAME"
           docker images
-          echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ let's see the content now ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-          ls package-cache/
-
+          
       - name: Upload Docker Image
         run: |
           #chmod +x ./script/upload-scripts/upload_docker_image.sh
