@@ -1,5 +1,10 @@
 #!/bin/bash -e
 
+if [[ -z "$CURRENCY_SERVICE_ID_API_KEY" ]]; then
+  echo "Error: CURRENCY_SERVICE_ID_API_KEY environment variable not set"
+  exit 1
+fi
+
 token_request=$(curl -X POST https://iam.cloud.ibm.com/identity/token \
   -H "content-type: application/x-www-form-urlencoded" \
   -H "accept: application/json" \
