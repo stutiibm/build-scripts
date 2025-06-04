@@ -180,8 +180,9 @@ jobs:
           bash ../script/pre_process.sh
           cd $GITHUB_WORKSPACE
           gzip build_log
-          #chmod +x ./script/upload-scripts/upload_file.sh
-          #bash ./script/upload-scripts/upload_file.sh build_log.gz
+          chmod +x ./script/upload-scripts/upload_file.sh
+          bash ./script/upload-scripts/upload_file.sh build_log.gz
+          echo "~~~~~~~~~~~~~~~~~ Scripts uploaded successfully ~~~~~~~~~~~~~~~~~~~~~~~~~"
 
       - name: Upload updated package-cache
         uses: actions/upload-artifact@v4
