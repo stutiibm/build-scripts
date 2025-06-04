@@ -180,6 +180,7 @@ jobs:
           bash ../script/pre_process.sh
           cd $GITHUB_WORKSPACE
           gzip build_log
+          echo "~~~~~~~~~~~~~~~~~~~~~~ Before file upload ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
           chmod +x ./script/upload-scripts/upload_file.sh
           bash ./script/upload-scripts/upload_file.sh build_log.gz
           echo "~~~~~~~~~~~~~~~~~ Scripts uploaded successfully ~~~~~~~~~~~~~~~~~~~~~~~~~"
