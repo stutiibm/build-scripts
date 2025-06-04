@@ -38,12 +38,6 @@ on:
         default: 'true'
 
 run-name: Currency Build ${{ inputs.package_name }}
-    
-
-# env:
-#   ENABLE_TRIVY: ${{ inputs.enable_trivy }}
-#   ENABLE_SYFT: ${{ inputs.enable_syft }}
-#   ENABLE_GRYPE: ${{ inputs.enable_grype }}
 
 jobs:
   build_info:
@@ -90,8 +84,10 @@ jobs:
           echo "Creating scanner-env.sh ......."
           echo "export VALIDATE_BUILD_SCRIPT='${{ inputs.validate_build_script }}'" > scanner-env.sh
           echo "export BUILD_DOCKER='${{ inputs.build_docker }}'" >> scanner-env.sh
-          echo "scanner-env.sh content:"
+          echo "export PACKAGE_NAME='${{ inputs.package_name }}'" >> scanner-env.sh         
+          echo "===== scanner-env.sh ====="
           cat scanner-env.sh
+          echo "=========================="
           echo "Moving scanner-env.sh and variable.sh into package-cache............"
           sudo mv variable.sh package-cache
           sudo mv scanner-env.sh package-cache
