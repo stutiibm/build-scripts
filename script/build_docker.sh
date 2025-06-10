@@ -59,11 +59,12 @@ if [ $build_docker != false ];then
     wait $SCRIPT_PID
     my_pid_status=$?
     docker_build_size=$(stat -c %s docker_build.log)
-    
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Before IF~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"    
     if [ $my_pid_status != 0 ];
     then
         if [ $docker_build_size -lt 1800000 ];
         then
+           echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Inside first IF~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
            cat docker_build.log
         else
            tail -300 docker_build.log
@@ -72,12 +73,15 @@ if [ $build_docker != false ];then
     else
         if [ $docker_build_size -lt 1800000 ];
         then
+           echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Inside second IF~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
            cat docker_build.log
         else
            tail -300 docker_build.log
         fi    
     fi
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Before TRAVIS_REPO_SLUG~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     docker save -o "$HOME/build/$TRAVIS_REPO_SLUG/image.tar" $image_name
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~After TRAVIS_REPO_SLUG~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 else
     echo "Docker image is not supported"
 fi
