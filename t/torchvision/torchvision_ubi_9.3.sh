@@ -19,6 +19,8 @@
 #
 # ----------------------------------------------------------------------------
 
+set -ex 
+
 PACKAGE_NAME=vision
 PACKAGE_VERSION=${1:-v0.21.0}
 PACKAGE_URL=https://github.com/pytorch/vision.git
@@ -541,7 +543,7 @@ git clone $PACKAGE_URL
 cd $PACKAGE_NAME
 git checkout $PACKAGE_VERSION
 
-if ! (pip3.12 install -v -e . --no-build-isolation); then
+if ! (python3.12 -m pip install -v . --no-build-isolation); then
     echo "------------------$PACKAGE_NAME:install_fails-------------------------------------"
     echo "$PACKAGE_URL $PACKAGE_NAME"
     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | $OS_NAME | GitHub | Fail |  Install_Fails"
@@ -549,7 +551,7 @@ if ! (pip3.12 install -v -e . --no-build-isolation); then
 fi
 
 cd $CURRENT_DIR
-pip3.12 install pytest pytest-xdist
+python3.12 -m pip install pytest pytest-xdist
 
 if ! pytest $PACKAGE_NAME/test/common_extended_utils.py $PACKAGE_NAME/test/common_utils.py $PACKAGE_NAME/test/smoke_test.py $PACKAGE_NAME/test/test_architecture_ops.py $PACKAGE_NAME/test/test_datasets_video_utils_opt.py ; then
     echo "------------------$PACKAGE_NAME:install_success_but_test_fails---------------------"

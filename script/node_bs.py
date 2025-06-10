@@ -172,9 +172,16 @@ def raise_pull_request(branch_pkg, base="master"):
             "Authorization": "Bearer {}".format(github_token)
     }
 
+    pr_body = "Adding build_script and build_info.json"
+
+    if package_language == "python" and args.generate_wheel_arg:
+	pr_title = "Python Ecosystem: Added build_script and build_info.json for "+package_name
+        with open('./templates/pyeco_pull_request_description.md', 'r') as file:
+            pr_body = file.read()
+		
     pull_request_data={
             "title": pr_title,
-            "body" : "Adding build_script and build_info.json",
+            "body" : pr_body,
             "head" : head,
             "base" : base,
             "maintainer_can_modify" : maintainer_can_modify,
@@ -192,7 +199,12 @@ def raise_pull_request(branch_pkg, base="master"):
     print("\n PR status code",response.status_code)
     
     if response.status_code >=200 and response.status_code <=299 :
-        return {"message" : "success"}
+        pr_data = response.json()
+        return {
+            "message": "success",
+            "pr_url": pr_data.get("html_url")
+        }
+
     return {"message" : "fail"}
 
 def add_license_file():
@@ -364,6 +376,3 @@ else:
     os.makedirs(dir_name, exist_ok = True)
     create_new_script()
     display_details()
-
-
-
