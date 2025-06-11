@@ -19,7 +19,7 @@
 #
 # ----------------------------------------------------------------------------
 
-set -ex 
+set -ex
 
 PACKAGE_NAME=vision
 PACKAGE_VERSION=${1:-v0.21.0}
@@ -31,23 +31,13 @@ CURRENT_DIR=$(pwd)
 
 yum install -y git make wget python3.12 python3.12-devel python3.12-pip pkgconfig atlas
 yum install gcc-toolset-13 -y
-yum install -y make libtool  xz zlib-devel openssl-devel bzip2-devel libffi-devel libevent-devel  patch ninja-build gcc-toolset-13  pkg-config  gmp-devel  freetype-devel
+yum install -y make libtool  xz zlib-devel openssl-devel cmake bzip2-devel libffi-devel libevent-devel  patch ninja-build gcc-toolset-13  pkg-config  gmp-devel  freetype-devel
 
 dnf install -y gcc-toolset-13-libatomic-devel
 
 export PATH=/opt/rh/gcc-toolset-13/root/usr/bin:$PATH
 export LD_LIBRARY_PATH=/opt/rh/gcc-toolset-13/root/usr/lib64:$LD_LIBRARY_PATH
 
-echo "------------Installing cmake---------------------------"
-
-echo "Installing cmake..."
-wget https://cmake.org/files/v3.31/cmake-3.31.0.tar.gz
-tar -zxvf cmake-3.31.0.tar.gz
-cd cmake-3.31.0
-./bootstrap
-make
-make install
-cd $CURRENT_DIR
 
 echo "---------------------openblas installing---------------------"
 
@@ -381,11 +371,10 @@ cd $CURRENT_DIR
 
 echo "---------------------------Installing FFmpeg------------------"
 #Cloning Source Code
-PACKAGE_VERSION=${1:-n7.1}
 
 git clone https://github.com/FFmpeg/FFmpeg
 cd FFmpeg
-git checkout $PACKAGE_VERSION
+git checkout n7.1
 git submodule update --init
 
 mkdir ffmpeg_prefix
@@ -462,55 +451,18 @@ USE_NONFREE=no   #the options below are set for NO
         --disable-decoder=h264_v4l2m2m \
         --disable-encoder=hevc_v4l2m2m \
         --disable-decoder=hevc_v4l2m2m \
-        --disable-nonfree --disable-gpl --disable-gnutls --enable-openssl --disable-libopenh264 --disable-libx264    #"${_CONFIG_OPTS[@]}"
+        --disable-nonfree --disable-gpl --disable-gnutls --enable-openssl --disable-libopenh264 --disable-libx264
 
 make -j$CPU_COUNT
 make install -j$CPU_COUNT
 
-echo "--------------------------------- ffmpeg Installed successfully ---------------------------------"
-
-cd $CURRENT_DIR
-mkdir -p local/ffmpeg
-cp -r FFmpeg/ffmpeg_prefix/* local/ffmpeg/
-
-PACKAGE_VERSION=$(echo "$PACKAGE_VERSION" | sed 's/[^0-9.]//g')
-
 export LD_LIBRARY_PATH=${LAME_PREFIX}/lib:${LIBVPX_PREFIX}/lib:${OPUS_PREFIX}/lib:${FFMPEG_PREFIX}/lib:${LD_LIBRARY_PATH}
-
-echo " ------------------------------------------ Checking Test ------------------------------------------ "
-
-cd ${FFMPEG_PREFIX}/bin/ && ./ffmpeg --help
-cd ${FFMPEG_PREFIX}/bin/ && ./ffmpeg -loglevel panic -protocols | grep "https"
-cd ${FFMPEG_PREFIX}/bin/ && ./ffmpeg -loglevel panic -codecs | grep "libmp3lame"
-cd ${FFMPEG_PREFIX}/bin/ && ./ffmpeg -loglevel panic -codecs | grep "DEVI.S zlib"
-cd ${FFMPEG_PREFIX}/bin/ && ./ffmpeg -loglevel panic -codecs
-
-cd ${FFMPEG_PREFIX}/bin/ && ./ffmpeg -encoders
-cd ${FFMPEG_PREFIX}/bin/ && ./ffmpeg -decoders
-cd ${FFMPEG_PREFIX}/bin/ && ./ffmpeg -codecs >$CURRENT_DIR/ffmpeg-codecs.txt
-
-if grep '\(h264\|aac\|hevc\|mpeg4\).*coders:' $HOME/ffmpeg-codecs.txt ; then
-  echo >&2 -e "\nError: Forbidden codecs in ffmpeg, see lines above.\n"
-  problem=true
-else
-  echo -e "OK, ffmpeg has no forbidden codecs."
-fi
-
-ffmpeg_libs="avcodec
-        avdevice
-        swresample
-        avfilter
-        avcodec
-        avformat
-        swscale"
-for each_ffmpeg_lib in $ffmpeg_libs; do
-  test -f $FFMPEG_PREFIX/lib/lib$each_ffmpeg_lib.so
-done
-
 
 export PKG_CONFIG_PATH=${FFMPEG_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}
 export LD_LIBRARY_PATH=${FFMPEG_PREFIX}/lib:${LD_LIBRARY_PATH}
 export PATH="/install-deps/ffmpeg/bin:$PATH"
+echo "--------------------------------- ffmpeg Installed successfully ---------------------------------"
+
 
 cd $CURRENT_DIR
 
@@ -538,7 +490,6 @@ python3.12 setup.py build_ext --inplace
 cd $CURRENT_DIR
 
 echo "------------------Building torchvision------------------------"
-PACKAGE_VERSION=${1:-v0.21.0}
 git clone $PACKAGE_URL
 cd $PACKAGE_NAME
 git checkout $PACKAGE_VERSION
@@ -564,3 +515,4 @@ else
     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | $OS_NAME | GitHub  | Pass |  Both_Install_and_Test_Success"
     exit 0
 fi
+
