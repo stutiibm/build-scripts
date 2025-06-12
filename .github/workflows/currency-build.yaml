@@ -314,6 +314,7 @@ jobs:
           #bash ./script/upload-scripts/upload_file.sh source_scanner.tar.gz
 
   build_docker:
+    needs: build_info 
     if: ${{ inputs.build_docker == 'true' }}
     runs-on: ubuntu-24.04-ppc64le
     steps:
