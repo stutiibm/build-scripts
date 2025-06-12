@@ -12,7 +12,7 @@ cd $package_dirpath
 # Using python script to find matched version string/key in build_info.json for version passed 
 match_version=$(python $CUR_DIR/script/match_version_buildinfo.py)
 
-if [ "$build_docker" != "false" ];then
+if [ $build_docker != "false" ];then
     if [[ $(jq --arg ver "$match_version" '.[$ver]' $config_file) != null ]]; then
         docker_builddir=$(jq -r --arg ver "$match_version" '.[$ver].dir' $config_file)
         args=$(jq -r --arg ver "$match_version" '.[$ver].args' $config_file)
@@ -26,7 +26,7 @@ if [ "$build_docker" != "false" ];then
             build_args=$(echo $build_args --build-arg $key=$value )
             done
         fi
-        if [ "$patches" != "null" ]; then
+        if [ $patches != "null" ]; then
             for row in $(echo "$patches" | jq -r 'to_entries[] | @base64'); do
             key=$(echo "$row" | base64 -d | jq -r '.key')
             value=$(echo "$row" | base64 -d | jq -r '.value')
