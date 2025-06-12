@@ -19,14 +19,14 @@ if [ $build_docker != false ];then
         patches=$(jq -r --arg ver "$match_version" '.[$ver].patches' $config_file)
         # By default send PACKAGE_VERSION argument.
         build_args="--build-arg PACKAGE_VERSION=$version"
-        if [ $args != null ]; then
+        if [ $args != "null" ]; then
             for row in $(echo "$args" | jq -r 'to_entries[] | @base64'); do
             key=$(echo "$row" | base64 -d | jq -r '.key')
             value=$(echo "$row" | base64 -d | jq -r '.value')
             build_args=$(echo $build_args --build-arg $key=$value )
             done
         fi
-        if [ $patches != null ]; then
+        if [ $patches != "null" ]; then
             for row in $(echo "$patches" | jq -r 'to_entries[] | @base64'); do
             key=$(echo "$row" | base64 -d | jq -r '.key')
             value=$(echo "$row" | base64 -d | jq -r '.value')
