@@ -179,6 +179,7 @@ jobs:
     if: ${{ inputs.wheel_build == 'true' }}
     runs-on: ubuntu-24.04-ppc64le-p10
     strategy:
+      fail-fast: false
       matrix:
         include:
           - python-version: "3.9"
