@@ -294,10 +294,11 @@ build --strip=always
 build --color=yes
 build --verbose_failures
 build --spawn_strategy=standalone
+build --action_env=RULES_PYTHON_PIP_ISOLATED=0
 EOF
 
 echo "----------------------------------Created bazelrc-----------------------------------"
-
+export RULES_PYTHON_PIP_ISOLATED=0
 export BUILD_TARGET="//tensorflow/tools/pip_package:wheel //tensorflow/tools/lib_package:libtensorflow //tensorflow:libtensorflow_cc${SHLIB_EXT}"
 
 #Install
