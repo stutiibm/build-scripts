@@ -205,7 +205,6 @@ index 3ef493e11f5..7d7cc58b0a0 100644
 -    --hash=sha256:ef4e2f338fc763f50a8113890f455e1a70acd42a4d083370ceb80c463d803972 \
 -    --hash=sha256:f3736fe21da2b7d8a13fe8fe415f1272d2a1ccdeff4849c1421d2fb30fd533bc \
 -    --hash=sha256:f4e025e852754ca833401777c25888acb96889ee2c27e7e629a19aee288833f0
-+h5py==3.13.0 \
      # via
      #   -r ci/official/requirements_updater/requirements.in
      #   keras
@@ -900,7 +899,6 @@ index 7e3a884f832..d5a28858572 100644
 -    --hash=sha256:ef4e2f338fc763f50a8113890f455e1a70acd42a4d083370ceb80c463d803972 \
 -    --hash=sha256:f3736fe21da2b7d8a13fe8fe415f1272d2a1ccdeff4849c1421d2fb30fd533bc \
 -    --hash=sha256:f4e025e852754ca833401777c25888acb96889ee2c27e7e629a19aee288833f0
-+h5py==3.13.0 \
      # via
      #   -r ci/official/requirements_updater/requirements.in
      #   keras
@@ -1595,7 +1593,6 @@ index 19b72598651..ac27d8bc44e 100644
 -    --hash=sha256:ef4e2f338fc763f50a8113890f455e1a70acd42a4d083370ceb80c463d803972 \
 -    --hash=sha256:f3736fe21da2b7d8a13fe8fe415f1272d2a1ccdeff4849c1421d2fb30fd533bc \
 -    --hash=sha256:f4e025e852754ca833401777c25888acb96889ee2c27e7e629a19aee288833f0
-+h5py==3.13.0 \
      # via
      #   -r ci/official/requirements_updater/requirements.in
      #   keras
@@ -2291,7 +2288,6 @@ index 115d6caa10d..0a0a24a0a6d 100644
 -    --hash=sha256:ef4e2f338fc763f50a8113890f455e1a70acd42a4d083370ceb80c463d803972 \
 -    --hash=sha256:f3736fe21da2b7d8a13fe8fe415f1272d2a1ccdeff4849c1421d2fb30fd533bc \
 -    --hash=sha256:f4e025e852754ca833401777c25888acb96889ee2c27e7e629a19aee288833f0
-+h5py==3.13.0 \
      # via
      #   -r ci/official/requirements_updater/requirements.in
      #   keras
