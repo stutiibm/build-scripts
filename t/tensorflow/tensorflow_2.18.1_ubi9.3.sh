@@ -64,6 +64,7 @@ export PATH=$JAVA_HOME/bin:$PATH
 
 #installing patchelf from source
 cd $CURRENT_DIR
+mkdir wheelhouse
 yum install -y git autoconf automake libtool make
 git clone https://github.com/NixOS/patchelf.git
 cd patchelf
@@ -143,7 +144,8 @@ git checkout 3.13.0
 
 HDF5_DIR=/install-deps/hdf5 python3.12 -m pip wheel . -w $CURRENT_DIR/wheelhouse
 cd $CURRENT_DIR
-python3.12 -m pip install wheelhouse/h5py-3.13.0-*.whl
+WHEEL_FILE=$(ls wheelhouse/h5py-3.13.0-*.whl | head -n1)
+python3.12 -m pip install "$WHEEL_FILE"
 python3.12 -c "import h5py; print(h5py.__version__)"
 echo "-----------------------------------------------------Installed h5py-----------------------------------------------------"
 
@@ -203,9 +205,9 @@ export CC=/opt/rh/gcc-toolset-13/root/bin/gcc
 export CXX=/opt/rh/gcc-toolset-13/root/bin/g++
 
 python3.12 -m pip wheel . -w /wheelhouse
-python3.12 -m pip install wheelhouse/h5py-3.13.0-*.whl
+WHEEL_FILE=$(ls wheelhouse/ml_dtypes-0.4.1-*.whl | head -n1)
+python3.12 -m pip install "$WHEEL_FILE"
 
-python3.12 -m pip install wheelhouse/ml_dtypes-0.4.1-*.whl
 cd $CURRENT_DIR
 python3.12 -c "import ml_dtypes; print(ml_dtypes.__version__)"
 echo "-----------------------------------------------------Installed ml_dtyapes-----------------------------------------------------"
