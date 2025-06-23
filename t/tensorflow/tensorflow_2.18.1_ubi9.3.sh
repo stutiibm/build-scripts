@@ -204,7 +204,10 @@ export CXXFLAGS="-I${ML_DIR}/include"
 export CC=/opt/rh/gcc-toolset-13/root/bin/gcc
 export CXX=/opt/rh/gcc-toolset-13/root/bin/g++
 
-python3.12 -m pip wheel . -w $CURRENT_DIR/wheelhouse
+python3.12 -m pip wheel --no-build-isolation --no-deps . -w $CURRENT_DIR/wheelhouse
+echo "--------------------------------------wheelhouse content--------------------------------"
+ls $CURRENT_DIR/wheelhouse
+#python3.12 -m pip wheel . -w $CURRENT_DIR/wheelhouse
 WHEEL_FILE=$(ls wheelhouse/ml_dtypes-0.4.1-*.whl | head -n1)
 python3.12 -m pip install "$WHEEL_FILE"
 
