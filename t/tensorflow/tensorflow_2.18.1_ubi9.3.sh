@@ -61,10 +61,10 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.25.0.9-3.el9.ppc64le
 export JAVA_HOME=/usr/lib/jvm/$(ls /usr/lib/jvm/ | grep -P '^(?=.*java-)(?=.*ppc64le)')
 export PATH=$JAVA_HOME/bin:$PATH
 
+mkdir -p $CURRENT_DIR/wheelhouse
 
 #installing patchelf from source
 cd $CURRENT_DIR
-mkdir wheelhouse
 yum install -y git autoconf automake libtool make
 git clone https://github.com/NixOS/patchelf.git
 cd patchelf
@@ -204,7 +204,7 @@ export CXXFLAGS="-I${ML_DIR}/include"
 export CC=/opt/rh/gcc-toolset-13/root/bin/gcc
 export CXX=/opt/rh/gcc-toolset-13/root/bin/g++
 
-python3.12 -m pip wheel . -w /wheelhouse
+python3.12 -m pip wheel . -w $CURRENT_DIR/wheelhouse
 WHEEL_FILE=$(ls wheelhouse/ml_dtypes-0.4.1-*.whl | head -n1)
 python3.12 -m pip install "$WHEEL_FILE"
 
