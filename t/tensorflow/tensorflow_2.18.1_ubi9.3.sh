@@ -208,7 +208,7 @@ python3.12 -m pip wheel --no-build-isolation --no-deps . -w $CURRENT_DIR/wheelho
 echo "--------------------------------------wheelhouse content--------------------------------"
 ls $CURRENT_DIR/wheelhouse
 #python3.12 -m pip wheel . -w $CURRENT_DIR/wheelhouse
-WHEEL_FILE=$(ls wheelhouse/ml_dtypes-0.4.1-*.whl | head -n1)
+WHEEL_FILE=$(ls "$CURRENT_DIR"/wheelhouse/ml_dtypes-0.4.1-*.whl | head -n1)
 python3.12 -m pip install "$WHEEL_FILE"
 
 cd $CURRENT_DIR
