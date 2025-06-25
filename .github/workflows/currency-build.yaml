@@ -150,6 +150,9 @@ jobs:
           cat package-cache/variable.sh
           echo "===== scanner-env.sh ====="
           cat package-cache/scanner-env.sh
+          echo "==============LSCPU================"
+          lscpu
+          echo "==================================="
           chmod +x ./script/build_package.sh
           bash ./script/build_package.sh
           cloned_package=$(ls -td -- */ | head -n 1)
