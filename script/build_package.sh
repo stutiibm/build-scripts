@@ -40,13 +40,24 @@ fi
 python3 script/validate_builds_currency.py "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" "$docker_image" > build_log &
 
 SCRIPT_PID=$!
-while ps -p $SCRIPT_PID > /dev/null
-do 
-  echo "$SCRIPT_PID is running"
-  sleep 100
-done
+# while ps -p $SCRIPT_PID > /dev/null
+# do 
+#   echo "$SCRIPT_PID is running"
+#   sleep 100
+# done
+
+# Tail the log file while the background process runs
+tail -f build_log &
+TAIL_PID=$!
+
+# Wait for script to finish
 wait $SCRIPT_PID
 my_pid_status=$?
+
+# Stop tailing the log file
+kill $TAIL_PID
+wait $TAIL_PID 2>/dev/null || true
+
 build_size=$(stat -c %s build_log)
 
 if [ $my_pid_status != 0 ];
