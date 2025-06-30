@@ -18,8 +18,8 @@ if [ $build_docker != false ];then
         args=$(jq -r --arg ver "$match_version" '.[$ver].args' $config_file)
         patches=$(jq -r --arg ver "$match_version" '.[$ver].patches' $config_file)
         # By default send PACKAGE_VERSION argument.
-        build_args ="--build-arg PACKAGE_VERSION=$version"
-        if [ $args != null ]; then
+        build_args="--build-arg PACKAGE_VERSION=$version"
+        if [ $args != "null" ]; then
             for row in $(echo "$args" | jq -r 'to_entries[] | @base64'); do
             key=$(echo "$row" | base64 -d | jq -r '.key')
             value=$(echo "$row" | base64 -d | jq -r '.value')
