@@ -18,7 +18,7 @@
 #
 # ----------------------------------------------------------------------------
 
-set -ex 
+set -ex
 
 PACKAGE_NAME=tensorflow
 PACKAGE_VERSION=${1:-v2.18.1}
@@ -27,7 +27,7 @@ CURRENT_DIR=$(pwd)
 PACKAGE_DIR=tensorflow
 
 # install core dependencies
-yum install -y wget python3.12 python3.12-pip python3.12-devel  gcc-toolset-13 gcc-toolset-13-binutils gcc-toolset-13-binutils-devel gcc-toolset-13-gcc-c++ git make cmake binutils 
+yum install -y wget python3.12 python3.12-pip python3.12-devel  gcc-toolset-13 gcc-toolset-13-binutils gcc-toolset-13-binutils-devel gcc-toolset-13-gcc-c++ git make cmake binutils
 
 yum install -y libffi-devel openssl-devel sqlite-devel zip rsync
 
@@ -57,10 +57,11 @@ done
 python3.12 -m pip install numpy==2.0.2 cython setuptools wheel ninja
 
 yum install -y java-11-openjdk-devel
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.25.0.9-3.el9.ppc64le 
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.25.0.9-3.el9.ppc64le
 export JAVA_HOME=/usr/lib/jvm/$(ls /usr/lib/jvm/ | grep -P '^(?=.*java-)(?=.*ppc64le)')
 export PATH=$JAVA_HOME/bin:$PATH
 
+mkdir -p $CURRENT_DIR/wheelhouse
 
 #installing patchelf from source
 cd $CURRENT_DIR
@@ -69,7 +70,7 @@ git clone https://github.com/NixOS/patchelf.git
 cd patchelf
 ./bootstrap.sh
 ./configure
-make 
+make
 make install
 ln -s /usr/local/bin/patchelf /usr/bin/patchelf
 echo "-----------------------------------------------------Installed patchelf-----------------------------------------------------"
@@ -129,7 +130,7 @@ git submodule update --init
 yum install -y zlib zlib-devel
 
 ./configure --prefix=$HDF5_PREFIX --enable-cxx --enable-fortran  --with-pthread=yes --enable-threadsafe  --enable-build-mode=production --enable-unsupported  --enable-using-memchecker  --enable-clear-file-buffers --with-ssl
-make 
+make
 make install PREFIX="${HDF5_PREFIX}"
 export LD_LIBRARY_PATH=${HDF5_PREFIX}/lib:$LD_LIBRARY_PATH
 echo "-----------------------------------------------------Installed hdf5-----------------------------------------------------"
@@ -143,9 +144,11 @@ git checkout 3.13.0
 
 HDF5_DIR=/install-deps/hdf5 python3.12 -m pip wheel . -w $CURRENT_DIR/wheelhouse
 cd $CURRENT_DIR
-python3.12 -m pip install wheelhouse/h5py-3.13.0-*.whl
+WHEEL_FILE=$(ls wheelhouse/h5py-3.13.0-*.whl | head -n1)
+python3.12 -m pip install "$WHEEL_FILE"
 python3.12 -c "import h5py; print(h5py.__version__)"
 echo "-----------------------------------------------------Installed h5py-----------------------------------------------------"
+
 
 
 
@@ -178,13 +181,13 @@ echo "-----------------------------------------------------Installed abseil-cpp-
 
 
 #Build bazel from source
-cd $CURRENT_DIR
-mkdir bazel
-cd bazel
-wget https://github.com/bazelbuild/bazel/releases/download/6.5.0/bazel-6.5.0-dist.zip
-unzip bazel-6.5.0-dist.zip
-env EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk" bash ./compile.sh
-cp output/bazel /usr/local/bin
+#cd $CURRENT_DIR
+#mkdir bazel
+#cd bazel
+#wget https://github.com/bazelbuild/bazel/releases/download/6.5.0/bazel-6.5.0-dist.zip
+#unzip bazel-6.5.0-dist.zip
+#env EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk" bash ./compile.sh
+#cp output/bazel /usr/local/bin
 export PATH=/usr/local/bin:$PATH
 bazel --version
 echo "-----------------------------------------------------Installed bazel-----------------------------------------------------"
@@ -201,14 +204,16 @@ export CXXFLAGS="-I${ML_DIR}/include"
 export CC=/opt/rh/gcc-toolset-13/root/bin/gcc
 export CXX=/opt/rh/gcc-toolset-13/root/bin/g++
 
-python3.12 -m pip wheel . -w /wheelhouse
-python3.12 -m pip install wheelhouse/h5py-3.13.0-*.whl
+python3.12 -m pip wheel --no-build-isolation --no-deps . -w $CURRENT_DIR/wheelhouse
+echo "--------------------------------------wheelhouse content--------------------------------"
+ls $CURRENT_DIR/wheelhouse
+#python3.12 -m pip wheel . -w $CURRENT_DIR/wheelhouse
+WHEEL_FILE=$(ls "$CURRENT_DIR"/wheelhouse/ml_dtypes-0.4.1-*.whl | head -n1)
+python3.12 -m pip install "$WHEEL_FILE"
 
-python3.12 -m pip install wheelhouse/ml_dtypes-0.4.1-*.whl
 cd $CURRENT_DIR
 python3.12 -c "import ml_dtypes; print(ml_dtypes.__version__)"
 echo "-----------------------------------------------------Installed ml_dtyapes-----------------------------------------------------"
-
 
 
 # Set CPU optimization flags
@@ -228,8 +233,8 @@ export HERMETIC_PYTHON_VERSION=$(python3.12 --version | awk '{print $2}' | cut -
 export GCC_HOST_COMPILER_PATH=$(which gcc)
 export CC=$GCC_HOST_COMPILER_PATH
 
-# set the variable, when grpcio fails to compile on the system. 
-export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=true;  
+# set the variable, when grpcio fails to compile on the system.
+export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=true;
 export LDFLAGS="${LDFLAGS} -lrt"
 export HDF5_DIR=/install-deps/hdf5
 export CFLAGS="-I${HDF5_DIR}/include"
@@ -244,6 +249,11 @@ SRC_DIR=$(pwd)
 
 wget https://raw.githubusercontent.com/ppc64le/build-scripts/refs/heads/master/t/tensorflow/tf_2.18.1_fix.patch
 git apply tf_2.18.1_fix.patch
+
+sed -i '1i --find-links=/wheelhouse' requirements_lock_3_12.txt
+sed -i '1i --find-links=/wheelhouse' requirements_lock_3_11.txt
+sed -i '1i --find-links=/wheelhouse' requirements_lock_3_10.txt
+
 
 # Pick up additional variables defined from the conda build environment
 export PYTHON_BIN_PATH=$(which python3.12)
@@ -298,14 +308,15 @@ build --strip=always
 build --color=yes
 build --verbose_failures
 build --spawn_strategy=standalone
+build --action_env=RULES_PYTHON_PIP_ISOLATED=0
 EOF
 
 echo "----------------------------------Created bazelrc-----------------------------------"
-
+export RULES_PYTHON_PIP_ISOLATED=0
 export BUILD_TARGET="//tensorflow/tools/pip_package:wheel //tensorflow/tools/lib_package:libtensorflow //tensorflow:libtensorflow_cc${SHLIB_EXT}"
 
 #Install
-if ! (bazel --bazelrc=$BAZEL_RC_DIR/tensorflow.bazelrc build --local_cpu_resources=HOST_CPUS*0.50 --local_ram_resources=HOST_RAM*0.50 --config=opt ${BUILD_TARGET}) ; then  
+if ! (bazel --bazelrc=$BAZEL_RC_DIR/tensorflow.bazelrc build --local_cpu_resources=HOST_CPUS*0.50 --local_ram_resources=HOST_RAM*0.50 --config=opt ${BUILD_TARGET}) ; then
     echo "------------------$PACKAGE_NAME:Install_fails-------------------------------------"
     echo "$PACKAGE_URL $PACKAGE_NAME"
     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_Fails"
@@ -326,7 +337,7 @@ find  ${SRC_DIR}/local/tensorflow  -type f \( -name "*.so*" -o -name "*.a" \) -e
 mkdir -p $SRC_DIR/libtensorflow_extracted
 tar -xzf $SRC_DIR/bazel-bin/tensorflow/tools/lib_package/libtensorflow.tar.gz -C $SRC_DIR/libtensorflow_extracted
 mkdir -p ${SRC_DIR}/local/tensorflow/include
-rsync -a  $SRC_DIR/libtensorflow_extracted/lib/*.so*  ${SRC_DIR}/local/tensorflow/lib 
+rsync -a  $SRC_DIR/libtensorflow_extracted/lib/*.so*  ${SRC_DIR}/local/tensorflow/lib
 cp -d -r $SRC_DIR/libtensorflow_extracted/include/* ${SRC_DIR}/local/tensorflow/include
 
 mkdir -p $SRC_DIR/libtensorflow_cc_output/lib
