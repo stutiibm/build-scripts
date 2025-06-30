@@ -181,13 +181,13 @@ echo "-----------------------------------------------------Installed abseil-cpp-
 
 
 #Build bazel from source
-#cd $CURRENT_DIR
-#mkdir bazel
-#cd bazel
-#wget https://github.com/bazelbuild/bazel/releases/download/6.5.0/bazel-6.5.0-dist.zip
-#unzip bazel-6.5.0-dist.zip
-#env EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk" bash ./compile.sh
-#cp output/bazel /usr/local/bin
+cd $CURRENT_DIR
+mkdir bazel
+cd bazel
+wget https://github.com/bazelbuild/bazel/releases/download/6.5.0/bazel-6.5.0-dist.zip
+unzip bazel-6.5.0-dist.zip
+env EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk" bash ./compile.sh
+cp output/bazel /usr/local/bin
 export PATH=/usr/local/bin:$PATH
 bazel --version
 echo "-----------------------------------------------------Installed bazel-----------------------------------------------------"
