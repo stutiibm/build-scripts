@@ -141,8 +141,9 @@ git clone https://github.com/h5py/h5py.git
 cd h5py/
 git checkout 3.13.0
 
-HDF5_DIR=/install-deps/hdf5 python3.12 -m pip install .
+HDF5_DIR=/install-deps/hdf5 python3.12 -m pip wheel . -w $CURRENT_DIR/wheelhouse
 cd $CURRENT_DIR
+python3.12 -m pip install wheelhouse/h5py-3.13.0-*.whl
 python3.12 -c "import h5py; print(h5py.__version__)"
 echo "-----------------------------------------------------Installed h5py-----------------------------------------------------"
 
@@ -200,7 +201,10 @@ export CXXFLAGS="-I${ML_DIR}/include"
 export CC=/opt/rh/gcc-toolset-13/root/bin/gcc
 export CXX=/opt/rh/gcc-toolset-13/root/bin/g++
 
-python3.12 -m pip install .
+python3.12 -m pip wheel . -w /wheelhouse
+python3.12 -m pip install wheelhouse/h5py-3.13.0-*.whl
+
+python3.12 -m pip install wheelhouse/ml_dtypes-0.4.1-*.whl
 cd $CURRENT_DIR
 python3.12 -c "import ml_dtypes; print(ml_dtypes.__version__)"
 echo "-----------------------------------------------------Installed ml_dtyapes-----------------------------------------------------"
@@ -370,10 +374,3 @@ else
     echo "$PACKAGE_NAME | $PACKAGE_URL | $PACKAGE_VERSION | $OS_NAME | GitHub | Pass | Both_Install_and_Test_Success"
     exit 0
 fi
-
-
-
-
-
-
-
