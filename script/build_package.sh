@@ -37,7 +37,7 @@ else
     fi  
 fi
 
-python3 script/validate_builds_currency.py "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" "$docker_image" > build_log &
+python3 script/validate_builds_currency.py "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" "$docker_image" > build_log 2>&1 &
 
 SCRIPT_PID=$!
 # Start tailing the log in the background
