@@ -1,7 +1,6 @@
  #!/bin/bash -e
 
 sudo apt update -y && sudo apt-get install file -y
-sudo apt-get install -y expect
 #pip3 install --upgrade requests
 pip3 install --force-reinstall -v "requests==2.31.0"
 pip3 install --upgrade docker
@@ -39,8 +38,8 @@ else
     fi  
 fi
 
-#python3 script/validate_builds_currency.py "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" "$docker_image" > build_log 2>&1 &
-unbuffer python3 script/validate_builds_currency.py "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" "$docker_image" > build_log 2>&1 &
+python3 script/validate_builds_currency.py "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" "$docker_image" > build_log 2>&1 &
+
 
 SCRIPT_PID=$!
 # Start tailing the log in the background
