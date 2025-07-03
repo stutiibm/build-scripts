@@ -55,13 +55,14 @@ def trigger_script_validation_checks(file_name, version, image_name):
     os.chmod(os.path.join(current_dir, file_name), st.st_mode | stat.S_IEXEC)
 
     package = file_name.split("/")[1]
-    print(f"Starting validation for package: {package}", flush=True)
+    print(f"🚀 Starting validation for package: {package}", flush=True)
 
     try:
+        # Force line-buffered output using stdbuf
         command = [
             "bash",
             "-c",
-            f"cd /home/tester/ && ./{file_name} {version}"
+            f"cd /home/tester/ && stdbuf -oL ./{file_name} {version}"
         ]
 
         container = client.containers.run(
@@ -69,28 +70,29 @@ def trigger_script_validation_checks(file_name, version, image_name):
             command=command,
             network='host',
             detach=True,
+            stdin_open=True,  # Ensure interactive mode
+            tty=True,         # Required for line-buffered streaming
             volumes={
                 current_dir: {'bind': '/home/tester/', 'mode': 'rw'}
             },
             stderr=True,
-            stdout=True,
-            tty=True  # Ensures line buffering works
+            stdout=True
         )
 
-        # Stream logs live
-        for line in container.logs(stream=True, follow=True):
+        # Stream logs line-by-line in real time
+        for line in container.logs(stream=True, stdout=True, stderr=True, follow=True):
             print(line.decode('utf-8').rstrip(), flush=True)
 
         result = container.wait()
         container.remove()
 
         if result["StatusCode"] != 0:
-            raise Exception(f"Build script validation failed for {file_name}!")
+            raise Exception(f"❌ Build script validation failed for {file_name}!")
 
     except Exception as e:
-        print(f"❌ Error during container execution: {e}", flush=True)
+        print(f"🔥 Error during container execution: {e}", flush=True)
         raise
-
+            
 if __name__=="__main__":
     print("Inside python program")
     trigger_script_validation_checks(sys.argv[1],sys.argv[2],sys.argv[3])
