@@ -6,46 +6,90 @@ import subprocess
 import docker
 import json
         
-def trigger_script_validation_checks(file_name,version, image_name):
-    # Spawn a container and pass the build script
+# def trigger_script_validation_checks(file_name,version, image_name):
+#     # Spawn a container and pass the build script
+#     client = docker.DockerClient(base_url='unix://var/run/docker.sock')
+#     st = os.stat(file_name)
+#     current_dir = os.getcwd()
+#     os.chmod("{}/{}".format(current_dir, file_name), st.st_mode | stat.S_IEXEC)
+#     # Let the container run in non detach mode, as we need to delete the container on operation completion
+#     print(current_dir)
+#     print(file_name)
+#     package = file_name.split("/")[1]
+#     print(package)
+#     try:
+#         command = [
+#             "bash",
+#             "-c",
+#             f"cd /home/tester/ && ./{file_name} {version} "
+#         ]
+        
+#         container = client.containers.run(
+#             image_name,
+#             command,
+#             network = 'host',
+#             detach = True,
+#             volumes = {
+#                 current_dir : {'bind': '/home/tester/', 'mode': 'rw'}
+#             },
+#             stderr = True, # Return logs from STDERR
+#         )
+#         result = container.wait()
+#     except Exception as e:
+#         print(f"Failed to created container: {e}")    
+#     try:
+#         print(container.logs().decode("utf-8"))
+#     except Exception:
+#         print(container.logs())
+#     container.remove()
+#     if int(result["StatusCode"]) != 0:
+#         raise Exception(f"Build script validation failed for {file_name} !")
+#     else:
+#         return True
+
+
+def trigger_script_validation_checks(file_name, version, image_name):
     client = docker.DockerClient(base_url='unix://var/run/docker.sock')
     st = os.stat(file_name)
     current_dir = os.getcwd()
-    os.chmod("{}/{}".format(current_dir, file_name), st.st_mode | stat.S_IEXEC)
-    # Let the container run in non detach mode, as we need to delete the container on operation completion
-    print(current_dir)
-    print(file_name)
+    os.chmod(os.path.join(current_dir, file_name), st.st_mode | stat.S_IEXEC)
+
     package = file_name.split("/")[1]
-    print(package)
+    print(f"Starting validation for package: {package}", flush=True)
+
     try:
         command = [
             "bash",
             "-c",
-            f"cd /home/tester/ && ./{file_name} {version} "
+            f"cd /home/tester/ && ./{file_name} {version}"
         ]
-        
+
         container = client.containers.run(
-            image_name,
-            command,
-            network = 'host',
-            detach = True,
-            volumes = {
-                current_dir : {'bind': '/home/tester/', 'mode': 'rw'}
+            image=image_name,
+            command=command,
+            network='host',
+            detach=True,
+            volumes={
+                current_dir: {'bind': '/home/tester/', 'mode': 'rw'}
             },
-            stderr = True, # Return logs from STDERR
+            stderr=True,
+            stdout=True,
+            tty=True  # Ensures line buffering works
         )
+
+        # Stream logs live
+        for line in container.logs(stream=True, follow=True):
+            print(line.decode('utf-8').rstrip(), flush=True)
+
         result = container.wait()
+        container.remove()
+
+        if result["StatusCode"] != 0:
+            raise Exception(f"Build script validation failed for {file_name}!")
+
     except Exception as e:
-        print(f"Failed to created container: {e}")    
-    try:
-        print(container.logs().decode("utf-8"))
-    except Exception:
-        print(container.logs())
-    container.remove()
-    if int(result["StatusCode"]) != 0:
-        raise Exception(f"Build script validation failed for {file_name} !")
-    else:
-        return True
+        print(f"❌ Error during container execution: {e}", flush=True)
+        raise
 
 if __name__=="__main__":
     print("Inside python program")
