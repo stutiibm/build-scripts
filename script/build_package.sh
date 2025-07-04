@@ -37,15 +37,17 @@ else
     fi  
 fi
 
-python3 script/validate_builds_currency.py "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" "$docker_image" > build_log &
+# python3 script/validate_builds_currency.py "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" "$docker_image" > build_log &
 
-SCRIPT_PID=$!
-while ps -p $SCRIPT_PID > /dev/null
-do 
-  echo "$SCRIPT_PID is running"
-  sleep 100
-done
-wait $SCRIPT_PID
+# SCRIPT_PID=$!
+# while ps -p $SCRIPT_PID > /dev/null
+# do 
+#   echo "$SCRIPT_PID is running"
+#   sleep 100
+# done
+# wait $SCRIPT_PID
+python3 script/validate_builds_currency.py "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" "$docker_image" | tee build_log
+
 my_pid_status=$?
 build_size=$(stat -c %s build_log)
 
