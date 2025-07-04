@@ -5,7 +5,6 @@ sudo apt update -y && sudo apt-get install file -y
 pip3 install --force-reinstall -v "requests==2.31.0"
 pip3 install --upgrade docker
 
-
 echo "Running build script execution in background for "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" " 
 echo "*************************************************************************************"
 
@@ -38,22 +37,16 @@ else
     fi  
 fi
 
-python3 -u script/validate_builds_currency.py "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" "$docker_image" > build_log 2>&1 &
-
+python3 script/validate_builds_currency.py "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" "$docker_image" > build_log &
 
 SCRIPT_PID=$!
-# Start tailing the log in the background
-tail -f build_log &
-TAIL_PID=$!
-
-# Wait for the script to finish
+while ps -p $SCRIPT_PID > /dev/null
+do 
+  echo "$SCRIPT_PID is running"
+  sleep 100
+done
 wait $SCRIPT_PID
 my_pid_status=$?
-
-# Once done, kill the tail process
-kill $TAIL_PID
-wait $TAIL_PID 2>/dev/null
-
 build_size=$(stat -c %s build_log)
 
 if [ $my_pid_status != 0 ];
@@ -78,4 +71,3 @@ else
     fi    
 fi
 exit 0
-
