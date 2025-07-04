@@ -5,7 +5,7 @@ import sys
 import subprocess
 import docker
 import json
-        
+
 def trigger_script_validation_checks(file_name, version, image_name):
     # Set up Docker client and file permissions
     client = docker.DockerClient(base_url='unix://var/run/docker.sock')
@@ -35,9 +35,10 @@ def trigger_script_validation_checks(file_name, version, image_name):
             stdout=True
         )
 
-        # ✅ Stream logs live
-        for line in container.logs(stream=True):
-            print(line.decode("utf-8").rstrip())
+        # ✅ FIXED: Stream logs with attach instead of logs()
+        stream = container.attach(stream=True, stdout=True, stderr=True)
+        for line in stream:
+            print(line.decode("utf-8").rstrip(), flush=True)  # flush to prevent buffering delays
 
         # Wait for container to finish
         result = container.wait()
@@ -57,7 +58,9 @@ def trigger_script_validation_checks(file_name, version, image_name):
     else:
         print("Build script executed successfully.")
         return True
-            
-if __name__=="__main__":
+
+if __name__ == "__main__":
     print("Inside python program")
-    trigger_script_validation_checks(sys.argv[1],sys.argv[2],sys.argv[3])
+    # ✅ Optional: Improve flush behavior for CI output
+    sys.stdout.reconfigure(line_buffering=True)
+    trigger_script_validation_checks(sys.argv[1], sys.argv[2], sys.argv[3])
