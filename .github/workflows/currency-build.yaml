@@ -170,13 +170,23 @@ jobs:
           #chmod +x ./script/upload-scripts/upload_file.sh
           #bash ./script/upload-scripts/upload_file.sh build_log.gz
 
+      # - name: Fix permissions on package-cache
+      #   run: |
+      #     echo "Fixing ownership and permissions for package-cache"
+      #     sudo chown -R $(whoami):$(whoami) package-cache
+      #     sudo find package-cache -type f -exec chmod 644 {} \;
+      #     sudo find package-cache -type d -exec chmod 755 {} \;
+
       - name: Fix permissions on package-cache
         run: |
+          echo "Current user: $USER"
+          echo "Permissions before fix:"
+          ls -ld /tmp/_actions-runner-working-dir/build-scripts/build-scripts/package-cache/tensorflow/bazel-bin
           echo "Fixing ownership and permissions for package-cache"
-          sudo chown -R $(whoami):$(whoami) package-cache
-          sudo find package-cache -type f -exec chmod 644 {} \;
-          sudo find package-cache -type d -exec chmod 755 {} \;
-
+          sudo chown -R $USER:$USER package-cache
+          sudo chmod -R u+rwX,go+rX,go-w package-cache
+          echo "Permissions after fix:"
+          ls -ld /tmp/_actions-runner-working-dir/build-scripts/build-scripts/package-cache/tensorflow/bazel-bin
 
       - name: Upload updated package-cache
         uses: actions/upload-artifact@v4
