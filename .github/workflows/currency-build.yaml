@@ -141,7 +141,8 @@ jobs:
 
       - name: Fix permissions on package-cache earlier
         run: |
-          echo "Current user (whoami): $(whoami)"
+          USERNAME=$(whoami)
+          echo "Current user: $USERNAME"
     
       - name: Build Package
         #env:
@@ -183,6 +184,7 @@ jobs:
 
       - name: Fix permissions on package-cache
         run: |
+          USER=$(whoami)
           echo "Current user: $USER"
           echo "Permissions before fix:"
           ls -ld /tmp/_actions-runner-working-dir/build-scripts/build-scripts/package-cache/tensorflow/bazel-bin
