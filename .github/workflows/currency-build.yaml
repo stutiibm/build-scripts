@@ -141,7 +141,7 @@ jobs:
 
       - name: Fix permissions on package-cache earlier
         run: |
-          echo "Current user: $USER"
+          echo "Current user (whoami): $(whoami)"
     
       - name: Build Package
         #env:
