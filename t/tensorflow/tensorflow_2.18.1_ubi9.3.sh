@@ -304,7 +304,8 @@ export BUILD_TARGET="//tensorflow/tools/pip_package:wheel //tensorflow/tools/lib
 
 #Install
 #if ! (bazel --output_user_root=$CURRENT_DIR/custom_bazel_cache --bazelrc=$BAZEL_RC_DIR/tensorflow.bazelrc build --local_cpu_resources=HOST_CPUS*0.50 --local_ram_resources=HOST_RAM*0.50 --config=opt ${BUILD_TARGET}) ; then
-if ! (bazel --output_user_root=$CURRENT_DIR/custom_bazel_cache --bazelrc=$BAZEL_RC_DIR/tensorflow.bazelrc --symlink_prefix=./bazel-symlinks/ build --local_cpu_resources=HOST_CPUS*0.50 --local_ram_resources=HOST_RAM*0.50 --config=opt ${BUILD_TARGET}) ; then
+#if ! (bazel --output_user_root=$CURRENT_DIR/custom_bazel_cache --bazelrc=$BAZEL_RC_DIR/tensorflow.bazelrc --symlink_prefix=./bazel-symlinks/ build --local_cpu_resources=HOST_CPUS*0.50 --local_ram_resources=HOST_RAM*0.50 --config=opt ${BUILD_TARGET}) ; then
+if ! (bazel --output_user_root=$CURRENT_DIR/custom_bazel_cache --bazelrc=$BAZEL_RC_DIR/tensorflow.bazelrc build --symlink_prefix=./bazel-symlinks/ --local_cpu_resources=HOST_CPUS*0.50 --local_ram_resources=HOST_RAM*0.50 --config=opt ${BUILD_TARGET}) ; then
     echo "------------------$PACKAGE_NAME:Install_fails-------------------------------------"
     echo "$PACKAGE_URL $PACKAGE_NAME"
     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_Fails"
