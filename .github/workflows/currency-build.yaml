@@ -138,6 +138,10 @@ jobs:
       #       cat /tmp/dockerd.log
       #       exit 1
       #     fi
+
+      - name: Fix permissions on package-cache earlier
+        run: |
+          echo "Current user: $USER"
     
       - name: Build Package
         #env:
