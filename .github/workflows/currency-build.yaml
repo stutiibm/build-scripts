@@ -187,12 +187,12 @@ jobs:
           USER=$(whoami)
           echo "Current user: $USER"
           echo "Permissions before fix:"
-          ls -ld /tmp/_actions-runner-working-dir/build-scripts/build-scripts/package-cache/tensorflow/bazel-bin
+          #ls -ld /tmp/_actions-runner-working-dir/build-scripts/build-scripts/package-cache/tensorflow/bazel-bin
           echo "Fixing ownership and permissions for package-cache"
           sudo chown -R $USER:$USER package-cache
           sudo chmod -R u+rwX,go+rX,go-w package-cache
           echo "Permissions after fix:"
-          ls -ld /tmp/_actions-runner-working-dir/build-scripts/build-scripts/package-cache/tensorflow/bazel-bin
+          #ls -ld /tmp/_actions-runner-working-dir/build-scripts/build-scripts/package-cache/tensorflow/bazel-bin
 
       - name: Upload updated package-cache
         uses: actions/upload-artifact@v4
