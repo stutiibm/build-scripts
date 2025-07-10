@@ -37,15 +37,17 @@ else
 fi
 
 WHEEL_SCRIPT=script/create_wheel_wrapper.sh
-python3 script/build_wheels.py "$WHEEL_SCRIPT" "$PYTHON_VERSION" "$docker_image" "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" > build_log &
+#python3 script/build_wheels.py "$WHEEL_SCRIPT" "$PYTHON_VERSION" "$docker_image" "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" > build_log &
 
-SCRIPT_PID=$!
-while ps -p $SCRIPT_PID > /dev/null
-do 
-  echo "$SCRIPT_PID is running"
-  sleep 100
-done
-wait $SCRIPT_PID
+# SCRIPT_PID=$!
+# while ps -p $SCRIPT_PID > /dev/null
+# do 
+#   echo "$SCRIPT_PID is running"
+#   sleep 100
+# done
+# wait $SCRIPT_PID
+python3 script/build_wheels.py "$WHEEL_SCRIPT" "$PYTHON_VERSION" "$docker_image" "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" | tee build_log
+
 my_pid_status=$?
 build_size=$(stat -c %s build_log)
 
