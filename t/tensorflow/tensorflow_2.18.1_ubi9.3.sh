@@ -353,8 +353,14 @@ echo "-------------------------------tensroflow installation successful---------
 # Create target directories
 mkdir -p "$SRC_DIR/tensorflow_pkg"
 mkdir -p "$SRC_DIR/local"
-TOOLS_DIR=$(find /custom_bazel_cache -type d -path "*/bazel-out/*/bin/tensorflow/tools" 2>/dev/null | head -n1)
+
+# Find the tools directory from root
+TOOLS_DIR=$(find / -type d -path "*/bazel-out/*/bin/tensorflow/tools" 2>/dev/null | head -n1)
+
+# Find the wheel directory
 WHEEL_DIR=$(find "$TOOLS_DIR/pip_package" -type d -name wheel_house 2>/dev/null | head -n1)
+
+# Copy wheel and extract
 find "$WHEEL_DIR" -iname "*.whl" -exec cp {} "$SRC_DIR/tensorflow_pkg" \;
 unzip -n "$SRC_DIR/tensorflow_pkg"/*.whl -d "${SRC_DIR}/local"
 mkdir -p "${SRC_DIR}/local/tensorflow/lib"
@@ -386,15 +392,19 @@ mkdir -p "$SRC_DIR/libtensorflow_cc_output/include/tensorflow"
 
 rsync -r --chmod=D777,F666 --exclude '_solib*' --exclude '_virtual_includes/' --exclude 'pip_package/' --exclude 'lib_package/' \
   --include '*/' --include '*.h' --include '*.inc' --exclude '*' "$TOOLS_DIR/../../.." "$SRC_DIR/libtensorflow_cc_output/include"
+
 rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' tensorflow/cc "$SRC_DIR/libtensorflow_cc_output/include/tensorflow/"
 rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' tensorflow/core "$SRC_DIR/libtensorflow_cc_output/include/tensorflow/"
 rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' third_party/xla/third_party/tsl/ "$SRC_DIR/libtensorflow_cc_output/include/"
 rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.cc' third_party/ "$SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/"
+
+# Merge into local include/lib dirs
 rsync -a "$SRC_DIR/libtensorflow_cc_output/include/"* "${SRC_DIR}/local/tensorflow/include"
 rsync -a "$SRC_DIR/libtensorflow_cc_output/lib/"*.so "${SRC_DIR}/local/tensorflow/lib"
 
-# Repack the final wheel
+# Repack wheel directory
 mkdir -p repackged_wheel
+
 
 
 # Pack the locally built TensorFlow files into a wheel
