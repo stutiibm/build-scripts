@@ -7,8 +7,8 @@ cd package-cache
 
 if [ $validate_build_script == true ];then
      GRYPE_VERSION=$(curl -s https://api.github.com/repos/anchore/grype/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
-     wget https://github.com/anchore/grype/releases/download/$GRYPE_VERSION/grype_${GRYPE_VERSION#v}_linux_ppc64le.tar.gz
-     tar -xzf grype_${GRYPE_VERSION#v}_linux_ppc64le.tar.gz
+     wget https://github.com/anchore/grype/releases/download/$GRYPE_VERSION/grype_${GRYPE_VERSION#v}_linux_amd64.tar.gz
+     tar -xzf grype_${GRYPE_VERSION#v}_linux_amd64.tar.gz
      chmod +x grype
      sudo mv grype /usr/bin 
      grype --version
