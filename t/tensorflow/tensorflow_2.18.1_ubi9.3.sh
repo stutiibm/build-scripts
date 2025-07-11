@@ -314,40 +314,88 @@ fi
 
 echo "-------------------------------tensroflow installation successful-------------------------------------"
 
-#copying .so and .a files into local/tensorflow/lib
-mkdir -p $SRC_DIR/tensorflow_pkg
-mkdir -p $SRC_DIR/local
-find ./bazel-bin/tensorflow/tools/pip_package/wheel_house -iname "*.whl" -exec cp {} $SRC_DIR/tensorflow_pkg  \;
-unzip -n $SRC_DIR/tensorflow_pkg/*.whl -d ${SRC_DIR}/local
-mkdir -p ${SRC_DIR}/local/tensorflow/lib
-find  ${SRC_DIR}/local/tensorflow  -type f \( -name "*.so*" -o -name "*.a" \) -exec cp {} ${SRC_DIR}/local/tensorflow/lib \;
+# #copying .so and .a files into local/tensorflow/lib
+# mkdir -p $SRC_DIR/tensorflow_pkg
+# mkdir -p $SRC_DIR/local
+# #find ./bazel-bin/tensorflow/tools/pip_package/wheel_house -iname "*.whl" -exec cp {} $SRC_DIR/tensorflow_pkg  \;
+# WHEEL_DIR=$(find / -type d -name wheel_house 2>/dev/null | head -n 1) && [ -n "$WHEEL_DIR" ] && find "$WHEEL_DIR" -iname "*.whl" -exec cp {} "$SRC_DIR/tensorflow_pkg" \;
+# unzip -n $SRC_DIR/tensorflow_pkg/*.whl -d ${SRC_DIR}/local
+# mkdir -p ${SRC_DIR}/local/tensorflow/lib
+# find  ${SRC_DIR}/local/tensorflow  -type f \( -name "*.so*" -o -name "*.a" \) -exec cp {} ${SRC_DIR}/local/tensorflow/lib \;
 
-#Build libtensorflow and libtensorflow_cc artifacts
-mkdir -p $SRC_DIR/libtensorflow_extracted
-tar -xzf $SRC_DIR/bazel-bin/tensorflow/tools/lib_package/libtensorflow.tar.gz -C $SRC_DIR/libtensorflow_extracted
-mkdir -p ${SRC_DIR}/local/tensorflow/include
-rsync -a  $SRC_DIR/libtensorflow_extracted/lib/*.so*  ${SRC_DIR}/local/tensorflow/lib 
-cp -d -r $SRC_DIR/libtensorflow_extracted/include/* ${SRC_DIR}/local/tensorflow/include
+# #Build libtensorflow and libtensorflow_cc artifacts
+# mkdir -p $SRC_DIR/libtensorflow_extracted
+# tar -xzf $SRC_DIR/bazel-bin/tensorflow/tools/lib_package/libtensorflow.tar.gz -C $SRC_DIR/libtensorflow_extracted
+# mkdir -p ${SRC_DIR}/local/tensorflow/include
+# rsync -a  $SRC_DIR/libtensorflow_extracted/lib/*.so*  ${SRC_DIR}/local/tensorflow/lib 
+# cp -d -r $SRC_DIR/libtensorflow_extracted/include/* ${SRC_DIR}/local/tensorflow/include
 
-mkdir -p $SRC_DIR/libtensorflow_cc_output/lib
-mkdir -p $SRC_DIR/libtensorflow_cc_output/include
-cp -d  bazel-bin/tensorflow/libtensorflow_cc.so* $SRC_DIR/libtensorflow_cc_output/lib/
-cp -d  bazel-bin/tensorflow/libtensorflow_framework.so* $SRC_DIR/libtensorflow_cc_output/lib/
-cp -d  $SRC_DIR/libtensorflow_cc_output/lib/libtensorflow_framework.so.2 ./libtensorflow_cc_output/lib/libtensorflow_framework.so
+# mkdir -p $SRC_DIR/libtensorflow_cc_output/lib
+# mkdir -p $SRC_DIR/libtensorflow_cc_output/include
+# cp -d  bazel-bin/tensorflow/libtensorflow_cc.so* $SRC_DIR/libtensorflow_cc_output/lib/
+# cp -d  bazel-bin/tensorflow/libtensorflow_framework.so* $SRC_DIR/libtensorflow_cc_output/lib/
+# cp -d  $SRC_DIR/libtensorflow_cc_output/lib/libtensorflow_framework.so.2 ./libtensorflow_cc_output/lib/libtensorflow_framework.so
 
-chmod u+w $SRC_DIR/libtensorflow_cc_output/lib/libtensorflow*
+# chmod u+w $SRC_DIR/libtensorflow_cc_output/lib/libtensorflow*
 
 
-mkdir -p $SRC_DIR/libtensorflow_cc_output/include/tensorflow
-rsync -r --chmod=D777,F666 --exclude '_solib*' --exclude '_virtual_includes/' --exclude 'pip_package/' --exclude 'lib_package/' --include '*/' --include '*.h' --include '*.inc' --exclude '*' bazel-bin/ $SRC_DIR/libtensorflow_cc_output/include
-rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' tensorflow/cc $SRC_DIR/libtensorflow_cc_output/include/tensorflow/
-rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' tensorflow/core $SRC_DIR/libtensorflow_cc_output/include/tensorflow/
-rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' third_party/xla/third_party/tsl/ $SRC_DIR/libtensorflow_cc_output/include/
-rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.cc' third_party/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/
-rsync -a $SRC_DIR/libtensorflow_cc_output/include/*  ${SRC_DIR}/local/tensorflow/include
-rsync -a $SRC_DIR/libtensorflow_cc_output/lib/*.so ${SRC_DIR}/local/tensorflow/lib
+# mkdir -p $SRC_DIR/libtensorflow_cc_output/include/tensorflow
+# rsync -r --chmod=D777,F666 --exclude '_solib*' --exclude '_virtual_includes/' --exclude 'pip_package/' --exclude 'lib_package/' --include '*/' --include '*.h' --include '*.inc' --exclude '*' bazel-bin/ $SRC_DIR/libtensorflow_cc_output/include
+# rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' tensorflow/cc $SRC_DIR/libtensorflow_cc_output/include/tensorflow/
+# rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' tensorflow/core $SRC_DIR/libtensorflow_cc_output/include/tensorflow/
+# rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' third_party/xla/third_party/tsl/ $SRC_DIR/libtensorflow_cc_output/include/
+# rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.cc' third_party/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/
+# rsync -a $SRC_DIR/libtensorflow_cc_output/include/*  ${SRC_DIR}/local/tensorflow/include
+# rsync -a $SRC_DIR/libtensorflow_cc_output/lib/*.so ${SRC_DIR}/local/tensorflow/lib
 
+# mkdir -p repackged_wheel
+
+# Create target directories
+mkdir -p "$SRC_DIR/tensorflow_pkg"
+mkdir -p "$SRC_DIR/local"
+TOOLS_DIR=$(find /custom_bazel_cache -type d -path "*/bazel-out/*/bin/tensorflow/tools" 2>/dev/null | head -n1)
+WHEEL_DIR=$(find "$TOOLS_DIR/pip_package" -type d -name wheel_house 2>/dev/null | head -n1)
+find "$WHEEL_DIR" -iname "*.whl" -exec cp {} "$SRC_DIR/tensorflow_pkg" \;
+unzip -n "$SRC_DIR/tensorflow_pkg"/*.whl -d "${SRC_DIR}/local"
+mkdir -p "${SRC_DIR}/local/tensorflow/lib"
+find "${SRC_DIR}/local/tensorflow" -type f \( -name "*.so*" -o -name "*.a" \) -exec cp {} "${SRC_DIR}/local/tensorflow/lib" \;
+
+# Extract libtensorflow artifacts
+mkdir -p "$SRC_DIR/libtensorflow_extracted"
+LIBTAR=$(find "$TOOLS_DIR/lib_package" -name "libtensorflow.tar.gz" | head -n1)
+tar -xzf "$LIBTAR" -C "$SRC_DIR/libtensorflow_extracted"
+
+# Copy lib files and headers
+mkdir -p "${SRC_DIR}/local/tensorflow/include"
+rsync -a "$SRC_DIR/libtensorflow_extracted/lib/"*.so* "${SRC_DIR}/local/tensorflow/lib"
+cp -d -r "$SRC_DIR/libtensorflow_extracted/include/"* "${SRC_DIR}/local/tensorflow/include"
+
+# Set up libtensorflow_cc output dirs
+mkdir -p "$SRC_DIR/libtensorflow_cc_output/lib"
+mkdir -p "$SRC_DIR/libtensorflow_cc_output/include"
+
+# Copy libtensorflow_cc and framework shared libs
+cp -d "$TOOLS_DIR/../../libtensorflow_cc.so"* "$SRC_DIR/libtensorflow_cc_output/lib/"
+cp -d "$TOOLS_DIR/../../libtensorflow_framework.so"* "$SRC_DIR/libtensorflow_cc_output/lib/"
+cp -d "$SRC_DIR/libtensorflow_cc_output/lib/libtensorflow_framework.so.2" "$SRC_DIR/libtensorflow_cc_output/lib/libtensorflow_framework.so"
+
+chmod u+w "$SRC_DIR/libtensorflow_cc_output/lib"/libtensorflow*
+
+# Copy header files into include/
+mkdir -p "$SRC_DIR/libtensorflow_cc_output/include/tensorflow"
+
+rsync -r --chmod=D777,F666 --exclude '_solib*' --exclude '_virtual_includes/' --exclude 'pip_package/' --exclude 'lib_package/' \
+  --include '*/' --include '*.h' --include '*.inc' --exclude '*' "$TOOLS_DIR/../../.." "$SRC_DIR/libtensorflow_cc_output/include"
+rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' tensorflow/cc "$SRC_DIR/libtensorflow_cc_output/include/tensorflow/"
+rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' tensorflow/core "$SRC_DIR/libtensorflow_cc_output/include/tensorflow/"
+rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' third_party/xla/third_party/tsl/ "$SRC_DIR/libtensorflow_cc_output/include/"
+rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.cc' third_party/ "$SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/"
+rsync -a "$SRC_DIR/libtensorflow_cc_output/include/"* "${SRC_DIR}/local/tensorflow/include"
+rsync -a "$SRC_DIR/libtensorflow_cc_output/lib/"*.so "${SRC_DIR}/local/tensorflow/lib"
+
+# Repack the final wheel
 mkdir -p repackged_wheel
+
 
 # Pack the locally built TensorFlow files into a wheel
 wheel pack local/ -d repackged_wheel
