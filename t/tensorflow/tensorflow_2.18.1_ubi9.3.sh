@@ -381,9 +381,9 @@ mkdir -p "$SRC_DIR/libtensorflow_cc_output/lib"
 mkdir -p "$SRC_DIR/libtensorflow_cc_output/include"
 
 # Copy libtensorflow_cc and framework shared libs
-cp -d "$TOOLS_DIR/../../libtensorflow_cc.so"* "$SRC_DIR/libtensorflow_cc_output/lib/"
-cp -d "$TOOLS_DIR/../../libtensorflow_framework.so"* "$SRC_DIR/libtensorflow_cc_output/lib/"
-cp -d "$SRC_DIR/libtensorflow_cc_output/lib/libtensorflow_framework.so.2" "$SRC_DIR/libtensorflow_cc_output/lib/libtensorflow_framework.so"
+cp -d $TOOLS_DIR/../../libtensorflow_cc.so* $SRC_DIR/libtensorflow_cc_output/lib/
+cp -d $TOOLS_DIR/../../libtensorflow_framework.so* $SRC_DIR/libtensorflow_cc_output/lib/
+cp -d $SRC_DIR/libtensorflow_cc_output/lib/libtensorflow_framework.so.2 $SRC_DIR/libtensorflow_cc_output/lib/libtensorflow_framework.so
 
 chmod u+w "$SRC_DIR/libtensorflow_cc_output/lib"/libtensorflow*
 
