@@ -8,47 +8,11 @@ on:
 
 jobs:
   validate:
-    runs-on: ubuntu-24.04-ppc64le  # Ensure this self-hosted runner exists
+    runs-on: ubuntu-24.04-ppc64le-4xlarge  # Ensure this self-hosted runner exists
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      # - name: Install Docker
-      #   run: |
-      #     curl -fsSL https://get.docker.com -o get-docker.sh
-      #     sudo sh get-docker.sh
-
-      # - name: Start Docker with vfs storage driver
-      #   run: |
-      #     echo 'Stopping any existing Docker...'
-      #     sudo systemctl stop docker || true
-      #     sudo killall dockerd || true
-
-      #     echo 'Writing vfs storage driver configuration...'
-      #     echo '{"storage-driver":"vfs"}' | sudo tee /etc/docker/daemon.json > /dev/null
-
-      #     echo 'Starting Docker manually (no conflicting flags)...'
-      #     sudo dockerd > /tmp/dockerd.log 2>&1 &
-
-      #     echo 'Waiting for Docker to become ready...'
-      #     for i in {1..10}; do
-      #       if docker info > /dev/null 2>&1; then
-      #         echo "Docker is up"
-      #         break
-      #       fi
-      #       sleep 3
-      #     done
-
-      #     if ! docker info > /dev/null 2>&1; then
-      #       echo "Docker failed to start. Dumping logs:"
-      #       cat /tmp/dockerd.log
-      #       exit 1
-      #     fi
-
-      # - name: Pull UBI9 Docker Image
-      #   run: |
-      #     docker pull registry.access.redhat.com/ubi9/ubi:9.3
 
       - name: Install required packages
         run: |
