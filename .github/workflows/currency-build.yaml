@@ -80,7 +80,6 @@ jobs:
         run: |
           echo "Creating package-cache........."
           mkdir package-cache
-          ls
           echo "Creating scanner-env.sh ......."
           echo "export VALIDATE_BUILD_SCRIPT='${{ inputs.validate_build_script }}'" > scanner-env.sh
           echo "export BUILD_DOCKER='${{ inputs.build_docker }}'" >> scanner-env.sh
@@ -114,31 +113,7 @@ jobs:
           name: package-cache
           path: package-cache
 
-      # - name: Install Docker
-      #   run: |
-      #     echo "Installing docker ..........................................."
-      #     curl -fsSL https://get.docker.com -o get-docker.sh
-      #     sudo sh get-docker.sh
-
-      # - name: Start Docker with vfs storage driver
-      #   run: |
-      #     sudo systemctl stop docker || true
-      #     sudo killall dockerd || true
-      #     echo '{"storage-driver":"vfs"}' | sudo tee /etc/docker/daemon.json > /dev/null
-      #     sudo dockerd > /tmp/dockerd.log 2>&1 &
-      #     for i in {1..10}; do
-      #       if docker info > /dev/null 2>&1; then
-      #         echo "Docker is up"
-      #         break
-      #       fi
-      #       sleep 3
-      #     done
-      #     if ! docker info > /dev/null 2>&1; then
-      #       echo "Docker failed to start. Dumping logs:"
-      #       cat /tmp/dockerd.log
-      #       exit 1
-      #     fi
-
+     
       - name: Fix permissions on package-cache earlier
         run: |
           USERNAME=$(whoami)
@@ -175,12 +150,7 @@ jobs:
           #chmod +x ./script/upload-scripts/upload_file.sh
           #bash ./script/upload-scripts/upload_file.sh build_log.gz
 
-      # - name: Fix permissions on package-cache
-      #   run: |
-      #     echo "Fixing ownership and permissions for package-cache"
-      #     sudo chown -R $(whoami):$(whoami) package-cache
-      #     sudo find package-cache -type f -exec chmod 644 {} \;
-      #     sudo find package-cache -type d -exec chmod 755 {} \;
+
 
       - name: Fix permissions on package-cache
         run: |
