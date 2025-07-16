@@ -47,8 +47,8 @@ WHEEL_SCRIPT=script/create_wheel_wrapper.sh
 # done
 # wait $SCRIPT_PID
 python3 script/build_wheels.py "$WHEEL_SCRIPT" "$PYTHON_VERSION" "$docker_image" "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" 2>&1 | tee build_log
+my_pid_status=${PIPESTATUS[0]}
 
-my_pid_status=$?
 build_size=$(stat -c %s build_log)
 
 if [ $my_pid_status != 0 ];
