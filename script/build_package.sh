@@ -47,8 +47,8 @@ fi
 # done
 # wait $SCRIPT_PID
 python3 script/validate_builds_currency.py "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" "$docker_image" 2>&1 | tee build_log
+my_pid_status=${PIPESTATUS[0]}
 
-my_pid_status=$?
 build_size=$(stat -c %s build_log)
 
 if [ $my_pid_status != 0 ];
