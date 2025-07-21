@@ -37,9 +37,9 @@ on:
         required: true
         default: 'true'
       unique_id:
-        description: 'Unique id of the build'
+        description: 'Unique ID for the build'
         required: false
-        default : 'None'
+        default: 'None'
 
 run-name: Currency Build ${{ inputs.package_name }} && Unique ID ${{ inputs.unique_id }}
 
