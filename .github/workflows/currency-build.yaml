@@ -118,11 +118,7 @@ jobs:
           path: package-cache
 
      
-      - name: Fix permissions on package-cache earlier
-        run: |
-          USERNAME=$(whoami)
-          echo "Current user: $USERNAME"
-    
+       
       - name: Build Package
         #env:
           #CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.CURRENCY_SERVICE_ID_API_KEY }}
@@ -160,14 +156,10 @@ jobs:
         run: |
           USER=$(whoami)
           echo "Current user: $USER"
-          echo "Permissions before fix:"
-          #ls -ld /tmp/_actions-runner-working-dir/build-scripts/build-scripts/package-cache/tensorflow/bazel-bin
           echo "Fixing ownership and permissions for package-cache"
           sudo chown -R $USER:$USER package-cache
           sudo chmod -R u+rwX,go+rX,go-w package-cache
-          echo "Permissions after fix:"
-          #ls -ld /tmp/_actions-runner-working-dir/build-scripts/build-scripts/package-cache/tensorflow/bazel-bin
-
+         
       - name: Upload updated package-cache
         uses: actions/upload-artifact@v4
         with:
@@ -175,7 +167,7 @@ jobs:
           path: package-cache
 
   wheel_build:
-    needs: build
+    needs: build_info
     name: Create Wheel for Python ${{ matrix.python-version }}
     if: ${{ inputs.wheel_build == 'true' }}
     runs-on: ubuntu-24.04-ppc64le-2xlarge
