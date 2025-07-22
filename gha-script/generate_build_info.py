@@ -10,7 +10,7 @@ This script parse the package build-scripts and Dockerfiles available in local f
 read the data and generates the build_info contents.
 
 This script can be executed from base build-script repo folder like 
-$python3 script/generate_build_info.py
+$python3 gha-script/generate_build_info.py
 
 Note : Content generated from this scipt are not final.
        Please review the generated build info data before committing.
