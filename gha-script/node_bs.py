@@ -273,12 +273,12 @@ def create_new_script():
         newfile.writelines(template_lines)
 
     if args.spawn_container_arg:
-        new_cmd=f"python3 script/trigger_container.py -f {package_name[0]}/{package_name}/{package_name}_ubi_9.3.sh"
+        new_cmd=f"python3 gha-script/trigger_container.py -f {package_name[0]}/{package_name}/{package_name}_ubi_9.3.sh"
         container_result=subprocess.Popen(new_cmd,shell=True)
         stdout, stderr=container_result.communicate()
         exit_code=container_result.wait()   
    
-    cmd_2=f"python3 script/generate_build_info.py --package_name_arg {package_name} --github_username_arg {args.github_username_arg} --generate_wheel_arg"
+    cmd_2=f"python3 gha-script/generate_build_info.py --package_name_arg {package_name} --github_username_arg {args.github_username_arg} --generate_wheel_arg"
     print("\n\n Generating build_info.json")
     build_info_w=subprocess.Popen(cmd_2,shell=True)
     build_info_w.wait()
