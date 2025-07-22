@@ -46,7 +46,7 @@ if [ -f $config_file ]; then
 
   if [[ $(jq --arg ver $VERSION '.[$ver]' $config_file) == null ]]; then
     # Using python script to find matched version string/key in build_info.json for version passed 
-    match_version=$(python $CUR_DIR/script/match_version_buildinfo.py)
+    match_version=$(python $CUR_DIR/gha-script/match_version_buildinfo.py)
     echo "match_version = $match_version"
 
   fi
