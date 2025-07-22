@@ -14,7 +14,7 @@ docker_image=""
 # function accepts one argument, which is the base image value.
 docker_build_non_root() {
   echo "building docker image for non root user build"
-  docker build --build-arg BASE_IMAGE="$1" -t docker_non_root_image -f script/dockerfile_non_root .
+  docker build --build-arg BASE_IMAGE="$1" -t docker_non_root_image -f gha-script/dockerfile_non_root .
   docker_image="docker_non_root_image"
 }
 
@@ -46,7 +46,7 @@ fi
 #   sleep 100
 # done
 # wait $SCRIPT_PID
-python3 script/validate_builds_currency.py "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" "$docker_image" 2>&1 | tee build_log
+python3 gha-script/validate_builds_currency.py "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" "$docker_image" 2>&1 | tee build_log
 my_pid_status=${PIPESTATUS[0]}
 
 build_size=$(stat -c %s build_log)
