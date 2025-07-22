@@ -29,7 +29,7 @@ jobs:
 
       - name: Run validate_builds.py script and monitor log size
         run: |
-          python3 script/validate_builds.py ${PR_NUMBER:-false} > build_log &
+          python3 gha-script/validate_builds.py ${PR_NUMBER:-false} > build_log &
           SCRIPT_PID=$!
           while ps -p $SCRIPT_PID > /dev/null; do
             echo "$SCRIPT_PID is running"
