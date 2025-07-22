@@ -14,7 +14,7 @@ docker_image=""
 # function accepts one argument, which is the base image value.
 docker_build_non_root() {
   echo "building docker image for non root user build"
-  docker build --build-arg BASE_IMAGE="$1" -t docker_non_root_image -f script/dockerfile_non_root .
+  docker build --build-arg BASE_IMAGE="$1" -t docker_non_root_image -f gha-script/dockerfile_non_root .
   docker_image="docker_non_root_image"
 }
 
@@ -36,8 +36,8 @@ else
     fi    
 fi
 
-WHEEL_SCRIPT=script/create_wheel_wrapper.sh
-#python3 script/build_wheels.py "$WHEEL_SCRIPT" "$PYTHON_VERSION" "$docker_image" "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" > build_log &
+WHEEL_SCRIPT=gha-script/create_wheel_wrapper.sh
+#python3 gha-script/build_wheels.py "$WHEEL_SCRIPT" "$PYTHON_VERSION" "$docker_image" "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" > build_log &
 
 # SCRIPT_PID=$!
 # while ps -p $SCRIPT_PID > /dev/null
@@ -46,7 +46,7 @@ WHEEL_SCRIPT=script/create_wheel_wrapper.sh
 #   sleep 100
 # done
 # wait $SCRIPT_PID
-python3 script/build_wheels.py "$WHEEL_SCRIPT" "$PYTHON_VERSION" "$docker_image" "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" 2>&1 | tee build_log
+python3 gha-script/build_wheels.py "$WHEEL_SCRIPT" "$PYTHON_VERSION" "$docker_image" "$PKG_DIR_PATH$BUILD_SCRIPT" "$VERSION" 2>&1 | tee build_log
 my_pid_status=${PIPESTATUS[0]}
 
 build_size=$(stat -c %s build_log)
