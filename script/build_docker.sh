@@ -10,7 +10,7 @@ CUR_DIR=$(pwd)
 cd $package_dirpath
 
 # Using python script to find matched version string/key in build_info.json for version passed 
-match_version=$(python $CUR_DIR/gha-script/match_version_buildinfo.py)
+match_version=$(python $CUR_DIR/script/match_version_buildinfo.py)
 
 if [ $build_docker != false ];then
     if [[ $(jq --arg ver "$match_version" '.[$ver]' $config_file) != null ]]; then
