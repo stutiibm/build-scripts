@@ -175,7 +175,7 @@ jobs:
           path: package-cache
 
   wheel_build:
-    needs: build_info
+    needs: build
     name: Create Wheel for Python ${{ matrix.python-version }}
     if: ${{ inputs.wheel_build == 'true' }}
     runs-on: ubuntu-24.04-ppc64le-2xlarge
