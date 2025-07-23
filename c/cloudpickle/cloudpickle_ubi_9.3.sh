@@ -22,14 +22,15 @@ PACKAGE_NAME=cloudpickle
 PACKAGE_VERSION=${1:-v3.1.1}
 PACKAGE_URL=https://github.com/cloudpipe/cloudpickle
 PACKAGE_DIR=cloudpickle
-
 CURRENT_DIR=${PWD}
 
+#installing deps
 yum install -y git make cmake zip tar wget python3 python3-devel python3-pip gcc-toolset-13 gcc-toolset-13-gcc-c++ gcc-toolset-13-gcc zlib-devel libjpeg-devel 
 
 export GCC_TOOLSET_PATH=/opt/rh/gcc-toolset-13/root/usr
 export PATH=$GCC_TOOLSET_PATH/bin:$PATH
 
+#cloning package
 git clone $PACKAGE_URL
 cd $PACKAGE_NAME
 git checkout $PACKAGE_VERSION
