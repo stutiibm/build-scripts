@@ -29,7 +29,7 @@ jobs:
 
       - name: Run validate_builds.py script with live logs
         run: |
-          python3 gha-script/validate_builds.py ${PR_NUMBER:-false} 2>&1 | tee build_log
+          python3 -u gha-script/validate_builds.py ${PR_NUMBER:-false} 2>&1 | tee build_log
           my_pid_status=${PIPESTATUS[0]}
 
           build_size=$(stat -c %s build_log)
