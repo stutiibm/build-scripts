@@ -22,7 +22,6 @@ PACKAGE_NAME=cloudpickle
 PACKAGE_VERSION=${1:-v3.1.1}
 PACKAGE_URL=https://github.com/cloudpipe/cloudpickle
 PACKAGE_DIR=cloudpickle
-
 CURRENT_DIR=${PWD}
 
 #installing deps
