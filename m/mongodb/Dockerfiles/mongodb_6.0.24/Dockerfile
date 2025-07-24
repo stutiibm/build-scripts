@@ -109,7 +109,7 @@ RUN echo "Installing dependencies and building mongodb from source..." \
         && bash -c " \
                 (while true; do echo '[keepalive] Still building...'; sleep 60; done) & \
                 keepalive_pid=\$! && \
-                python3 buildscripts/scons.py install-mongod install-mongos -j$(nproc) --separate-debug=on --disable-warnings-as-errors DESTDIR=/usr/ --ssl=on --no-cache --release --dbg=off --opt=on VERBOSE=1 && \
+                python3 buildscripts/scons.py install-mongod -j$(nproc) --separate-debug=on --disable-warnings-as-errors DESTDIR=/usr/ --ssl=on --no-cache --release --dbg=off --opt=on VERBOSE=1 && \
                 kill \$keepalive_pid \
         " \
         && apt-get purge -y --auto-remove \
