@@ -327,9 +327,13 @@ jobs:
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
           chmod +x ./gha-script/build_docker.sh
+          echo "----------------------------Dockerfile execution started----------------------------"
           bash ./gha-script/build_docker.sh
+          echo "----------------------------Dockerfile execution finished----------------------------"
           docker save -o package-cache/image.tar "$IMAGE_NAME"
+          echo "----------------------------Saved image----------------------------------------------"
           docker images
+          echo "--------------------------Displayed images-------------------------------------------"
           
       - name: Upload Docker Image
         run: |
