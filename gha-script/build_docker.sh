@@ -81,6 +81,7 @@ if [ $build_docker != false ];then
         fi    
     fi
     echo "---------------------Value of TRAVIS_REPO_SLUG = ${TRAVIS_REPO_SLUG}----------------------------"
+    echo "---------------------Value of TRAVIS_REPO_SLUG = ${GITHUB_REPO_SLUG}----------------------------"
     docker save -o "$HOME/build/$GITHUB_REPO_SLUG/image.tar" $image_name
 else
     echo "Docker image is not supported"
