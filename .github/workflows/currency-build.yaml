@@ -320,13 +320,9 @@ jobs:
           name: package-cache
           path: package-cache
           
-      - name: Set TRAVIS_REPO_SLUG equivalent
-        run: echo "GITHUB_REPO_SLUG=${GITHUB_REPOSITORY}" >> $GITHUB_ENV
-
-
+    
       - name: Build Docker Image
         run: |
-          #export GITHUB_REPO_SLUG="${GITHUB_REPOSITORY}"
           echo "................................Sourcing scanner-env.sh............................."
           ls package-cache
           source package-cache/variable.sh
