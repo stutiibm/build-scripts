@@ -80,10 +80,8 @@ if [ $build_docker != false ];then
            tail -300 docker_build.log
         fi    
     fi
-    echo "---------------------Value of TRAVIS_REPO_SLUG = "${CUR_DIR}"----------------------------"
-    echo "---------------------Value of TRAVIS_REPO_SLUG = ${GITHUB_REPO_SLUG}----------------------------"
+    echo "---------------------Saving docker image at = "${CUR_DIR}"----------------------------"
     docker save -o image.tar $image_name
-    docker save -o "$HOME/build/$GITHUB_REPO_SLUG/image.tar" $image_name
 else
     echo "Docker image is not supported"
 fi
