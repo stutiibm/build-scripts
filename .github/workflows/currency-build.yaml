@@ -121,7 +121,7 @@ jobs:
        
       - name: Build Package
         env:
-          CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.CURRENCY_SERVICE_ID_API_KEY }}
+          travis_currency_service_id_api_key_dev: ${{ secrets.travis_currency_service_id_api_key_dev }}
         run: |
           echo "Sourcing variable.sh and scanner-env.sh..........................................."
           source package-cache/variable.sh
