@@ -10,7 +10,7 @@ token_request=$(curl -X POST https://iam.cloud.ibm.com/identity/token \
 #token=$(echo "$token_request" | jq -r '.access_token')
 #curl -X PUT -H "Authorization: bearer $token" -H "Content-Type: application/gzip" -T $1 "https://s3.au-syd.cloud-object-storage.appdomain.cloud/ose-power-toolci-bucket/$PACKAGE_NAME/$VERSION/$1"
 token=$(echo "$token_request" | jq -r '.access_token')
-curl -X PUT -H "Authorization: bearer $token" -H "Content-Type: application/gzip" -T $1 "https://s3.us.cloud-object-storage.appdomain.cloud/ose-power-toolci-bucket/$PACKAGE_NAME/$VERSION/$1"
+curl -X PUT -H "Authorization: bearer $token" -H "Content-Type: application/gzip" -T $1 "https://s3.us.cloud-object-storage.appdomain.cloud/ose-power-toolci-bucket-stag/$PACKAGE_NAME/$VERSION/$1"
 
 
 
