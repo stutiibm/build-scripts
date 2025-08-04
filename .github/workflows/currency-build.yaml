@@ -129,6 +129,7 @@ jobs:
           else
             echo "travis_currency_service_id_api_key_dev is set (length: ${#travis_currency_service_id_api_key_dev})"
           fi
+          export travis_currency_service_id_api_key_dev
           echo "Sourcing variable.sh and scanner-env.sh..........................................."
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
