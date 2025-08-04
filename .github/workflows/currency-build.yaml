@@ -120,8 +120,8 @@ jobs:
      
        
       - name: Build Package
-        #env:
-          #CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.CURRENCY_SERVICE_ID_API_KEY }}
+        env:
+          CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.CURRENCY_SERVICE_ID_API_KEY }}
         run: |
           echo "Sourcing variable.sh and scanner-env.sh..........................................."
           source package-cache/variable.sh
@@ -147,8 +147,11 @@ jobs:
           bash ../gha-script/pre_process.sh
           cd $GITHUB_WORKSPACE
           gzip build_log
-          #chmod +x ./gha-script/upload-scripts/upload_file.sh
-          #bash ./gha-script/upload-scripts/upload_file.sh build_log.gz
+          echo "------------------- starting upload --------------------------"
+          chmod +x ./gha-script/upload-scripts/upload_file.sh
+          echo "-------------------- started upload -------------------------"
+          bash ./gha-script/upload-scripts/upload_file.sh build_log.gz
+          echo "------------------ Done with upload ---------------------------"
 
 
 
