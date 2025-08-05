@@ -231,10 +231,15 @@ jobs:
 
       - name: Upload wheel artifact using custom script
         run: |
-          export travis_currency_service_id_api_key_dev
-          WHEEL_FILE=*.whl
-          chmod +x ./gha-script/upload-scripts/upload_wheel.sh
-          bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE
+          if [ -z "${{ secrets.travis_currency_service_id_api_key_dev }}" ]; then
+              echo "travis_currency_service_id_api_key_dev is empty or not set"
+          else
+              # Print the length of the variable
+              echo "Length of travis_currency_service_id_api_key_dev is: ${#travis_currency_service_id_api_key_dev}"
+              export travis_currency_service_id_api_key_dev
+              WHEEL_FILE=*.whl
+              chmod +x ./gha-script/upload-scripts/upload_wheel.sh
+              bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE
         # continue-on-error: ${{ matrix.allow-failure }}
 
       
