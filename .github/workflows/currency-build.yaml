@@ -123,12 +123,6 @@ jobs:
         env:
           travis_currency_service_id_api_key_dev: ${{ secrets.travis_currency_service_id_api_key_dev }}
         run: |
-          if [ -z "$travis_currency_service_id_api_key_dev" ]; then
-            echo "travis_currency_service_id_api_key_dev is NOT set!"
-            exit 1
-          else
-            echo "travis_currency_service_id_api_key_dev is set (length: ${#travis_currency_service_id_api_key_dev})"
-          fi
           export travis_currency_service_id_api_key_dev
           echo "Sourcing variable.sh and scanner-env.sh..........................................."
           source package-cache/variable.sh
@@ -196,6 +190,7 @@ jobs:
           - python-version: "3.13"
             allow-failure: true
     env:
+      travis_currency_service_id_api_key_dev: ${{ secrets.travis_currency_service_id_api_key_dev }}
       PYTHON_VERSION: ${{ matrix.python-version }}
       PACKAGE_NAME: ${{ inputs.package_name }}
       VERSION: ${{ inputs.version }}
@@ -236,6 +231,7 @@ jobs:
 
       - name: Upload wheel artifact using custom script
         run: |
+          export travis_currency_service_id_api_key_dev
           WHEEL_FILE=*.whl
           chmod +x ./gha-script/upload-scripts/upload_wheel.sh
           bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE
@@ -412,7 +408,10 @@ jobs:
           mv grype_image_sbom_results.json grype_image_vulnerabilities_results.json image_grype
 
       - name: Upload Image Scanner Results
+        env:
+          travis_currency_service_id_api_key_dev: ${{ secrets.travis_currency_service_id_api_key_dev }}
         run: |
+          export travis_currency_service_id_api_key_dev
           mkdir image
           find image_trivy -mindepth 1 -exec mv -t image {} + 2>/dev/null || true
           find image_syft -mindepth 1 -exec mv -t image {} + 2>/dev/null || true
