@@ -240,6 +240,7 @@ jobs:
               WHEEL_FILE=*.whl
               chmod +x ./gha-script/upload-scripts/upload_wheel.sh
               bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE
+          fi 
         # continue-on-error: ${{ matrix.allow-failure }}
 
       
