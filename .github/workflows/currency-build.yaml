@@ -358,6 +358,8 @@ jobs:
           travis_currency_service_id_api_key_dev: ${{ secrets.travis_currency_service_id_api_key_dev }}
         run: |
           export travis_currency_service_id_api_key_dev
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
           chmod +x ./gha-script/upload-scripts/upload_docker_image.sh
           bash ./gha-script/upload-scripts/upload_docker_image.sh
 
