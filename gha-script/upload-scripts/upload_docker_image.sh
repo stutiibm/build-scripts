@@ -2,7 +2,7 @@
 
 echo "-----------------Uploading docker image---------------------------"
 
-echo "$GHA_ACTIONS_SERVICE_ID_API_KEY" | docker login -u "iamapikey" --password-stdin icr.io
+echo "$GHA_ACTIONS_SERVICE_ID_API_KEY" | docker login -u iamapikey --password-stdin icr.io
 if [ $? -ne 0 ]; then
     echo "Docker login failed. Exiting script."
     exit 1
