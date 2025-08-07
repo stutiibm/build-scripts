@@ -312,7 +312,10 @@ jobs:
           mv package-cache/grype_source_sbom_results.json package-cache/grype_source_vulnerabilities_results.json source_grype
 
       - name: Upload Scanner Results
+        env:
+          travis_currency_service_id_api_key_dev: ${{ secrets.travis_currency_service_id_api_key_dev }}
         run: |
+          export travis_currency_service_id_api_key_dev
           mkdir source
           find source_trivy -mindepth 1 -exec mv -t source {} + 2>/dev/null || true
           find source_syft -mindepth 1 -exec mv -t source {} + 2>/dev/null || true
@@ -351,7 +354,10 @@ jobs:
           echo "--------------------------Displayed images-------------------------------------------"
           
       - name: Upload Docker Image
+        env:
+          travis_currency_service_id_api_key_dev: ${{ secrets.travis_currency_service_id_api_key_dev }}
         run: |
+          export travis_currency_service_id_api_key_dev
           chmod +x ./gha-script/upload-scripts/upload_docker_image.sh
           bash ./gha-script/upload-scripts/upload_docker_image.sh
 
