@@ -355,9 +355,9 @@ jobs:
           
       - name: Upload Docker Image
         env:
-          travis_currency_service_id_api_key_dev: ${{ secrets.travis_currency_service_id_api_key_dev }}
+          $GHA_ACTIONS_SERVICE_ID_API_KEY: ${{ secrets.gha_actions_service_id_api_key }}
         run: |
-          export travis_currency_service_id_api_key_dev
+          export gha_actions_service_id_api_key
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
           chmod +x ./gha-script/upload-scripts/upload_docker_image.sh
