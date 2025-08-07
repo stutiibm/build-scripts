@@ -9,6 +9,13 @@ fi
 echo "----------------Lowering package name--------------------------"
 package_name=$(echo $PACKAGE_NAME | tr '[:upper:]' '[:lower:]')
 echo "-----------------Tagging image---------------------------"
+
+# Exit if any of the required variables are empty
+if [[ -z "$PACKAGE_NAME" || -z "$IMAGE_NAME" || -z "$VERSION" ]]; then
+    echo "One or more required environment variables are empty. Exiting script."
+    exit 1
+fi
+
 docker tag $IMAGE_NAME icr.io/ose4power-packages/$package_name-ppc64le:$VERSION
 echo "-----------------Pushing image---------------------------"
 docker push "icr.io/ose4power-packages/$package_name-ppc64le:$VERSION"
