@@ -1,6 +1,9 @@
 #!/bin/bash -e
 
 echo "-----------------Uploading docker image---------------------------"
+echo "Checking DNS resolution for icr.io"
+dig icr.io || nslookup icr.io
+echo "-----------------logging in docker---------------------------"
 echo "$travis_currency_service_id_api_key_dev" | docker login -u "iamapikey" --password-stdin icr.io
 if [ $? -ne 0 ]; then
     echo "Docker login failed. Exiting script."
