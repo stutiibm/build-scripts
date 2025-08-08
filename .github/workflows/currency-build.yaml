@@ -355,7 +355,7 @@ jobs:
           
       - name: Upload Docker Image
         env:
-          $GHA_ACTIONS_SERVICE_ID_API_KEY: ${{ secrets.gha_actions_service_id_api_key }}
+          gha_actions_service_id_api_key: ${{ secrets.gha_actions_service_id_api_key }}
         run: |
           export gha_actions_service_id_api_key
           source package-cache/variable.sh
