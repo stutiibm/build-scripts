@@ -243,10 +243,92 @@ jobs:
           fi 
 
       
+  # source_scanner:
+  #   needs: build
+  #   if: ${{ inputs.validate_build_script == 'true' }}
+  #   runs-on: ubuntu-24.04-ppc64le-2xlarge
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Download package-cache
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: updated-package-cache
+  #         path: package-cache
+
+  #     - name: Prepare scanner environment
+  #       run: |
+  #         echo "Sourcing variable.sh..."
+  #         source package-cache/variable.sh
+  #         source package-cache/scanner-env.sh
+  #         echo "---------updated scanner-env.sh cat----------------"
+  #         cat package-cache/scanner-env.sh
+
+  #         # # Write exports to a file that can be sourced in every scan step
+  #         # echo "export VALIDATE_BUILD_SCRIPT='${{ inputs.validate_build_script }}'" > scanner-env.sh
+  #         # echo "export CLONED_PACKAGE='$CLONED_PACKAGE'" >> scanner-env.sh
+
+  #         echo "scanner-env.sh created with:"
+  #         cat package-cache/scanner-env.sh
+
+
+  #     - name: Run Trivy Scan
+  #       if: ${{ inputs.enable_trivy == 'true' }}
+  #       run: |
+
+  #         echo ".................Sourcing variable.sh and scanner-env.sh...................."
+  #         source package-cache/variable.sh
+  #         source package-cache/scanner-env.sh
+  #         cat package-cache/scanner-env.sh
+                         
+  #         chmod +x ./gha-script/scanner-scripts/trivy_code_scan.sh
+  #         bash ./gha-script/scanner-scripts/trivy_code_scan.sh;
+  #         mkdir source_trivy
+  #         mv package-cache/trivy_source_vulnerabilities_results.json package-cache/trivy_source_sbom_results.cyclonedx source_trivy
+
+  #     - name: Run Syft Scan
+  #       if: ${{ inputs.enable_syft == 'true' }}
+  #       run: |
+  #         echo ".................Sourcing variable.sh and scanner-env.sh...................."
+  #         source package-cache/variable.sh
+  #         source package-cache/scanner-env.sh
+  #         chmod +x ./gha-script/scanner-scripts/syft_code_scan.sh
+  #         bash ./gha-script/scanner-scripts/syft_code_scan.sh
+  #         mkdir source_syft
+  #         mv package-cache/syft_source_sbom_results.json source_syft
+
+  #     - name: Run Grype Scan
+  #       if: ${{ inputs.enable_grype == 'true' }}
+  #       run: |
+  #         echo ".................Sourcing variable.sh and scanner-env.sh...................."
+  #         source package-cache/variable.sh
+  #         source package-cache/scanner-env.sh
+  #         chmod +x ./gha-script/scanner-scripts/grype_code_scan.sh
+  #         bash ./gha-script/scanner-scripts/grype_code_scan.sh
+  #         mkdir source_grype
+  #         mv package-cache/grype_source_sbom_results.json package-cache/grype_source_vulnerabilities_results.json source_grype
+
+  #     - name: Upload Scanner Results
+  #       env:
+  #         gha_currency_service_id_api_key_dev: ${{ secrets.gha_currency_service_id_api_key_dev }}
+  #       run: |
+  #         export gha_currency_service_id_api_key_dev
+  #         mkdir source
+  #         find source_trivy -mindepth 1 -exec mv -t source {} + 2>/dev/null || true
+  #         find source_syft -mindepth 1 -exec mv -t source {} + 2>/dev/null || true
+  #         find source_grype -mindepth 1 -exec mv -t source {} + 2>/dev/null || true
+  #         tar cvzf source_scanner.tar.gz source
+  #         chmod +x ./gha-script/upload-scripts/upload_file.sh
+  #         bash ./gha-script/upload-scripts/upload_file.sh source_scanner.tar.gz
+
   source_scanner:
     needs: build
     if: ${{ inputs.validate_build_script == 'true' }}
     runs-on: ubuntu-24.04-ppc64le-2xlarge
+    strategy:
+      matrix:
+        scanner: [trivy, syft, grype]
+
     steps:
       - uses: actions/checkout@v4
 
@@ -256,70 +338,24 @@ jobs:
           name: updated-package-cache
           path: package-cache
 
-      - name: Prepare scanner environment
+      - name: Source scanner-env.sh
         run: |
-          echo "Sourcing variable.sh..."
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
-          echo "---------updated scanner-env.sh cat----------------"
-          cat package-cache/scanner-env.sh
 
-          # # Write exports to a file that can be sourced in every scan step
-          # echo "export VALIDATE_BUILD_SCRIPT='${{ inputs.validate_build_script }}'" > scanner-env.sh
-          # echo "export CLONED_PACKAGE='$CLONED_PACKAGE'" >> scanner-env.sh
-
-          echo "scanner-env.sh created with:"
-          cat package-cache/scanner-env.sh
-
-
-      - name: Run Trivy Scan
-        if: ${{ inputs.enable_trivy == 'true' }}
+      - name: Run ${{ matrix.scanner }} Scan
         run: |
+          chmod +x ./gha-script/scanner-scripts/${{ matrix.scanner }}_code_scan.sh
+          bash ./gha-script/scanner-scripts/${{ matrix.scanner }}_code_scan.sh
+          
+          mkdir source_${{ matrix.scanner }}
+          mv package-cache/${{ matrix.scanner }}_source* source_${{ matrix.scanner }}
 
-          echo ".................Sourcing variable.sh and scanner-env.sh...................."
-          source package-cache/variable.sh
-          source package-cache/scanner-env.sh
-          cat package-cache/scanner-env.sh
-                         
-          chmod +x ./gha-script/scanner-scripts/trivy_code_scan.sh
-          bash ./gha-script/scanner-scripts/trivy_code_scan.sh;
-          mkdir source_trivy
-          mv package-cache/trivy_source_vulnerabilities_results.json package-cache/trivy_source_sbom_results.cyclonedx source_trivy
-
-      - name: Run Syft Scan
-        if: ${{ inputs.enable_syft == 'true' }}
-        run: |
-          echo ".................Sourcing variable.sh and scanner-env.sh...................."
-          source package-cache/variable.sh
-          source package-cache/scanner-env.sh
-          chmod +x ./gha-script/scanner-scripts/syft_code_scan.sh
-          bash ./gha-script/scanner-scripts/syft_code_scan.sh
-          mkdir source_syft
-          mv package-cache/syft_source_sbom_results.json source_syft
-
-      - name: Run Grype Scan
-        if: ${{ inputs.enable_grype == 'true' }}
-        run: |
-          echo ".................Sourcing variable.sh and scanner-env.sh...................."
-          source package-cache/variable.sh
-          source package-cache/scanner-env.sh
-          chmod +x ./gha-script/scanner-scripts/grype_code_scan.sh
-          bash ./gha-script/scanner-scripts/grype_code_scan.sh
-          mkdir source_grype
-          mv package-cache/grype_source_sbom_results.json package-cache/grype_source_vulnerabilities_results.json source_grype
-
-      - name: Upload Scanner Results
-        env:
-          gha_currency_service_id_api_key_dev: ${{ secrets.gha_currency_service_id_api_key_dev }}
-        run: |
-          export gha_currency_service_id_api_key_dev
-          mkdir source
-          find source_trivy -mindepth 1 -exec mv -t source {} + 2>/dev/null || true
-          find source_syft -mindepth 1 -exec mv -t source {} + 2>/dev/null || true
-          find source_grype -mindepth 1 -exec mv -t source {} + 2>/dev/null || true
-          tar cvzf source_scanner.tar.gz source
-          chmod +x ./gha-script/upload-scripts/upload_file.sh
-          bash ./gha-script/upload-scripts/upload_file.sh source_scanner.tar.gz
+      - name: Upload ${{ matrix.scanner }} Scan Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-${{ matrix.scanner }}-results
+          path: source_${{ matrix.scanner }}
 
   build_docker:
     needs: build_info 
