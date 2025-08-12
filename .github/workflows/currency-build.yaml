@@ -326,6 +326,7 @@ jobs:
     if: ${{ inputs.validate_build_script == 'true' }}
     runs-on: ubuntu-24.04-ppc64le-2xlarge
     strategy:
+      fail-fast: false
       matrix:
         scanner: [trivy, syft, grype]
 
