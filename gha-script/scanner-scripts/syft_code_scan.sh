@@ -4,7 +4,8 @@ validate_build_script=$VALIDATE_BUILD_SCRIPT
 cloned_package=$CLONED_PACKAGE
 cd package-cache
 echo "-------------------------------------------outside syft scanner -------------------------------------------"
-echo "$validate_build_script"
+echo "validate_build_script=[$validate_build_script]"
+
 
 if [ "$validate_build_script" == "true" ];then
       echo "-------------------------------------------Started syft scanner-------------------------------------------"
