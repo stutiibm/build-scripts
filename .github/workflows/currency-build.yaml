@@ -339,18 +339,11 @@ jobs:
           name: updated-package-cache
           path: package-cache
 
-      # - name: Source scanner-env.sh
-      #   run: |
-      #     source package-cache/variable.sh
-      #     source package-cache/scanner-env.sh
-      #     echo "---------updated scanner-env.sh cat----------------"
-      #     cat package-cache/scanner-env.sh
-
       - name: Run ${{ matrix.scanner }} Scan
         run: |
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
-          echo "---------updated scanner-env.sh cat----------------"
+          echo "---------updated scanner-env.sh ----------------"
           cat package-cache/scanner-env.sh
           chmod +x ./gha-script/scanner-scripts/${{ matrix.scanner }}_code_scan.sh
           bash ./gha-script/scanner-scripts/${{ matrix.scanner }}_code_scan.sh
