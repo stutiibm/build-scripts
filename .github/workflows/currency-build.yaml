@@ -147,9 +147,6 @@ jobs:
           chmod +x ../gha-script/pre_process.sh
           bash ../gha-script/pre_process.sh
           cd $GITHUB_WORKSPACE
-          echo "--------------GITHUB WORKSPACE : ${GITHUB_WORKSPACE} ------------------"
-          ls
-          echo "--------------TRAVIS_BUILD_DIR : ${TRAVIS_BUILD_DIR} ------------------"
           gzip build_log
           echo "------------------- starting upload --------------------------"
           chmod +x ./gha-script/upload-scripts/upload_file.sh
