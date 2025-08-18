@@ -157,6 +157,16 @@ def trigger_build_validation_travis(pr_number):
         pr_number
     )
     validated_file_list = []
+
+    api_response = requests.get(pull_request_file_url)
+
+    print("----- GitHub API Call Debug -----")
+    print(f"Status: {api_response.status_code}")
+    print(f"Response: {api_response.text}")
+
+    if api_response.status_code != 200:
+        raise Exception(f"GitHub API call failed with status code {api_response.status_code}")
+        
     response = requests.get(pull_request_file_url).json()
 
     ordered_files = []
