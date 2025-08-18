@@ -18,7 +18,7 @@
 #
 # ---------------------------------------------------------------------------
 
-# Variables
+
 PACKAGE_NAME=cytoolz
 PACKAGE_VERSION=${1:-1.0.1}
 PACKAGE_URL=https://github.com/pytoolz/cytoolz.git
