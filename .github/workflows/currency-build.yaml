@@ -51,3 +51,9 @@ jobs:
       enable_syft: ${{ inputs.enable_syft }}
       enable_grype: ${{ inputs.enable_grype }}
       unique_id: ${{ inputs.unique_id }}
+
+  build:
+    needs: build_info
+    uses: ./.github/workflows/build.yaml
+    with:
+      validate_build_script: ${{ inputs.validate_build_script }}
