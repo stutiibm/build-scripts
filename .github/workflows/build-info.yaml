@@ -75,43 +75,4 @@ jobs:
           path: package-cache
 
 
-  get-run-id:
-      runs-on: ubuntu-24.04-ppc64le-p10
-      needs: build_info
-      outputs:
-        run-id: ${{ steps.get_run_id.outputs.run-id }}
-      steps:
-        - name: Get latest run ID of build-info.yaml
-          id: get_run_id
-          env:
-            GH_PAT: ${{ secrets.GH_PAT }}
-            REPO: ${{ github.repository }}
-          run: |
-            WORKFLOW_FILE="build-info.yaml"
-            
-            RUN_INFO=$(curl -s -H "Authorization: token $GH_PAT" \
-              "https://api.github.com/repos/$REPO/actions/workflows/$WORKFLOW_FILE/runs?status=completed&per_page=1")
   
-            echo "$RUN_INFO"
-            
-            RUN_ID=$(echo "$RUN_INFO" | jq -r '.workflow_runs[0].id')
-            echo "Latest run-id: $RUN_ID"
-            echo "run-id=$RUN_ID" >> $GITHUB_OUTPUT
-  
-  download-artifact:
-      runs-on: ubuntu-24.04-ppc64le-p10
-      needs: get-run-id
-      steps:
-        - uses: actions/download-artifact@v5
-          with:
-            name: package-cache
-            github-token: ${{ secrets.GH_PAT }}
-            repository: ${{ github.repository }}
-            run-id: ${{ needs.get-run-id.outputs.run-id }}
-  
-        - name: Show downloaded contents
-          run: |
-              echo "--------------------printing downloaded--------------------------------"
-              ls -R
-              
-    
