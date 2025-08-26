@@ -1,0 +1,66 @@
+name: Build Package
+
+on:
+  workflow_call:
+    inputs:
+      validate_build_script:
+        required: true
+        type: string
+
+
+jobs:
+  build:
+    if: ${{ inputs.validate_build_script == 'true' }}
+    runs-on: ubuntu-24.04-ppc64le-p10
+    steps:
+      - uses: actions/checkout@v4
+      
+      # - uses: actions/download-artifact@v4
+      #   with:
+      #     name: package-cache
+      #     path: package-cache
+      - name: Get latest run ID of build-info.yaml
+        id: get_run_id
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+          REPO: ${{ github.repository }}
+        run: |
+          WORKFLOW_FILE="build-info.yaml"
+          
+          RUN_INFO=$(curl -s -H "Authorization: token $GH_PAT" \
+            "https://api.github.com/repos/$REPO/actions/workflows/$WORKFLOW_FILE/runs?status=completed&per_page=1")
+
+          echo "$RUN_INFO"
+          
+          RUN_ID=$(echo "$RUN_INFO" | jq -r '.workflow_runs[0].id')
+          echo "Latest run-id: $RUN_ID"
+
+      - uses: actions/download-artifact@v5
+        with:
+          name: package-cache
+          github-token: ${{ secrets.GH_PAT }}
+          repository: ${{ github.repository }}
+          run-id: ${{ needs.get-run-id.outputs.run-id }}
+      
+      - name: Build Package
+        run: |
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
+          chmod +x ./gha-script/build_package.sh
+          bash ./gha-script/build_package.sh
+          cloned_package=$(ls -td -- */ | head -n 1)
+          mv "$cloned_package" package-cache
+          echo "export CLONED_PACKAGE=\"$cloned_package\"" >> package-cache/scanner-env.sh
+          chmod +x ./gha-script/pre_process.sh
+          bash ./gha-script/pre_process.sh
+          gzip build_log
+
+      - name: Fix permissions and upload artifact
+        run: |
+          sudo chown -R $USER:$USER package-cache
+          sudo chmod -R u+rwX,go+rX,go-w package-cache
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: updated-package-cache
+          path: package-cache
