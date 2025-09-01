@@ -93,6 +93,7 @@ if [ -f $config_file ]; then
       build_docker=$(jq "$version_block.docker_build" $config_file)
     fi
   fi
+fi
 
 #   #Getting specific build_script name for version
 #   if [[ $(jq --arg ver "$match_version" '.[$ver]' $config_file) != null ]]; then
