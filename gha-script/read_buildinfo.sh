@@ -51,80 +51,80 @@ if [ -f $config_file ]; then
 
   fi
 
-#   # Getting specific build_script name and other overrides for version
-#   if [[ $(jq --arg ver "$match_version" '.[$ver]' $config_file) != null ]]; then
-#     version_block=".[$match_version]"
-  
-#     # version-specific build_script
-#     if [[ $(jq -r "$version_block.build_script" $config_file) != "null" ]]; then
-#       build_script=$(jq -r "$version_block.build_script" $config_file)
-#     fi
-  
-#     # version-specific base_docker_image
-#     if [[ $(jq -r "$version_block.base_docker_image" $config_file) != "null" ]]; then
-#       basename=$(jq -r "$version_block.base_docker_image" $config_file)
-#     fi
-  
-#     # version-specific base_docker_variant
-#     if [[ $(jq -r "$version_block.base_docker_variant" $config_file) != "null" ]]; then
-#       variant_str=$(jq -r "$version_block.base_docker_variant" $config_file)
-#       case "$variant_str" in
-#         "rhel") variant=1 ;;
-#         "ubuntu") variant=2 ;;
-#         "alpine") variant=3 ;;
-#         *) 
-#           echo "No valid distro variant, picking default one"
-#           variant=1 ;;
-#       esac
-#     fi
-  
-#     # version-specific use_non_root_user
-#     if [[ $(jq "$version_block | has(\"use_non_root_user\")" $config_file) == "true" ]]; then
-#       nonRootBuild=$(jq "$version_block.use_non_root_user" $config_file)
-#     fi
-  
-#     # version-specific validate_build_script
-#     if [[ $(jq "$version_block | has(\"validate_build_script\")" $config_file) == "true" ]]; then
-#       validate_build_script=$(jq "$version_block.validate_build_script" $config_file)
-#     fi
-  
-#     # version-specific docker_build
-#     if [[ $(jq "$version_block | has(\"docker_build\")" $config_file) == "true" ]]; then
-#       build_docker=$(jq "$version_block.docker_build" $config_file)
-#     fi
-#   fi
-# fi
-
-  #Getting specific build_script name for version
+  # Getting specific build_script name and other overrides for version
   if [[ $(jq --arg ver "$match_version" '.[$ver]' $config_file) != null ]]; then
-    if [[ $(jq -r --arg ver "$match_version" '.[$ver].build_script' $config_file) != null ]]; then
-      build_script=$(jq -r --arg ver "$match_version" '.[$ver].build_script' $config_file)
-    fi
-
-    if [[ $(jq -r --arg ver "$match_version" '.[$ver].base_docker_image' $config_file) != null ]]; then
-      basename=$(jq -r --arg ver "$match_version" '.[$ver].base_docker_image' $config_file)
+    version_block=".[$match_version]"
+  
+    # version-specific build_script
+    if [[ $(jq -r "$version_block.build_script" $config_file) != "null" ]]; then
+      build_script=$(jq -r "$version_block.build_script" $config_file)
     fi
   
-    if [[ $(jq -r --arg ver "$match_version" '.[$ver].base_docker_variant' $config_file) != null ]]; then
-      variant_str=$(jq -r --arg ver "$match_version" '.[$ver].base_docker_variant' $config_file)
+    # version-specific base_docker_image
+    if [[ $(jq -r "$version_block.base_docker_image" $config_file) != "null" ]]; then
+      basename=$(jq -r "$version_block.base_docker_image" $config_file)
+    fi
+  
+    # version-specific base_docker_variant
+    if [[ $(jq -r "$version_block.base_docker_variant" $config_file) != "null" ]]; then
+      variant_str=$(jq -r "$version_block.base_docker_variant" $config_file)
       case "$variant_str" in
-        "rhel")
-          variant=1
-          ;;
-        "ubuntu")
-          variant=2
-          ;;
-        "alpine")
-          variant=3
-          ;;
-        *)
+        "rhel") variant=1 ;;
+        "ubuntu") variant=2 ;;
+        "alpine") variant=3 ;;
+        *) 
           echo "No valid distro variant, picking default one"
-          variant=1
-          ;;
+          variant=1 ;;
       esac
-   fi
+    fi
+  
+    # version-specific use_non_root_user
+    if [[ $(jq "$version_block | has(\"use_non_root_user\")" $config_file) == "true" ]]; then
+      nonRootBuild=$(jq "$version_block.use_non_root_user" $config_file)
+    fi
+  
+    # version-specific validate_build_script
+    if [[ $(jq "$version_block | has(\"validate_build_script\")" $config_file) == "true" ]]; then
+      validate_build_script=$(jq "$version_block.validate_build_script" $config_file)
+    fi
+  
+    # version-specific docker_build
+    if [[ $(jq "$version_block | has(\"docker_build\")" $config_file) == "true" ]]; then
+      build_docker=$(jq "$version_block.docker_build" $config_file)
+    fi
   fi
 fi
+
+#   #Getting specific build_script name for version
+#   if [[ $(jq --arg ver "$match_version" '.[$ver]' $config_file) != null ]]; then
+#     if [[ $(jq -r --arg ver "$match_version" '.[$ver].build_script' $config_file) != null ]]; then
+#       build_script=$(jq -r --arg ver "$match_version" '.[$ver].build_script' $config_file)
+#     fi
+
+#     if [[ $(jq -r --arg ver "$match_version" '.[$ver].base_docker_image' $config_file) != null ]]; then
+#       basename=$(jq -r --arg ver "$match_version" '.[$ver].base_docker_image' $config_file)
+#     fi
+  
+#     if [[ $(jq -r --arg ver "$match_version" '.[$ver].base_docker_variant' $config_file) != null ]]; then
+#       variant_str=$(jq -r --arg ver "$match_version" '.[$ver].base_docker_variant' $config_file)
+#       case "$variant_str" in
+#         "rhel")
+#           variant=1
+#           ;;
+#         "ubuntu")
+#           variant=2
+#           ;;
+#         "alpine")
+#           variant=3
+#           ;;
+#         *)
+#           echo "No valid distro variant, picking default one"
+#           variant=1
+#           ;;
+#       esac
+#    fi
+#   fi
+# fi
 
 
 
