@@ -25,6 +25,10 @@ ELASTICSEARCH_VERSION=${1:-v7.17.2}
 #yum update -y 
 yum install -y wget git zip unzip sudo libtool-ltdl patch
 
+echo "------------------------------------------------------------------------------------------------------"
+echo "Current user inside build script: $(whoami)"
+echo "------------------------------------------------------------------------------------------------------"
+
 wget https://github.com/adoptium/temurin18-binaries/releases/download/jdk-18.0.1%2B10/OpenJDK18U-jdk_ppc64le_linux_hotspot_18.0.1_10.tar.gz
 tar -C /usr/local -xzf OpenJDK18U-jdk_ppc64le_linux_hotspot_18.0.1_10.tar.gz
 export JAVA_HOME=/usr/local/jdk-18.0.1+10
