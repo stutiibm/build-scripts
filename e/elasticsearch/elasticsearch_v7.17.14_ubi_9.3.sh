@@ -26,6 +26,9 @@ CURRENT_DIR=`pwd`
 SCRIPT=$(readlink -f $0)
 SCRIPT_DIR=$(dirname $SCRIPT)
 
+echo "-------------------------------------Started script execution---------------------------------------------------"
+echo "Current user inside build script: $(whoami)"
+echo "------------------------------------------------------------------------------------------------------"
 
 # install dependencies
 #yum update -y
