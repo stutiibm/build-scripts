@@ -25,6 +25,7 @@ jobs:
           if [ -z "$GH_PAT" ]; then
             echo "GH_PAT is empty. Setting from secrets..."
             export GH_PAT="${{ secrets.GH_PAT }}"
+            echo "First 4 chars of GH_PAT: ${GH_PAT:0:4}"
           else
             echo "GH_PAT was already set."
           fi
@@ -36,7 +37,7 @@ jobs:
             echo "GH_PAT is now set. Length: ${#GH_PAT}"
           fi
         env:
-          GH_PAT: ${{ env.GH_PAT }}
+          GH_PAT: ${{ secrets.GH_PAT }}
 
 
       - name: Get latest run ID of build-info.yaml
