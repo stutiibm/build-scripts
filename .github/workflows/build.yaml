@@ -23,18 +23,10 @@ jobs:
       - name: Ensure GH_PAT is set and print its length
         run: |
           if [ -z "$GH_PAT" ]; then
-            echo "GH_PAT is empty. Setting from secrets..."
-            export GH_PAT="${{ secrets.GH_PAT }}"
+            echo "GH_PAT is empty!"
+          else
+            echo "GH_PAT is set. Length: ${#GH_PAT}"
             echo "First 4 chars of GH_PAT: ${GH_PAT:0:4}"
-          else
-            echo "GH_PAT was already set."
-          fi
-
-          if [ -z "$GH_PAT" ]; then
-            echo "GH_PAT is STILL empty! Something went wrong."
-            exit 1
-          else
-            echo "GH_PAT is now set. Length: ${#GH_PAT}"
           fi
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
