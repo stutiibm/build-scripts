@@ -19,6 +19,17 @@ jobs:
       #   with:
       #     name: package-cache
       #     path: package-cache
+
+      - name: Debug GH_PAT
+        run: |
+          if [ -z "$GH_PAT" ]; then
+             echo "GH_PAT is empty!"
+          else
+            echo "GH_PAT is set. Length: ${#GH_PAT}"
+          fi
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+
       - name: Get latest run ID of build-info.yaml
         id: get_run_id
         env:
