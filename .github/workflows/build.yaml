@@ -20,17 +20,19 @@ jobs:
       #     name: package-cache
       #     path: package-cache
 
+     
       - name: Ensure GH_PAT is set and print its length
+        env :
+            gh_pat: ${{ secrets.GH_PAT }}
         run: |
-          if [ -z "$GH_PAT" ]; then
-            echo "GH_PAT is empty!"
+          export gh_pat
+          if [ -z "$gh_pat" ]; then
+            echo "gh_pat is empty!"
           else
-            echo "GH_PAT is set. Length: ${#GH_PAT}"
-            echo "First 4 chars of GH_PAT: ${GH_PAT:0:4}"
+            echo "gh_pat is set. Length: ${#gh_pat}"
+            echo "First 4 chars of gh_pat: ${gh_pat:0:4}"
           fi
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
-
+       
 
       - name: Get latest run ID of build-info.yaml
         id: get_run_id
