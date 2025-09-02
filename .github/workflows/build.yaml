@@ -27,13 +27,15 @@ jobs:
         run: |
           WORKFLOW_FILE="build-info.yaml"
           
-          RUN_INFO=$(curl -s -H "Authorization: token $GH_PAT" \
-            "https://api.github.com/repos/$REPO/actions/workflows/$WORKFLOW_FILE/runs?status=completed&per_page=1")
+          #RUN_INFO=$(curl -s -H "Authorization: token $GH_PAT" \
+          #  "https://api.github.com/repos/$REPO/actions/workflows/$WORKFLOW_FILE/runs?status=completed&per_page=1")
+
+          RUN_INFO=$(curl -s -H "Authorization: token $GH_PAT" https://api.github.com/user)
 
           echo "------------------RUN_INFO :::::  $RUN_INFO---------------------------------------"
           
-          RUN_ID=$(echo "$RUN_INFO" | jq -r '.workflow_runs[0].id')
-          echo "Latest run-id: $RUN_ID" >> "$GITHUB_OUTPUT"
+          #RUN_ID=$(echo "$RUN_INFO" | jq -r '.workflow_runs[0].id')
+          #echo "Latest run-id: $RUN_ID" >> "$GITHUB_OUTPUT"
           
       - uses: actions/download-artifact@v5
         with:
