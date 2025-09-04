@@ -21,9 +21,9 @@ jobs:
       #     path: package-cache
 
      
-      - name: Ensure GHA_PAT_VAR is set and print its length
+      - name: Ensure GHA_PAT_SEC is set and print its length
         env :
-            gha_pat: ${{ secrets.GHA_PAT_VAR }}
+            gha_pat: ${{ secrets.GHA_PAT_SEC }}
         run: |
           export gha_pat
           if [ -z "$gha_pat" ]; then
@@ -34,50 +34,50 @@ jobs:
           fi
        
 
-      - name: Get latest run ID of build-info.yaml
-        id: get_run_id
-        env:
-          gha_pat: ${{ secrets.GHA_PAT_VAR }}
-          REPO: ${{ github.repository }}
-        run: |
-          WORKFLOW_FILE="build-info.yaml"
+      # - name: Get latest run ID of build-info.yaml
+      #   id: get_run_id
+      #   env:
+      #     gha_pat: ${{ secrets.GHA_PAT_SEC }}
+      #     REPO: ${{ github.repository }}
+      #   run: |
+      #     WORKFLOW_FILE="build-info.yaml"
           
-          #RUN_INFO=$(curl -s -H "Authorization: token $GHA_PAT_VAR" \
-          #  "https://api.github.com/repos/$REPO/actions/workflows/$WORKFLOW_FILE/runs?status=completed&per_page=1")
+      #     #RUN_INFO=$(curl -s -H "Authorization: token $GHA_PAT_SEC" \
+      #     #  "https://api.github.com/repos/$REPO/actions/workflows/$WORKFLOW_FILE/runs?status=completed&per_page=1")
 
-          RUN_INFO=$(curl -s -H "Authorization: token $GHA_PAT_VAR" https://api.github.com/user)
+      #     RUN_INFO=$(curl -s -H "Authorization: token $GHA_PAT_SEC" https://api.github.com/user)
 
-          echo "------------------RUN_INFO :::::  $RUN_INFO---------------------------------------"
+      #     echo "------------------RUN_INFO :::::  $RUN_INFO---------------------------------------"
           
-          #RUN_ID=$(echo "$RUN_INFO" | jq -r '.workflow_runs[0].id')
-          #echo "Latest run-id: $RUN_ID" >> "$GITHUB_OUTPUT"
+      #     #RUN_ID=$(echo "$RUN_INFO" | jq -r '.workflow_runs[0].id')
+      #     #echo "Latest run-id: $RUN_ID" >> "$GITHUB_OUTPUT"
           
-      - uses: actions/download-artifact@v5
-        with:
-          name: package-cache
-          github-token: ${{ secrets.GHA_PAT_VAR }}
-          repository: ${{ github.repository }}
-          run-id: ${{ steps.get-run-id.outputs.run-id }}
+      # - uses: actions/download-artifact@v5
+      #   with:
+      #     name: package-cache
+      #     github-token: ${{ secrets.GHA_PAT_SEC }}
+      #     repository: ${{ github.repository }}
+      #     run-id: ${{ steps.get-run-id.outputs.run-id }}
       
-      - name: Build Package
-        run: |
-          source package-cache/variable.sh
-          source package-cache/scanner-env.sh
-          chmod +x ./gha-script/build_package.sh
-          bash ./gha-script/build_package.sh
-          cloned_package=$(ls -td -- */ | head -n 1)
-          mv "$cloned_package" package-cache
-          echo "export CLONED_PACKAGE=\"$cloned_package\"" >> package-cache/scanner-env.sh
-          chmod +x ./gha-script/pre_process.sh
-          bash ./gha-script/pre_process.sh
-          gzip build_log
+      # - name: Build Package
+      #   run: |
+      #     source package-cache/variable.sh
+      #     source package-cache/scanner-env.sh
+      #     chmod +x ./gha-script/build_package.sh
+      #     bash ./gha-script/build_package.sh
+      #     cloned_package=$(ls -td -- */ | head -n 1)
+      #     mv "$cloned_package" package-cache
+      #     echo "export CLONED_PACKAGE=\"$cloned_package\"" >> package-cache/scanner-env.sh
+      #     chmod +x ./gha-script/pre_process.sh
+      #     bash ./gha-script/pre_process.sh
+      #     gzip build_log
 
-      - name: Fix permissions and upload artifact
-        run: |
-          sudo chown -R $USER:$USER package-cache
-          sudo chmod -R u+rwX,go+rX,go-w package-cache
+      # - name: Fix permissions and upload artifact
+      #   run: |
+      #     sudo chown -R $USER:$USER package-cache
+      #     sudo chmod -R u+rwX,go+rX,go-w package-cache
       
-      - uses: actions/upload-artifact@v4
-        with:
-          name: updated-package-cache
-          path: package-cache
+      # - uses: actions/upload-artifact@v4
+      #   with:
+      #     name: updated-package-cache
+      #     path: package-cache
