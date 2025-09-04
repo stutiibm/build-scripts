@@ -9,7 +9,7 @@ on:
 
 jobs:
   say-hello:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-ppc64le-p10
     steps:
       - name: Print Hello World
         run: echo "Hello World"
