@@ -1,0 +1,78 @@
+name: Build Info
+
+on:
+  workflow_call:
+    inputs:
+      package_name:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+      validate_build_script:
+        required: true
+        type: string
+      wheel_build:
+        required: true
+        type: string
+      build_docker:
+        required: true
+        type: string
+      enable_trivy:
+        required: true
+        type: string
+      enable_syft:
+        required: true
+        type: string
+      enable_grype:
+        required: true
+        type: string
+      unique_id:
+        required: false
+        type: string
+
+jobs:
+  build_info:
+    runs-on: ubuntu-24.04-ppc64le-p10
+    env:
+      PACKAGE_NAME: ${{ inputs.package_name }}
+      VERSION: ${{ inputs.version }}
+      VALIDATE_BUILD_SCRIPT: ${{ inputs.validate_build_script }}
+      WHEEL_BUILD: ${{ inputs.wheel_build }}
+      BUILD_DOCKER: ${{ inputs.build_docker }}
+      ENABLE_TRIVY: ${{ inputs.enable_trivy }}
+      ENABLE_SYFT: ${{ inputs.enable_syft }}
+      ENABLE_GRYPE: ${{ inputs.enable_grype }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system packages
+        run: |
+          sudo apt update -y
+          sudo apt install -y jq file
+
+      - name: Install Python dependencies
+        run: |
+          pip3 install --force-reinstall -v "requests==2.31.0"
+          pip3 install --upgrade docker
+
+      - name: Get Build Info and Save Variables
+        run: |
+          chmod +x ./gha-script/read_buildinfo.sh
+          bash ./gha-script/read_buildinfo.sh
+
+      - name: Create scanner-env.sh and move artifacts
+        run: |
+          mkdir package-cache
+          echo "export VALIDATE_BUILD_SCRIPT='${{ inputs.validate_build_script }}'" > scanner-env.sh
+          echo "export BUILD_DOCKER='${{ inputs.build_docker }}'" >> scanner-env.sh
+          echo "export PACKAGE_NAME='${{ inputs.package_name }}'" >> scanner-env.sh
+          mv variable.sh scanner-env.sh package-cache/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: package-cache
+          path: package-cache
+
+
+  
