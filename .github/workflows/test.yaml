@@ -1,0 +1,21 @@
+name: Hello and Secret Length
+
+on:
+  workflow_dispatch:
+    inputs:
+      package_name:
+        description: 'Name of the package to build'
+        required: true
+
+jobs:
+  say-hello:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Hello World
+        run: echo "Hello World"
+
+      - name: Print length of GHA_PAT_SEC (safely)
+        run: |
+          echo "Length of GHA_PAT_SEC: ${#GHA_PAT_SEC}"
+        env:
+          GHA_PAT_SEC: ${{ secrets.GHA_PAT_SEC }}
