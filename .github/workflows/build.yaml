@@ -20,6 +20,11 @@ jobs:
       #     name: package-cache
       #     path: package-cache
 
+      - name: Print length of GHA_PAT_SEC (safely)
+        run: |
+          echo "Length of GHA_PAT_SEC: ${#GHA_PAT_SEC}"
+        env:
+          GHA_PAT_SEC: ${{ secrets.GHA_PAT_SEC }}
      
       - name: Ensure GHA_PAT_SEC is set and print its length
         env :
