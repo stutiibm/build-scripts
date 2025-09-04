@@ -1,11 +1,11 @@
 name: Hello and Secret Length
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
-      package_name:
-        description: 'Name of the package to build'
+      validate_build_script:
         required: true
+        type: string
 
 jobs:
   say-hello:
