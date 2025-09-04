@@ -54,16 +54,17 @@ jobs:
 
   build:
     needs: build_info
-    runs-on: ubuntu-24.04-ppc64le-p10
-    steps:
-      - name: Print Hello World
-        run: echo "Hello World"
+    uses: ./.github/workflows/build.yaml
+    with:
+      validate_build_script: ${{ inputs.validate_build_script }}
+    # runs-on: ubuntu-24.04-ppc64le-p10
+    # steps:
+    #   - name: Print Hello World
+    #     run: echo "Hello World"
 
-      - name: Print length of GHA_PAT_SEC (safely)
-        run: |
-          echo "Length of GHA_PAT_SEC: ${#GHA_PAT_SEC}"
-        env:
-          GHA_PAT_SEC: ${{ secrets.GHA_PAT_SEC }}
-    # uses: ./.github/workflows/build.yaml
-    # with:
-    #   validate_build_script: ${{ inputs.validate_build_script }}
+    #   - name: Print length of GHA_PAT_SEC (safely)
+    #     run: |
+    #       echo "Length of GHA_PAT_SEC: ${#GHA_PAT_SEC}"
+    #     env:
+    #       GHA_PAT_SEC: ${{ secrets.GHA_PAT_SEC }}
+    
