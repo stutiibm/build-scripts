@@ -21,9 +21,9 @@ jobs:
       #     path: package-cache
 
      
-      - name: Ensure GHA_PAT_SEC is set and print its length
+      - name: Ensure GHA_PAT_VAR is set and print its length
         env :
-            gha_pat: ${{ secrets.GHA_PAT_SEC }}
+            gha_pat: ${{ secrets.GHA_PAT_VAR }}
         run: |
           export gha_pat
           if [ -z "$gha_pat" ]; then
@@ -37,15 +37,15 @@ jobs:
       - name: Get latest run ID of build-info.yaml
         id: get_run_id
         env:
-          gha_pat: ${{ secrets.GHA_PAT_SEC }}
+          gha_pat: ${{ secrets.GHA_PAT_VAR }}
           REPO: ${{ github.repository }}
         run: |
           WORKFLOW_FILE="build-info.yaml"
           
-          #RUN_INFO=$(curl -s -H "Authorization: token $GHA_PAT_SEC" \
+          #RUN_INFO=$(curl -s -H "Authorization: token $GHA_PAT_VAR" \
           #  "https://api.github.com/repos/$REPO/actions/workflows/$WORKFLOW_FILE/runs?status=completed&per_page=1")
 
-          RUN_INFO=$(curl -s -H "Authorization: token $GHA_PAT_SEC" https://api.github.com/user)
+          RUN_INFO=$(curl -s -H "Authorization: token $GHA_PAT_VAR" https://api.github.com/user)
 
           echo "------------------RUN_INFO :::::  $RUN_INFO---------------------------------------"
           
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/download-artifact@v5
         with:
           name: package-cache
-          github-token: ${{ secrets.GHA_PAT_SEC }}
+          github-token: ${{ secrets.GHA_PAT_VAR }}
           repository: ${{ github.repository }}
           run-id: ${{ steps.get-run-id.outputs.run-id }}
       
