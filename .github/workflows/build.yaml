@@ -20,6 +20,9 @@ jobs:
       #     name: package-cache
       #     path: package-cache
 
+      - name: Print Hello World
+        run: echo "Hello World"
+
       - name: Print length of GHA_PAT_SEC (safely)
         run: |
           echo "Length of GHA_PAT_SEC: ${#GHA_PAT_SEC}"
