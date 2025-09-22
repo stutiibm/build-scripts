@@ -19,6 +19,7 @@
 # ----------------------------------------------------------------------------
 
 PACKAGE_NAME=multipart
+
 PACKAGE_VERSION=${1:-v1.2.1}
 PACKAGE_URL=https://github.com/defnull/multipart
 PACKAGE_DIR=multipart
