@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - replica-master
+      - 123
 
 jobs:
   validate:
