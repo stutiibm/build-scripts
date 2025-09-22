@@ -7,7 +7,7 @@ import docker
 import json
 
 
-GITHUB_BUILD_SCRIPT_BASE_REPO = "build-scripts"
+GITHUB_BUILD_SCRIPT_BASE_REPO = "stutiibm"
 GITHUB_BUILD_SCRIPT_BASE_OWNER = "ppc64le"
 HOME = os.getcwd()
 
