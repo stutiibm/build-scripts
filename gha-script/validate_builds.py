@@ -8,7 +8,7 @@ import json
 import re
 
 
-GITHUB_BUILD_SCRIPT_BASE_REPO = "build-scripts"
+GITHUB_BUILD_SCRIPT_BASE_REPO = "stutiibm"
 GITHUB_BUILD_SCRIPT_BASE_OWNER = "ppc64le"
 HOME = os.getcwd()
 
