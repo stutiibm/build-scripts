@@ -19,4 +19,5 @@
     "dir": "v1.2.1_ubi9",
     "build_script": "multipart_ubi_9.3.sh"
   }
+
 }
