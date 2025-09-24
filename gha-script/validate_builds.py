@@ -1,3 +1,4 @@
+
 import os
 import stat
 import requests
@@ -106,7 +107,7 @@ def trigger_script_validation_checks(file_name):
 def build_non_root_custom_docker_image():
     global image_name
     print("Building custom docker image for non root user build")
-    os.system('docker build --build-arg BASE_IMAGE="registry.access.redhat.com/ubi9/ubi:9.3" -t docker_non_root_image -f gha-script/dockerfile_non_root .')
+    os.system('docker build --build-arg BASE_IMAGE="registry.access.redhat.com/ubi9/ubi:9.3" -t docker_non_root_image -f script/dockerfile_non_root .')
     image_name = "docker_non_root_image"
     return True
 
