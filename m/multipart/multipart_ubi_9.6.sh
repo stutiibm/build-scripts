@@ -4,7 +4,7 @@
 # Package       : multipart
 # Version       : v1.2.1
 # Source repo   : https://github.com/defnull/multipart
-# Tested on     : UBI:9.3
+# Tested on     : UBI:9.6
 # Language      : Python
 # Travis-Check  : True
 # Script License: Apache License, Version 2 or later
@@ -19,7 +19,7 @@
 # ----------------------------------------------------------------------------
 
 PACKAGE_NAME=multipart
-PACKAGE_VERSION=${1:-v1.2.1}
+PACKAGE_VERSION=${1:-v1.3.0}
 PACKAGE_URL=https://github.com/defnull/multipart
 PACKAGE_DIR=multipart
 
