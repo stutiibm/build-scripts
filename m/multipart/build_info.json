@@ -18,6 +18,6 @@
   "v1.3.0": {
     "dir": "Dockerfiles/v1.3.0_ubi9",
     "build_script": "multipart_ubi_9.6.sh"
-  },
+  }
 }
 
