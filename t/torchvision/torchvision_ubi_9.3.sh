@@ -391,7 +391,11 @@ FFMPEG_PACKAGE_VERSION=${1:-n7.1}
 
 git clone https://github.com/FFmpeg/FFmpeg
 cd FFmpeg
+echo "---------------------------Checked out to : ${FFMPEG_PACKAGE_VERSION} ------------------"
 git checkout $FFMPEG_PACKAGE_VERSION
+echo "---------------------------Checked out to : ${FFMPEG_PACKAGE_VERSION} ------------------"
+echo "---------------------------git branch------------------"
+git branch
 git submodule update --init
 
 mkdir ffmpeg_prefix

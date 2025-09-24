@@ -4,7 +4,8 @@ validate_build_script=$VALIDATE_BUILD_SCRIPT
 cloned_package=$CLONED_PACKAGE
 cd package-cache
 
-if [ $validate_build_script == true ];then
+
+if [ "$validate_build_script" == "true" ];then
       SYFT_VERSION=$(curl -s https://api.github.com/repos/anchore/syft/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
       wget https://github.com/anchore/syft/releases/download/$SYFT_VERSION/syft_${SYFT_VERSION#v}_linux_ppc64le.tar.gz
       tar -xzf syft_${SYFT_VERSION#v}_linux_ppc64le.tar.gz

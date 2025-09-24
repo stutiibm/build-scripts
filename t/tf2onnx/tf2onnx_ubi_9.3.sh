@@ -51,7 +51,8 @@ for package in openblas hdf5 tensorflow ; do
     echo "Exported ${package^^}_PREFIX=${INSTALL_ROOT}/${package}"
 done
 
-python${PYTHON_VERSION} -m pip install cython setuptools wheel ninja
+python3.12 -m pip install cython setuptools wheel ninja
+
 
 yum install -y java-11-openjdk-devel
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-11.0.25.0.9-3.el9.ppc64le
@@ -146,7 +147,9 @@ pkg-config --modversion openblas
 
 echo " --------------------------------- OpenBlas Successfully Installed  --------------------------------- "
 
-python${PYTHON_VERSION} -m pip install numpy==2.0.2
+
+python3.12 -m pip install numpy==2.0.2
+
 
 cd $CURRENT_DIR
 
@@ -312,12 +315,14 @@ export CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
 
 # Adding this source due to - (Unable to detect linker for compiler `cc -Wl,--version`)
 source /opt/rh/gcc-toolset-13/enable
-python${PYTHON_VERSION} -m pip install meson
-python${PYTHON_VERSION} -m pip install parameterized
-python${PYTHON_VERSION} -m pip install pytest nbval pythran mypy-protobuf
-python${PYTHON_VERSION} -m pip install scipy==1.15.2 pandas scikit_learn==1.6.1
+
+python3.12 -m pip install meson
+python3.12 -m pip install parameterized
+python3.12 -m pip install pytest nbval pythran mypy-protobuf
+python3.12 -m pip install scipy==1.15.2 pandas scikit_learn==1.6.1
 sed -i 's/protobuf>=[^ ]*/protobuf==4.25.8/' requirements.txt
-python${PYTHON_VERSION} setup.py install
+python3.12 setup.py install
+
 
 echo " --------------------------------- Onnx Successfully Installed --------------------------------- "
 
@@ -583,15 +588,16 @@ fi
 echo " --------------------------------- Tf2Onnx Wheel Build --------------------------------- "
 
 # Build wheel
-python${PYTHON_VERSION} setup.py bdist_wheel --plat-name=linux_$(uname -m) --dist-dir $CURRENT_DIR
+
+python3.12 -m build --wheel --no-isolation --outdir="$CURRENT_DIR"
+
 
 echo " --------------------------------- Tf2Onnx Wheel Built Success --------------------------------- "
 
 echo " --------------------------------- Running Tests --------------------------------- "
 
 cd tests
-#test need to be fixed 
-rm test_profile.py
+
 if ! pytest -k "not test_cudnn_compatible_gru and not test_custom_rnncell and not test_gru and not test_grublock and not test_lstm and not test_lstmblock and not test_seq2seq and not test_stacked_lstm"; then
     echo "------------------$PACKAGE_NAME:Install_success_but_test_fails---------------------"
     echo "$PACKAGE_URL $PACKAGE_NAME"

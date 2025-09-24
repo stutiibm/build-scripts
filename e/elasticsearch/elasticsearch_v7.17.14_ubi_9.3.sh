@@ -27,9 +27,14 @@ SCRIPT=$(readlink -f $0)
 SCRIPT_DIR=$(dirname $SCRIPT)
 
 
+echo "-------------------------------------Started script execution---------------------------------------------------"
+echo "Current user inside build script: $(whoami)"
+echo "------------------------------------------------------------------------------------------------------"
+
 # install dependencies
 #yum update -y
-yum install -y libcurl-devel git gzip tar wget patch make gcc gcc-c++ java-17-openjdk java-17-openjdk-devel java-17-openjdk-headless
+sudo yum install -y libcurl-devel git gzip tar wget patch make gcc gcc-c++ java-17-openjdk java-17-openjdk-devel java-17-openjdk-headless
+
 
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
 export PATH=$JAVA_HOME/bin:$PATH
@@ -59,5 +64,6 @@ mkdir -p distribution/archives/darwin-ppc64le-tar
 
 ./gradlew :distribution:archives:linux-ppc64le-tar:assemble --parallel
 
-#Test -- run it as non - root user 
-# ./gradlew test -x :x-pack:plugin:ml:test --no-parallel --continue
+ 
+#tests
+./gradlew test -x :x-pack:plugin:ml:test --no-parallel --continue

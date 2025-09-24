@@ -80,6 +80,9 @@ if [ $build_docker != false ];then
            tail -300 docker_build.log
         fi    
     fi
+
+    echo "---------------------Saving docker image at = "${CUR_DIR}"----------------------------"
+
     docker save -o image.tar $image_name
 else
     echo "Docker image is not supported"
