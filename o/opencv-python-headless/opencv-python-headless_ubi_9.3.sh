@@ -104,7 +104,7 @@ export CXX_COMPILER=$(which g++)
 echo "----------------protobuf installing-------------------"
 git clone https://github.com/protocolbuffers/protobuf
 cd protobuf
-git checkout v4.25.3
+git checkout v4.25.8
 
 LIBPROTO_DIR=$(pwd)
 mkdir -p $LIBPROTO_DIR/local/libprotobuf
@@ -167,7 +167,7 @@ cd $PACKAGE_DIR
 git checkout $PACKAGE_VERSION
 git submodule update --init --recursive
 
-sed -i "s/^[[:space:]]*name=package_name/name=\"${PACKAGE_NAME}\"/" setup.py
+export ENABLE_HEADLESS=1
 
 export CMAKE_PREFIX_PATH="$ABSEILCPP_PREFIX;$LIBPROTOBUF_PREFIX"
 export CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release

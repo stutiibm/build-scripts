@@ -325,6 +325,7 @@ jobs:
     needs: build
     if: ${{ inputs.validate_build_script == 'true' }}
     runs-on: ubuntu-24.04-ppc64le-p10
+
     strategy:
       fail-fast: false
       matrix:
@@ -380,7 +381,7 @@ jobs:
           tar cvzf source_scanner.tar.gz source
           chmod +x ./gha-script/upload-scripts/upload_file.sh
           bash ./gha-script/upload-scripts/upload_file.sh source_scanner.tar.gz
-          
+
   build_docker:
     needs: build_info 
     if: ${{ inputs.build_docker == 'true' }}
@@ -393,8 +394,7 @@ jobs:
         with:
           name: package-cache
           path: package-cache
-          
-    
+
       - name: Build Docker Image
         run: |
           echo "................................Sourcing scanner-env.sh............................."
@@ -402,6 +402,7 @@ jobs:
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
           chmod +x ./gha-script/build_docker.sh
+
           echo "----------------------------Dockerfile execution started----------------------------"
           bash ./gha-script/build_docker.sh
           echo "----------------------------Dockerfile execution finished----------------------------"
@@ -419,6 +420,7 @@ jobs:
           source package-cache/scanner-env.sh
           chmod +x ./gha-script/upload-scripts/upload_docker_image.sh
           bash ./gha-script/upload-scripts/upload_docker_image.sh
+
 
       - name: Upload package-cache with image.tar
         uses: actions/upload-artifact@v4
@@ -497,6 +499,7 @@ jobs:
     needs: build_docker
     if: ${{ inputs.build_docker == 'true' }}
     runs-on: ubuntu-24.04-ppc64le-p10
+
     strategy:
       fail-fast: false
       matrix:
@@ -506,6 +509,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Download package-cache with Docker image
+
         uses: actions/download-artifact@v4
         with:
           name: package-cache-with-image
@@ -516,6 +520,7 @@ jobs:
           echo "Sourcing variable.sh ..........................................."
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
+
           echo ".......................Loading image.tar ............................"
           docker load -i "package-cache/image.tar"
       - name: Run ${{ matrix.scanner }} Image Scan
@@ -536,7 +541,4 @@ jobs:
           name: image-${{ matrix.scanner }}-results
           path: image_${{ matrix.scanner }}
     
-
-  
-   
 

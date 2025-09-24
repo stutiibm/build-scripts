@@ -215,9 +215,6 @@
 #     trigger_build_validation_travis(sys.argv[1])
 
 
-
-
-
 import os
 import stat
 import requests
@@ -225,7 +222,9 @@ import sys
 import subprocess
 import docker
 import json
+
 import re
+
 
 
 GITHUB_BUILD_SCRIPT_BASE_REPO = "build-scripts"
@@ -234,6 +233,7 @@ HOME = os.getcwd()
 
 package_data = {}
 use_non_root = ""
+
 image_name = None  # changed from hardcoded to None
 
 
@@ -273,13 +273,17 @@ def trigger_basic_validation_checks(file_name):
         "# Package": "package_name",
         "# Version": "package_version",
         "# Source repo": "package_url",
+
         "# Tested on": "tested_on_raw_value",
+
         "# Maintainer": "maintainer",
         "# Language": "package_type",
         "# Travis-Check": "travis_check"
     }
     matched_keys = []
+
     # Check if license file exists
+
     file_parts = file_name.split('/')
     licence_file = "{}/{}/LICENSE".format(HOME, "/".join(file_parts[:-1]))
     if not os.path.exists(licence_file):
@@ -288,8 +292,10 @@ def trigger_basic_validation_checks(file_name):
     # Check if components of Doc string are available.
     script_path = "{}/{}".format(HOME, file_name)
 
+
     # Check build script line endings
     eof = os.popen('file ' + script_path).read()
+
     if 'crlf' in eof.lower():
         raise EOFError("Build script {} contains windows line endings(CRLF), Please update build script with Linux based line endings.".format(file_name))
 
@@ -301,6 +307,7 @@ def trigger_basic_validation_checks(file_name):
         for line in all_lines:
             try:
                 for key in key_checks:
+
                     if key in line:
                         matched_keys.append(key)
                         val = line.split(':', 1)[-1].strip()
@@ -325,12 +332,15 @@ def trigger_basic_validation_checks(file_name):
             image_name = determine_docker_image(tested_on_val, use_non_root)
 
             print(f"Using image: {image_name}")
+
             return True
         else:
             print("Basic Validation Checks Failed!!!")
             print("Requried keys: {}".format(",".join(key_checks.keys())))
             print("Found keys: {}".format(",".join(matched_keys)))
+
             print("Missing required keys: {}".format(",".join(set(key_checks.keys()) - set(matched_keys))))
+
             raise ValueError(f"Basic Validation Checks Failed for {file_name} !!!")
     else:
         raise ValueError("Build script not found.")
@@ -341,6 +351,7 @@ def trigger_script_validation_checks(file_name):
     if not image_name:
         # fallback if image_name is still None
         image_name = "registry.access.redhat.com/ubi9/ubi:9.3"
+
     print(f"Image used for the creating container: {image_name}")
     # Spawn a container and pass the build script
     client = docker.DockerClient(base_url='unix://var/run/docker.sock')
@@ -351,12 +362,14 @@ def trigger_script_validation_checks(file_name):
     container = client.containers.run(
         image_name,
         "/home/tester/{}".format(file_name),
+
         network='host',
         detach=True,
         volumes={
             current_dir: {'bind': '/home/tester/', 'mode': 'rw'}
         },
         stderr=True,  # Return logs from STDERR
+
     )
     result = container.wait()
     try:
@@ -370,6 +383,7 @@ def trigger_script_validation_checks(file_name):
         return True
 
 
+
 def build_non_root_custom_docker_image(base_image=None):
     global image_name
     if base_image is None:
@@ -379,6 +393,8 @@ def build_non_root_custom_docker_image(base_image=None):
     os.system(f'docker build --build-arg BASE_IMAGE="{base_image}" -t docker_non_root_image -f gha-script/dockerfile_non_root .')
     image_name = "docker_non_root_image"
     return True
+
+
 
 
 def validate_build_info_file(file_name):
@@ -399,6 +415,7 @@ def validate_build_info_file(file_name):
         if str(data['github_url']).endswith('/'):
             raise Exception(f"Build info validation failed for {file_name} due to \"/\" present at the end of github url !")
 
+
         # Check for empty lines
         lines = open(script_path, 'r').read().splitlines()
         for line in lines:
@@ -407,11 +424,13 @@ def validate_build_info_file(file_name):
 
         # check for container user mode
         global use_non_root
+
         use_non_root = str(data['use_non_root_user']).lower()
         print("Non root user: " + use_non_root)
 
         # Only build non-root image here once, actual image selection happens in determine_docker_image
         # so remove build_non_root_custom_docker_image() call here to avoid duplicate build
+
 
         print("Validated build_info.json file successfully")
         return True
@@ -452,6 +471,7 @@ def trigger_build_validation_travis(pr_number):
             # check Travis-check from package header  
             travis_check = package_data['travis_check'].lower()
             if travis_check == "true":
+
                 # Build/test script files
                 trigger_script_validation_checks(file_name)
             else:
@@ -463,12 +483,16 @@ def trigger_build_validation_travis(pr_number):
             # Keep track of validated files.
             validated_file_list.append(file_name)
 
+
     if len(validated_file_list) == 0:
+
         print("No scripts available for validation.")
     else:
         print("Validated below scripts:")
         print(*validated_file_list, sep="\n")
 
 
+
 if __name__ == "__main__":
+
     trigger_build_validation_travis(sys.argv[1])

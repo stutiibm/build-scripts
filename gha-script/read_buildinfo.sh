@@ -11,6 +11,7 @@ match_version=$VERSION
 
 if [ -f $buildinfo_path ]; then
   echo "$package_dirpath exists"
+
 else
   package_dirpath="$initial_char/$PACKAGE_NAME/"
   echo "Correct package_dirpath is $package_dirpath"
@@ -21,6 +22,7 @@ cd $package_dirpath
 echo "printing the list of contents"
 pwd
 ls -ltr
+
 
 config_file='build_info.json'
 if [ -f $config_file ]; then
@@ -36,6 +38,7 @@ if [ -f $config_file ]; then
   if $(jq 'has("docker_build")' $jsonObj); then
     build_docker=$(jq .docker_build $jsonObj)
   fi
+
 
   # default validate_build_script=true
   validate_build_script=true
@@ -129,7 +132,9 @@ build_script_with_quotes=$build_script
 stripped_build_script=$(echo "$build_script_with_quotes" | sed 's/"//g')
 echo $stripped_build_script
 
+
 if [ -f "$stripped_build_script" ]; then
+
   echo "build script found"
   while IFS= read -r line; do
       # Check if the line starts with '# Tested on'
@@ -138,11 +143,13 @@ if [ -f "$stripped_build_script" ]; then
           tested_on=$(echo "$line" | cut -d ':' -f 2- | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')
           break
       fi
+
   done < "$stripped_build_script"
   echo "Tested on value: $tested_on"
 fi
 
 # Export variables
+
 echo "export VERSION=$VERSION" > $CUR_DIR/variable.sh
 echo "export BUILD_SCRIPT=$build_script" >> $CUR_DIR/variable.sh
 echo "export PKG_DIR_PATH=$package_dirpath" >> $CUR_DIR/variable.sh
