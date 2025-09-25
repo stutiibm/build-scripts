@@ -2,7 +2,7 @@
   "maintainer": "ramnathnayak-ibm",
   "package_name": "multipart",
   "github_url": "https://github.com/defnull/multipart",
-  "version": "v1.3.0",
+  "version": "v1.2.1",
   "default_branch": "master",
   "build_script": "multipart_ubi_9.6.sh",
   "package_dir": "m/multipart",
@@ -11,13 +11,13 @@
   "use_non_root_user": "false",
   "wheel_build": "true",
   "validate_build_script": true,
-  "v1.2.1": {
-    "dir": "Dockerfiles/v1.2.1_ubi9",
-    "build_script": "multipart_ubi_9.6.sh"
-  },
   "v1.3.0": {
     "dir": "Dockerfiles/v1.3.0_ubi9",
     "build_script": "multipart_ubi_9.3.sh"
+  },
+  "v1.2.1": {
+    "dir": "Dockerfiles/v1.2.1_ubi9",
+    "build_script": "multipart_ubi_9.6.sh"
   }
 }
 
