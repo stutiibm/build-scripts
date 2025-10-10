@@ -224,6 +224,21 @@ jobs:
           
         continue-on-error: ${{ matrix.allow-failure }}
 
+        
+      - name: Move wheel into package-cache
+        run: |
+          mkdir -p package-cache/wheels
+          find . -name "*.whl" -exec cp {} package-cache/wheels/ \;
+          echo "Wheels moved to package-cache/wheels"
+          ls -lh package-cache/wheels
+
+      - name: Upload wheel package-cache
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel-artifact
+          path: package-cache
+        
+
       # - name: Upload wheel artifact using custom script
       #   run: |
       #     WHEEL_FILE=*.whl
