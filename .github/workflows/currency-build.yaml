@@ -230,7 +230,7 @@ jobs:
           mkdir -p package-cache/wheels
           # Ensure permissions are correct
           sudo chown -R $USER:$USER .
-          chmod -R u+rw 
+          chmod -R u+rw .
           find . -name "*.whl" -exec cp {} package-cache/wheels/ \;
           echo "Wheels moved to package-cache/wheels"
           ls -lh package-cache/wheels
