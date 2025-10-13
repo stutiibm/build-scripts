@@ -124,6 +124,7 @@ jobs:
           GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
         run: |
           echo "GHA_CURRENCY_SERVICE_ID_API_KEY prefix: ${GHA_CURRENCY_SERVICE_ID_API_KEY:0:4}"
+          echo "API key length: ${#gha_currency_service_id_api_key}"
           echo "Sourcing variable.sh and scanner-env.sh..........................................."
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
@@ -209,6 +210,7 @@ jobs:
       - name: Run build_wheels.sh
         run: |
           echo "GHA_CURRENCY_SERVICE_ID_API_KEY prefix: ${GHA_CURRENCY_SERVICE_ID_API_KEY:0:4}"
+          echo "API key length: ${#gha_currency_service_id_api_key}"
 
           ls
           echo "---------------------updated cache-----------------------"
