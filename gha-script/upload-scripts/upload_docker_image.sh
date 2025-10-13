@@ -1,6 +1,9 @@
 #!/bin/bash -e
 
 echo "$GHA_CURRENCY_SERVICE_ID_API_KEY" | docker login -u iamapikey --password-stdin icr.io
+echo "GHA_CURRENCY_SERVICE_ID_API_KEY prefix: ${GHA_CURRENCY_SERVICE_ID_API_KEY:0:4}"
+echo "API key length: ${#GHA_CURRENCY_SERVICE_ID_API_KEY}"
+
 if [ $? -ne 0 ]; then
     echo "Docker login failed. Exiting script."
     exit 1
