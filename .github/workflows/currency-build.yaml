@@ -123,6 +123,7 @@ jobs:
         env:
           GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
         run: |
+          echo "GHA_CURRENCY_SERVICE_ID_API_KEY prefix: ${GHA_CURRENCY_SERVICE_ID_API_KEY:0:4}"
           echo "Sourcing variable.sh and scanner-env.sh..........................................."
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
@@ -207,6 +208,8 @@ jobs:
 
       - name: Run build_wheels.sh
         run: |
+          echo "GHA_CURRENCY_SERVICE_ID_API_KEY prefix: ${GHA_CURRENCY_SERVICE_ID_API_KEY:0:4}"
+
           ls
           echo "---------------------updated cache-----------------------"
           ls package-cache
@@ -302,6 +305,8 @@ jobs:
         env:
            GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
         run: |
+          echo "GHA_CURRENCY_SERVICE_ID_API_KEY prefix: ${GHA_CURRENCY_SERVICE_ID_API_KEY:0:4}"
+
           mkdir source
           find source_trivy -mindepth 1 -exec mv -t source {} + 2>/dev/null || true
           find source_syft -mindepth 1 -exec mv -t source {} + 2>/dev/null || true
