@@ -53,6 +53,8 @@ if [[ $(echo "$token_request" | jq -r '.errorCode') == "null" ]]; then
     http_code="${full_response: -3}"
     response="${full_response:0:-3}"
 
+    echo "------------------------------------------------------ Full Resoponse : $full_response"
+
     # Check if the PUT request was successful based on the absence of an <Error> block
     if ! echo "$response" | grep -q "<Error>"; then
         echo "File successfully uploaded."
