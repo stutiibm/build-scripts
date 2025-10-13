@@ -40,6 +40,8 @@ token_request=$(curl -X POST https://iam.cloud.ibm.com/identity/token \
 # Check if the token request was successful based on the presence of 'errorCode'
 if [[ $(echo "$token_request" | jq -r '.errorCode') == "null" ]]; then
     token=$(echo "$token_request" | jq -r '.access_token')
+    echo "bearer token length: ${#token}"
+    echo "bearer token chars: ${token:0:10}"
     
     # Upload the file and capture response + HTTP status code
     full_response=$(curl -s -w "%{http_code}" -X PUT \
