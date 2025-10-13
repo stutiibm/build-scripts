@@ -315,7 +315,13 @@ jobs:
           find source_trivy -mindepth 1 -exec mv -t source {} + 2>/dev/null || true
           find source_syft -mindepth 1 -exec mv -t source {} + 2>/dev/null || true
           find source_grype -mindepth 1 -exec mv -t source {} + 2>/dev/null || true
+          echo "-------------------------------------------------------"
+          ls
+          echo "-------------------------------------------------------"
           tar cvzf source_scanner.tar.gz source
+          echo "-------------------------------------------------------"
+          ls
+          echo "-------------------------------------------------------"
           chmod +x ./gha-script/upload-scripts/upload_file.sh
           bash ./gha-script/upload-scripts/upload_file.sh source_scanner.tar.gz
 
