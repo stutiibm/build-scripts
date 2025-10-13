@@ -54,6 +54,7 @@ if [[ $(echo "$token_request" | jq -r '.errorCode') == "null" ]]; then
     # Check if the PUT request was successful based on the absence of an <Error> block
     if ! echo "$response" | grep -q "<Error>"; then
         echo "File successfully uploaded."
+        echo "Response: $response"
         echo "HTTP status code: $http_code"
     else
         echo "Error: PUT request failed."
