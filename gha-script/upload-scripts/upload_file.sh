@@ -1,5 +1,15 @@
 #!/bin/bash -e
 
+if [[ -z "$gha_currency_service_id_api_key" ]]; then
+  echo "Error: gha_currency_service_id_api_key is not set or empty."
+  exit 1
+else
+  echo "gha_currency_service_id_api_key is set."
+  echo "API key prefix: ${gha_currency_service_id_api_key:0:4}"
+  echo "API key length: ${#gha_currency_service_id_api_key}"
+fi
+
+
 token_request=$(curl -X POST https://iam.cloud.ibm.com/identity/token \
   -H "content-type: application/x-www-form-urlencoded" \
   -H "accept: application/json" \
