@@ -125,6 +125,7 @@ jobs:
         run: |
           echo "GHA_CURRENCY_SERVICE_ID_API_KEY prefix: ${GHA_CURRENCY_SERVICE_ID_API_KEY:0:4}"
           echo "API key length: ${#GHA_CURRENCY_SERVICE_ID_API_KEY}"
+          date
           echo "Sourcing variable.sh and scanner-env.sh..........................................."
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
