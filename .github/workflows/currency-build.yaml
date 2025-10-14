@@ -420,6 +420,8 @@ jobs:
 
       - name: Upload Image Scanner Results
         run: |
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
           mkdir image
           find image_trivy -mindepth 1 -exec mv -t image {} + 2>/dev/null || true
           find image_syft -mindepth 1 -exec mv -t image {} + 2>/dev/null || true
