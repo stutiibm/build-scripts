@@ -18,6 +18,10 @@ token_request=$(curl -X POST https://iam.cloud.ibm.com/identity/token \
 #token=$(echo "$token_request" | jq -r '.access_token')
 #curl -X PUT -H "Authorization: bearer $token" -H "Content-Type: application/gzip" -T $1 "https://s3.au-syd.cloud-object-storage.appdomain.cloud/ose-power-toolci-bucket/$PACKAGE_NAME/$VERSION/$1"
 
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "--------- token request : $token_request -------------"
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+
 # Check if the token request was successful based on the presence of 'errorCode'
 if [[ $(echo "$token_request" | jq -r '.errorCode') == "null" ]]; then
     token=$(echo "$token_request" | jq -r '.access_token')
@@ -27,7 +31,7 @@ if [[ $(echo "$token_request" | jq -r '.errorCode') == "null" ]]; then
     response=$(curl -i -X PUT -H "Authorization: bearer $token" -H "Content-Type: application/gzip" -T $1 "https://s3.us.cloud-object-storage.appdomain.cloud/ose-power-toolci-bucket-production/$PACKAGE_NAME/$VERSION/$1")
     echo "*****************************************************"
     echo "--------- token : $token ----------------------------"
-    echo "-----------length of token : ${token:0:10} ------------"
+    echo "-----------length of token : ${token:0:4} ------------"
     echo "-----------response : $response --------------------"
     echo "*****************************************************"
     
