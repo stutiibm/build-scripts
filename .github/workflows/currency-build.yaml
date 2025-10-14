@@ -419,6 +419,8 @@ jobs:
           mv grype_image_sbom_results.json grype_image_vulnerabilities_results.json image_grype
 
       - name: Upload Image Scanner Results
+        env:
+           GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
         run: |
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
