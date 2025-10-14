@@ -44,7 +44,7 @@ if [[ $(echo "$token_request" | jq -r '.errorCode') == "null" ]]; then
     echo "bearer token chars: ${token:0:10}"
     
     # Upload the file and capture response + HTTP status code
-    full_response=$(curl -s -w "%{http_code}" -X PUT \
+    full_response=$(curl -i -s -w "%{http_code}" -X PUT \
       -H "Authorization: bearer $token" \
       -H "Content-Type: application/octet-stream" \
       -T "$1" \
