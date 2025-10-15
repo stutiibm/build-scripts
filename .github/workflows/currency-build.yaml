@@ -267,8 +267,10 @@ jobs:
             echo "Sourcing variable and scanner envs..."
             source package-cache/variable.sh
             source package-cache/scanner-env.sh
-            echo "========= scanner-env.sh ========="
-            cat package-cache/scanner-env.sh
+            echo "========= ls package-cache ========="
+            ls package-cache
+            echo "+++++++++++++++++++++++++++++++++++"
+            ls package-cache/wheels
             echo "=================================="
 
         - name: Run ScanCode Toolkit on Wheels
