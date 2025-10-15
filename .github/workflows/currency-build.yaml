@@ -233,6 +233,11 @@ jobs:
           chmod -R u+rw .
           find . -name "*.whl" -exec cp {} package-cache/wheels/ \;
           echo "Wheels moved to package-cache/wheels"
+          echo "========= ls package-cache ========="
+          ls package-cache
+          echo "+++++++++++++++++++++++++++++++++++"
+          ls package-cache/wheels
+          echo "==================================" 
           ls -lh package-cache/wheels
 
       - name: Upload wheel package-cache
@@ -250,31 +255,32 @@ jobs:
       #   continue-on-error: ${{ matrix.allow-failure }}
 
   wheel_scanner:
-      needs: wheel_build
-      if: ${{ inputs.validate_build_script == 'true' }}
-      runs-on: ubuntu-24.04-ppc64le-p10
-      steps:
-        - uses: actions/checkout@v4
+    needs: wheel_build
+    if: ${{ inputs.validate_build_script == 'true' }}
+    runs-on: ubuntu-24.04-ppc64le-p10
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
 
-        - name: Download package-cache
-          uses: actions/download-artifact@v4
-          with:
-            name: package-cache
-            path: package-cache
+      - name: Download wheel artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: wheel-artifact-${{ matrix.python-version }}
+          path: package-cache
 
-        - name: Prepare Scanner Environment
-          run: |
-            echo "Sourcing variable and scanner envs..."
-            source package-cache/variable.sh
-            source package-cache/scanner-env.sh
-            echo "========= ls package-cache ========="
-            ls package-cache
-            echo "+++++++++++++++++++++++++++++++++++"
-            ls package-cache/wheels
-            echo "=================================="
+      - name: List downloaded wheels
+        run: |
+          echo "========= ls package-cache ========="
+          ls package-cache
+          echo "+++++++++++++++++++++++++++++++++++"
+          ls package-cache/wheels
+          echo "==================================" 
+          ls -lh package-cache/wheels
 
-        - name: Run ScanCode Toolkit on Wheels
-          run: |
+      - name: Run ScanCode Toolkit on Wheels
+        run: |
             source package-cache/variable.sh
             source package-cache/scanner-env.sh
             chmod +x ./gha-script/scanner-scripts/scancode_wheel_scan.sh
