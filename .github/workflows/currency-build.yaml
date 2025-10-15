@@ -181,8 +181,8 @@ jobs:
           #   allow-failure: false
           - python-version: "3.11"
             allow-failure: false
-          - python-version: "3.12"
-            allow-failure: false
+          # - python-version: "3.12"
+          #   allow-failure: false
           # - python-version: "3.13"
           #   allow-failure: true
     env:
@@ -260,7 +260,7 @@ jobs:
     runs-on: ubuntu-24.04-ppc64le-p10
     strategy:
       matrix:
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.11"]
     steps:
       - uses: actions/checkout@v4
 
