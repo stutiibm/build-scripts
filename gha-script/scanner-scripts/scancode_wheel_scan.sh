@@ -21,7 +21,7 @@
 
 
 
-sudo yum install -y git python3.12 python3.12-pip python3.12-devel gcc gcc-c++ make unzip patch wget tar which findutils libffi-devel zlib-devel openssl-devel libxml2 libxml2-devel libxslt libxslt-devel libicu-devel pkgconfig libicu-devel pkgconf-pkg-config
+yum install -y git python3.12 python3.12-pip python3.12-devel gcc gcc-c++ make unzip patch wget tar which findutils libffi-devel zlib-devel openssl-devel libxml2 libxml2-devel libxslt libxslt-devel libicu-devel pkgconfig libicu-devel pkgconf-pkg-config
 git clone https://github.com/nexB/scancode-toolkit.git
 cd scancode-toolkit
 git checkout v32.4.0
