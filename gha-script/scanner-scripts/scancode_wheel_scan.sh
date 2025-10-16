@@ -7,21 +7,21 @@
 
 #if [ "$validate_build_script" == true ]; then  
   
-  echo "------------------Installing ScanCode Toolkit..."
-  SCANCODE_VERSION=v32.4.0
-  echo "===============wgetting=================="
-  wget https://github.com/nexB/scancode-toolkit/archive/refs/tags/${SCANCODE_VERSION}.tar.gz
-  echo "===============tarring=================="
-  tar -xzf ${SCANCODE_VERSION}.tar.gz
-  SCANCODE_DIR="scancode-toolkit-${SCANCODE_VERSION#v}"
-  cd $SCANCODE_DIR
-  echo "===============Python version=================="
-  python --version
-  echo "===============Python version=================="
+  # echo "------------------Installing ScanCode Toolkit..."
+  # SCANCODE_VERSION=v32.4.0
+  # echo "===============wgetting=================="
+  # wget https://github.com/nexB/scancode-toolkit/archive/refs/tags/${SCANCODE_VERSION}.tar.gz
+  # echo "===============tarring=================="
+  # tar -xzf ${SCANCODE_VERSION}.tar.gz
+  # SCANCODE_DIR="scancode-toolkit-${SCANCODE_VERSION#v}"
+  # cd $SCANCODE_DIR
+  # echo "===============Python version=================="
+  # python --version
+  # echo "===============Python version=================="
 
 
 
-sudo yum install -y git python3.12 python3.12-pip python3.12-devel gcc gcc-c++ make unzip patch wget tar which findutils libffi-devel zlib-devel openssl-devel libxml2 libxml2-devel libxslt libxslt-devel libicu-devel pkgconfig
+sudo yum install -y git python3.12 python3.12-pip python3.12-devel gcc gcc-c++ make unzip patch wget tar which findutils libffi-devel zlib-devel openssl-devel libxml2 libxml2-devel libxslt libxslt-devel libicu-devel pkgconfig libicu-devel pkgconf-pkg-config
 git clone https://github.com/nexB/scancode-toolkit.git
 cd scancode-toolkit
 git checkout v32.4.0
