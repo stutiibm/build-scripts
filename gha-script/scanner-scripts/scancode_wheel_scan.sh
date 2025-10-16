@@ -21,7 +21,9 @@
 
 
 echo "----------Installing-----------------"
-sudo apt update -y && sudo apt-get install file git python3.12 python3.12-pip python3.12-devel gcc gcc-c++ make unzip patch wget tar which findutils libffi-devel zlib-devel openssl-devel libxml2 libxml2-devel libxslt libxslt-devel libicu-devel pkgconfig libicu-devel pkgconf-pkg-config -y
+#sudo apt update -y && sudo apt-get install file git python3.12 python3.12-pip python3.12-devel gcc gcc-c++ make unzip patch wget tar which findutils libffi-devel zlib-devel openssl-devel libxml2 libxml2-devel libxslt libxslt-devel libicu-devel pkgconfig libicu-devel pkgconf-pkg-config -y
+sudo apt update -y && sudo apt install -y file git python3.12 python3.12-venv python3-pip python3.12-dev build-essential unzip patch wget tar libffi-dev zlib1g-dev libssl-dev libxml2-dev libxslt1-dev libicu-dev pkg-config
+
 echo "----------Installed dependencies-----------------"
 git clone https://github.com/nexB/scancode-toolkit.git
 cd scancode-toolkit
