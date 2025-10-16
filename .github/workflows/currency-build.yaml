@@ -259,7 +259,7 @@ jobs:
 
   wheel_scanner:
     needs: wheel_build
-    if: ${{ inputs.validate_build_script == 'true' }}
+    #if: ${{ inputs.validate_build_script == 'true' }}
     runs-on: ubuntu-24.04-ppc64le-p10
     strategy:
       matrix:
