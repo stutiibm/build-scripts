@@ -51,9 +51,6 @@ cd ..
 ls 
 echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
 
-cd ../package-cache/wheels
-echo "-------------------ls wheels ---------------"
-
 for wheel in *.whl; do
   echo "Processing: $wheel"
   
@@ -67,15 +64,11 @@ for wheel in *.whl; do
   unzip -q "$wheel" -d "$extract_dir"
 
   # Run scancode
-  echo "------------------- Scanning started --------------------------------"
-  ls
-  echo "----------------------------------- Finding scancode file -----------------------------------"
-  cd ..
-  ls
+ 
   echo "****************************************************************"
   find  scancode-toolkit -name scancode
   echo "-----------------------------------------------------------------------"
-  ../scancode-toolkit/venv/bin/scancode --license --package --json-pp "$output_json" "$extract_dir"
+  scancode-toolkit/venv/bin/scancode --license --package --json-pp "$output_json" "$extract_dir"
 
   # Zip the result
   echo "------------------------- output files ---------------------"
