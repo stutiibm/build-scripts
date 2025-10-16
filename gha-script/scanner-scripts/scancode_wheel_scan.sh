@@ -64,7 +64,9 @@ for wheel in *.whl; do
   # Run scancode
   echo "------------------- Scanning started --------------------------------"
   ls
-  echo "----------------------------------------------------------------------"
+  echo "----------------------------------- Finding scancode file -----------------------------------"
+  find / -name scancode
+  echo "-----------------------------------------------------------------------"
   ../scancode-toolkit/venv/bin/scancode --license --package --json-pp "$output_json" "$extract_dir"
 
   # Zip the result
