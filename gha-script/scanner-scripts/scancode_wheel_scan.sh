@@ -59,10 +59,20 @@ for wheel in *.whl; do
   output_json="${base_name}_output.json"
   output_zip="${base_name}_output.zip"
 
+  echo "base name : $base_name"
+  echo "extract_dir : $extract_dir"
+  echo "output_json : $output_json"
+  echo "output_zip : $output_zip"
+  
+
   # Unzip the wheel
   echo "------------- unzipping wheel ------------------------------"
   cd package-cache/wheels
+  ls 
+  echo "------------- unzippied wheel ------------------------------"
   unzip -q "$wheel" -d "$extract_dir"
+  echo "??????????????????????????????????"
+  ls
   
   
   # Run scancode
