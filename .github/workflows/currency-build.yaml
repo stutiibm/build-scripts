@@ -218,6 +218,9 @@ jobs:
 
           chmod +x ./gha-script/build_wheels.sh
           bash ./gha-script/build_wheels.sh
+          echo "===============Python version=================="
+          python --version
+          echo "===============Python version=================="
           sudo apt update -y
           sudo lsb_release -a 2>/dev/null || echo "lsb_release not available"
           sudo uname -a
