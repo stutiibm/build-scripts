@@ -26,6 +26,9 @@ git clone https://github.com/nexB/scancode-toolkit.git
 cd scancode-toolkit
 git checkout v32.4.0
 echo "-------------- Create venv ------------------"
+which icu-config
+echo "========================================="
+icu-config --version
 python3.12 -m venv venv
 source venv/bin/activate
 python3.12 -m pip install --upgrade pip setuptools wheel typecode pyahocorasick
