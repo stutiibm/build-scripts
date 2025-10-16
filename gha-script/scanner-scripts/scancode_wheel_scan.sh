@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
-# validate_build_script=$VALIDATE_BUILD_SCRIPT
-# cloned_package=$CLONED_PACKAGE
+validate_build_script=$VALIDATE_BUILD_SCRIPT
+cloned_package=$CLONED_PACKAGE
 
 #cd package-cache
 
@@ -45,6 +45,36 @@ python3.12 -m pip install -e .
 python3.12 -m pip install click==8.0.4
 echo "------------- scancode version ---------------"
 scancode --version
+
+cd ../package-cache/wheels
+echo "-------------------ls wheels ---------------"
+
+for wheel in *.whl; do
+  echo "Processing: $wheel"
+  
+  base_name="${wheel%.whl}"  # Strip .whl extension
+  extract_dir="${base_name}_extract"
+  output_json="${base_name}_output.json"
+  output_zip="${base_name}_output.zip"
+
+  # Unzip the wheel
+  echo "------------- unzipping wheel ------------------------------"
+  unzip -q "$wheel" -d "$extract_dir"
+
+  # Run scancode
+  echo "------------------- Scanning started --------------------------------"
+  scancode-toolkit/venv/bin/scancode --license --package --json-pp "$output_json" "$extract_dir"
+
+  # Zip the result
+  echo "------------------------- output files ---------------------"
+  ls
+  echo "------------------------------------------------------------"
+  zip -q "$output_zip" "$output_json"
+
+  echo "Finished: $wheel"
+  echo "Output: $output_zip"
+  echo "==========================================="
+done
 
 
 
