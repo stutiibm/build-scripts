@@ -18,6 +18,26 @@
   echo "===============Python version=================="
   python --version
   echo "===============Python version=================="
+
+
+
+sudo yum install -y git python3.12 python3.12-pip python3.12-devel gcc gcc-c++ make unzip patch wget tar which findutils libffi-devel zlib-devel openssl-devel libxml2 libxml2-devel libxslt libxslt-devel libicu-devel pkgconfig
+git clone https://github.com/nexB/scancode-toolkit.git
+cd scancode-toolkit
+git checkout v32.4.0
+echo "-------------- Create venv ------------------"
+python3.12 -m venv venv
+source venv/bin/activate
+python3.12 -m pip install --upgrade pip setuptools wheel typecode pyahocorasick
+
+echo "--------------- Apply changes ----------------"
+sed -i '/typecode\[full\] >= 30\.0\.1/s/^/    # /' setup.cfg
+sed -i '/extractcode\[full\] >= 31\.0\.0/s/^/    # /' setup.cfg
+sed -i '/typecode\[full\] >= 30\.0\.0/s/^/    # /' setup.cfg
+
+echo "------------- Install scancode-toolkit ---------------"
+python3.12 -m pip install -e .
+
   # python -m pip install -e .
   # export PYTHONWARNINGS="ignore"
   # export PATH=$HOME/scancode-toolkit/venv/bin:$PATH
