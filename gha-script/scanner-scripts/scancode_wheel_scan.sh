@@ -61,14 +61,16 @@ for wheel in *.whl; do
 
   # Unzip the wheel
   echo "------------- unzipping wheel ------------------------------"
+  cd package-cache/wheels
   unzip -q "$wheel" -d "$extract_dir"
-
+  
+  
   # Run scancode
  
   echo "****************************************************************"
   find  scancode-toolkit -name scancode
   echo "-----------------------------------------------------------------------"
-  scancode-toolkit/venv/bin/scancode --license --package --json-pp "$output_json" "$extract_dir"
+  ../../scancode-toolkit/venv/bin/scancode --license --package --json-pp "$output_json" "$extract_dir"
 
   # Zip the result
   echo "------------------------- output files ---------------------"
