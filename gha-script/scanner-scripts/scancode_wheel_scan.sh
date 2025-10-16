@@ -87,7 +87,7 @@ for wheel in *.whl; do
   echo "------------------------- output files ---------------------"
   ls
   echo "------------------------------------------------------------"
-  cat output_json
+  cat $output_json
   echo "------------------------------------------------------------"
   zip -q "$output_zip" "$output_json"
 
