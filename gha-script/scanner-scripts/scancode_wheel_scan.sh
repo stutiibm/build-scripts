@@ -92,6 +92,7 @@ for wheel in *.whl; do
 
   echo "Finished: $wheel"
   echo "Output: $output_zip"
+  cat output_zip
   echo "==========================================="
 done
 
