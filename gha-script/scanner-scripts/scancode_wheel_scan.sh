@@ -33,7 +33,7 @@ python --version
 echo "========================================="
 python3.12 -m venv venv
 source venv/bin/activate
-python3.12 -m pip install --upgrade pip setuptools wheel typecode pyahocorasick click==8.0.4
+python3.12 -m pip install --upgrade pip setuptools wheel typecode pyahocorasick 
 
 echo "--------------- Apply changes ----------------"
 sed -i '/typecode\[full\] >= 30\.0\.1/s/^/    # /' setup.cfg
@@ -42,6 +42,7 @@ sed -i '/typecode\[full\] >= 30\.0\.0/s/^/    # /' setup.cfg
 
 echo "------------- Install scancode-toolkit ---------------"
 python3.12 -m pip install -e .
+python3.12 -m pip install click==8.0.4
 echo "------------- scancode version ---------------"
 scancode --version
 
