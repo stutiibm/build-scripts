@@ -23,9 +23,15 @@
 echo "----------Installing-----------------"
 sudo apt update -y && sudo apt-get install file git python3.12 python3.12-pip python3.12-devel gcc gcc-c++ make unzip patch wget tar which findutils libffi-devel zlib-devel openssl-devel libxml2 libxml2-devel libxslt libxslt-devel libicu-devel pkgconfig libicu-devel pkgconf-pkg-config -y
 echo "----------Installed dependencies-----------------"
+git clone https://github.com/nexB/scancode-toolkit.git
+cd scancode-toolkit
 git checkout v32.4.0
 echo "-------------- Create venv ------------------"
 which icu-config
+echo "========================================="
+python --version
+echo "========================================="
+python3.12 --version
 echo "========================================="
 icu-config --version
 python3.12 -m venv venv
