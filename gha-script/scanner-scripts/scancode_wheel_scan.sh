@@ -50,7 +50,9 @@ echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
 cd ..
 ls 
 echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+cd package-cache/wheels
 
+#find package-cache/wheels -type f -name "*.whl" | while IFS= read -r wheel; do
 for wheel in *.whl; do
   echo "Processing: $wheel"
   
