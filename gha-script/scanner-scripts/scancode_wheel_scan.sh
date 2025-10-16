@@ -29,16 +29,11 @@ git clone https://github.com/nexB/scancode-toolkit.git
 cd scancode-toolkit
 git checkout v32.4.0
 echo "-------------- Create venv ------------------"
-which icu-config
-echo "========================================="
 python --version
 echo "========================================="
-python3.12 --version
-echo "========================================="
-icu-config --version
 python3.12 -m venv venv
 source venv/bin/activate
-python3.12 -m pip install --upgrade pip setuptools wheel typecode pyahocorasick
+python3.12 -m pip install --upgrade pip setuptools wheel typecode pyahocorasick click==8.0.4
 
 echo "--------------- Apply changes ----------------"
 sed -i '/typecode\[full\] >= 30\.0\.1/s/^/    # /' setup.cfg
@@ -47,6 +42,11 @@ sed -i '/typecode\[full\] >= 30\.0\.0/s/^/    # /' setup.cfg
 
 echo "------------- Install scancode-toolkit ---------------"
 python3.12 -m pip install -e .
+echo "------------- scancode version ---------------"
+scancode --version
+
+
+
 
   # python -m pip install -e .
   # export PYTHONWARNINGS="ignore"
