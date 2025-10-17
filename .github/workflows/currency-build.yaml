@@ -298,8 +298,9 @@ jobs:
       - name: Upload consolidated package-cache
         uses: actions/upload-artifact@v4
         with:
-          name: package-cache
+          name: package-cache-consolidated
           path: package-cache
+
 
   verify_wheels:
     name: Verify Collected Wheels
@@ -309,7 +310,7 @@ jobs:
       - name: Download consolidated package-cache
         uses: actions/download-artifact@v4
         with:
-          name: package-cache
+          name: package-cache-consolidated
           path: .
 
       - name: List wheels in package-cache
