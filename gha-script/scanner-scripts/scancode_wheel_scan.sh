@@ -69,6 +69,8 @@ for wheel in *.whl; do
 
   # Unzip the wheel
   echo "------------- unzipping wheel ------------------------------"
+  pwd 
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   cd package-cache/wheels
   ls 
   echo "------------- unzippied wheel ------------------------------"
