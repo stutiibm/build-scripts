@@ -270,13 +270,16 @@ jobs:
     needs: wheel_build
     runs-on: ubuntu-24.04-ppc64le-p10
     steps:
-      - name: Create target directory
-        run: mkdir -p package-cache/wheels
-
       - name: Download all wheel artifacts
         uses: actions/download-artifact@v4
         with:
           path: all-wheels
+
+      - name: Download package-cache from previous step
+        uses: actions/download-artifact@v4
+        with:
+          name: package-cache
+          path: package-cache
 
       
       - name: Move only main package wheels into package-cache/wheels
