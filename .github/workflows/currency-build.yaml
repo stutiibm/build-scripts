@@ -354,8 +354,13 @@ jobs:
             source package-cache/scanner-env.sh
             chmod +x ./gha-script/scanner-scripts/scancode_wheel_scan.sh
             bash ./gha-script/scanner-scripts/scancode_wheel_scan.sh
+            echo "@@@@@@@@@@@@@@ back to yaml @@@@@@@@@@@@@@@@@@@@"
+            pwd 
+            echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+            ls package-cache/wheels
+            echo "********************************************"
             mkdir wheel_scancode
-            mv package-cache/wheels/$PACKAGE_NAME-$VERSION-$python-version_output.json wheel_scancode
+            #mv package-cache/wheels/$PACKAGE_NAME-$VERSION-$python-version_output.json wheel_scancode
 
         # - name: Upload Wheel Scanner Results
         #   env:
