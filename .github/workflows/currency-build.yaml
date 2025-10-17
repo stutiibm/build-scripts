@@ -300,7 +300,7 @@ jobs:
 
 
   wheel_scanner:
-    needs: wheel_build
+    needs: collect_wheels
     #if: ${{ inputs.validate_build_script == 'true' }}
     runs-on: ubuntu-24.04-ppc64le-p10
     steps:
