@@ -120,8 +120,8 @@ jobs:
      
        
       - name: Build Package
-        #env:
-          #CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.CURRENCY_SERVICE_ID_API_KEY }}
+        env:
+          GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
         run: |
           echo "Sourcing variable.sh and scanner-env.sh..........................................."
           source package-cache/variable.sh
@@ -147,8 +147,8 @@ jobs:
           bash ../gha-script/pre_process.sh
           cd $GITHUB_WORKSPACE
           gzip build_log
-          #chmod +x ./gha-script/upload-scripts/upload_file.sh
-          #bash ./gha-script/upload-scripts/upload_file.sh build_log.gz
+          chmod +x ./gha-script/upload-scripts/upload_file.sh
+          bash ./gha-script/upload-scripts/upload_file.sh build_log.gz
 
 
 
@@ -175,17 +175,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # - python-version: "3.9"
-          #   allow-failure: true
-          # - python-version: "3.10"
-          #   allow-failure: false
+          - python-version: "3.9"
+            allow-failure: true
+          - python-version: "3.10"
+            allow-failure: false
           - python-version: "3.11"
             allow-failure: false
           - python-version: "3.12"
             allow-failure: false
-          # - python-version: "3.13"
-          #   allow-failure: true
+          - python-version: "3.13"
+            allow-failure: true
     env:
+      GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
       PYTHON_VERSION: ${{ matrix.python-version }}
       PACKAGE_NAME: ${{ inputs.package_name }}
       VERSION: ${{ inputs.version }}
@@ -243,26 +244,21 @@ jobs:
           echo "==================================" 
           ls -lh package-cache/wheels
 
-      # - name: Upload wheel package-cache
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: wheel-artifact-${{ matrix.python-version }}
-      #     path: package-cache
-
+    
       - name: Upload wheel package-cache
         uses: actions/upload-artifact@v4
         with:
           name: wheel-${{ matrix.python-version }}
           path: package-cache/wheels/*.whl
 
-        
 
-      # - name: Upload wheel artifact using custom script
-      #   run: |
-      #     WHEEL_FILE=*.whl
-      #     chmod +x ./gha-script/upload-scripts/upload_wheel.sh
-      #     bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE
-      #   continue-on-error: ${{ matrix.allow-failure }}
+      - name: Upload wheel artifact using custom script
+        run: |
+          sudo chmod a+r *.whl
+          WHEEL_FILE=*.whl
+          chmod +x ./gha-script/upload-scripts/upload_wheel.sh
+          bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE
+        continue-on-error: ${{ matrix.allow-failure }}
 
 
   collect_wheels:
@@ -292,7 +288,7 @@ jobs:
           echo "Copying wheels starting with package name: $PACKAGE_NAME"
           find all-wheels -type f -name "${PACKAGE_NAME}*.whl" -exec cp {} package-cache/wheels/ \;
 
-          echo "✅ Final wheel contents for package: $PACKAGE_NAME"
+          echo "Final wheel contents for package: $PACKAGE_NAME"
           ls -lh package-cache/wheels
 
       - name: Upload consolidated package-cache
@@ -301,32 +297,6 @@ jobs:
           name: package-cache-consolidated
           path: package-cache
 
-
-  verify_wheels:
-    name: Verify Collected Wheels
-    needs: collect_wheels
-    runs-on: ubuntu-24.04-ppc64le-p10
-    steps:
-      - name: Download consolidated package-cache
-        uses: actions/download-artifact@v4
-        with:
-          name: package-cache-consolidated
-          path: package-cache
-
-      - name: List wheels in package-cache
-        run: |
-          echo "🎯 Verifying contents of package-cache/wheels/"
-          ls -lh package-cache/wheels
-          echo "✅ Done listing all wheels."
-
-      - name: Count number of wheels
-        run: |
-          WHEEL_COUNT=$(find package-cache/wheels -name "*.whl" | wc -l)
-          echo "Total wheels found: $WHEEL_COUNT"
-          if [ "$WHEEL_COUNT" -lt 1 ]; then
-            echo "❌ No wheels found!"
-            exit 1
-          fi
 
 
   wheel_scanner:
@@ -354,11 +324,9 @@ jobs:
             source package-cache/scanner-env.sh
             chmod +x ./gha-script/scanner-scripts/scancode_wheel_scan.sh
             bash ./gha-script/scanner-scripts/scancode_wheel_scan.sh
-            echo "@@@@@@@@@@@@@@ back to yaml @@@@@@@@@@@@@@@@@@@@"
-            pwd 
-            echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+            echo "-------------------------Wheels inside package-cache/wheels-----------------------------------------"
             ls package-cache/wheels
-            echo "********************************************"
+            echo "------------------------------------------------------------------"
 
 
       - name: Collect wheel scan outputs
@@ -376,57 +344,17 @@ jobs:
           ls
           echo "-------------------------------------"
 
-        # - name: Upload Wheel Scanner Results
-        #   env:
-        #     GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
-        #   run: |
-        #     tar cvzf wheel_scanner.tar.gz wheel_scancode
-        #     chmod +x ./gha-script/upload-scripts/upload_file.sh
-        #     bash ./gha-script/upload-scripts/upload_file.sh wheel_scanner.tar.gz
+      - name: Upload Wheel Scanner Results
+        env:
+            GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
+        run: |
+            tar cvzf wheel_scanner.tar.gz wheel_scancode
+            chmod +x ./gha-script/upload-scripts/upload_file.sh
+            bash ./gha-script/upload-scripts/upload_file.sh wheel_scanner.tar.gz
 
 
 
-  # wheel_scanner:
-  #   needs: wheel_build
-  #   #if: ${{ inputs.validate_build_script == 'true' }}
-  #   runs-on: ubuntu-24.04-ppc64le-p10
-  #   strategy:
-  #     matrix:
-  #       python-version: ["3.11"]
-  #   steps:
-  #     - uses: actions/checkout@v4
 
-  #     - name: Download wheel artifact
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: wheel-artifact-${{ matrix.python-version }}
-  #         path: package-cache
-
-  #     - name: List downloaded wheels
-  #       run: |
-  #         echo "========= ls package-cache ========="
-  #         ls package-cache
-  #         echo "+++++++++++++++++++++++++++++++++++"
-  #         ls package-cache/wheels
-  #         echo "==================================" 
-  #         ls -lh package-cache/wheels
-
-  #     - name: Run ScanCode Toolkit on Wheels
-  #       run: |
-  #           source package-cache/variable.sh
-  #           source package-cache/scanner-env.sh
-  #           chmod +x ./gha-script/scanner-scripts/scancode_wheel_scan.sh
-  #           bash ./gha-script/scanner-scripts/scancode_wheel_scan.sh
-  #           mkdir wheel_scancode
-  #           mv package-cache/wheels/$PACKAGE_NAME-$VERSION-$python-version_output.json wheel_scancode
-
-  #       # - name: Upload Wheel Scanner Results
-  #       #   env:
-  #       #     GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
-  #       #   run: |
-  #       #     tar cvzf wheel_scanner.tar.gz wheel_scancode
-  #       #     chmod +x ./gha-script/upload-scripts/upload_file.sh
-  #       #     bash ./gha-script/upload-scripts/upload_file.sh wheel_scanner.tar.gz
 
 
       
@@ -496,14 +424,19 @@ jobs:
           mv package-cache/grype_source_sbom_results.json package-cache/grype_source_vulnerabilities_results.json source_grype
 
       - name: Upload Scanner Results
+        env:
+           GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
         run: |
           mkdir source
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
           find source_trivy -mindepth 1 -exec mv -t source {} + 2>/dev/null || true
           find source_syft -mindepth 1 -exec mv -t source {} + 2>/dev/null || true
           find source_grype -mindepth 1 -exec mv -t source {} + 2>/dev/null || true
           tar cvzf source_scanner.tar.gz source
-          #chmod +x ./gha-script/upload-scripts/upload_file.sh
-          #bash ./gha-script/upload-scripts/upload_file.sh source_scanner.tar.gz
+          chmod +x ./gha-script/upload-scripts/upload_file.sh
+          bash ./gha-script/upload-scripts/upload_file.sh source_scanner.tar.gz
+
 
   build_docker:
     needs: build_info 
@@ -530,9 +463,13 @@ jobs:
           docker images
           
       - name: Upload Docker Image
+        env:
+          GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
         run: |
-          #chmod +x ./gha-script/upload-scripts/upload_docker_image.sh
-          #bash ./gha-script/upload-scripts/upload_docker_image.sh
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
+          chmod +x ./gha-script/upload-scripts/upload_docker_image.sh
+          bash ./gha-script/upload-scripts/upload_docker_image.sh
 
       - name: Upload package-cache with image.tar
         uses: actions/upload-artifact@v4
@@ -594,12 +531,18 @@ jobs:
           mkdir image_grype
           mv grype_image_sbom_results.json grype_image_vulnerabilities_results.json image_grype
 
+     
+
       - name: Upload Image Scanner Results
+        env:
+          GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
         run: |
           mkdir image
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
           find image_trivy -mindepth 1 -exec mv -t image {} + 2>/dev/null || true
           find image_syft -mindepth 1 -exec mv -t image {} + 2>/dev/null || true
           find image_grype -mindepth 1 -exec mv -t image {} + 2>/dev/null || true
           tar cvzf image_scanner.tar.gz image
-          #chmod +x ./gha-script/upload-scripts/upload_file.sh
-          #bash ./gha-script/upload-scripts/upload_file.sh image_scanner.tar.gz
+          chmod +x ./gha-script/upload-scripts/upload_file.sh
+          bash ./gha-script/upload-scripts/upload_file.sh image_scanner.tar.gz
