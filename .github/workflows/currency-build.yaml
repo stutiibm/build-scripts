@@ -175,16 +175,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # - python-version: "3.9"
-          #   allow-failure: true
-          # - python-version: "3.10"
-          #   allow-failure: false
+          - python-version: "3.9"
+            allow-failure: true
+          - python-version: "3.10"
+            allow-failure: false
           - python-version: "3.11"
             allow-failure: false
-          # - python-version: "3.12"
-          #   allow-failure: false
-          # - python-version: "3.13"
-          #   allow-failure: true
+          - python-version: "3.12"
+            allow-failure: false
+          - python-version: "3.13"
+            allow-failure: true
     env:
       PYTHON_VERSION: ${{ matrix.python-version }}
       PACKAGE_NAME: ${{ inputs.package_name }}
@@ -243,11 +243,18 @@ jobs:
           echo "==================================" 
           ls -lh package-cache/wheels
 
+      # - name: Upload wheel package-cache
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: wheel-artifact-${{ matrix.python-version }}
+      #     path: package-cache
+
       - name: Upload wheel package-cache
         uses: actions/upload-artifact@v4
         with:
-          name: wheel-artifact-${{ matrix.python-version }}
-          path: package-cache
+          name: wheel-${{ matrix.python-version }}
+          path: package-cache/wheels/*.whl
+
         
 
       # - name: Upload wheel artifact using custom script
@@ -257,47 +264,102 @@ jobs:
       #     bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE
       #   continue-on-error: ${{ matrix.allow-failure }}
 
-  wheel_scanner:
-    needs: wheel_build
-    #if: ${{ inputs.validate_build_script == 'true' }}
-    runs-on: ubuntu-24.04-ppc64le-p10
-    strategy:
-      matrix:
-        python-version: ["3.11"]
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Download wheel artifact
+  collect_wheels:
+    name: Collect All Wheels
+    needs: wheel_build
+    runs-on: ubuntu-24.04-ppc64le-p10
+    steps:
+      - name: Create target directory
+        run: mkdir -p package-cache/wheels
+
+      - name: Download all wheel artifacts
         uses: actions/download-artifact@v4
         with:
-          name: wheel-artifact-${{ matrix.python-version }}
-          path: package-cache
+          path: all-wheels
 
-      - name: List downloaded wheels
+      - name: Move all wheels into package-cache/wheels
         run: |
-          echo "========= ls package-cache ========="
-          ls package-cache
-          echo "+++++++++++++++++++++++++++++++++++"
-          ls package-cache/wheels
-          echo "==================================" 
+          mkdir -p package-cache/wheels
+          find all-wheels -name "*.whl" -exec cp {} package-cache/wheels/ \;
+          echo "Final wheel contents:"
           ls -lh package-cache/wheels
 
-      - name: Run ScanCode Toolkit on Wheels
-        run: |
-            source package-cache/variable.sh
-            source package-cache/scanner-env.sh
-            chmod +x ./gha-script/scanner-scripts/scancode_wheel_scan.sh
-            bash ./gha-script/scanner-scripts/scancode_wheel_scan.sh
-            mkdir wheel_scancode
-            mv package-cache/scancode_results wheel_scancode
+      - name: Upload consolidated package-cache
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-cache
+          path: package-cache
 
-        # - name: Upload Wheel Scanner Results
-        #   env:
-        #     GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
-        #   run: |
-        #     tar cvzf wheel_scanner.tar.gz wheel_scancode
-        #     chmod +x ./gha-script/upload-scripts/upload_file.sh
-        #     bash ./gha-script/upload-scripts/upload_file.sh wheel_scanner.tar.gz
+  verify_wheels:
+    name: Verify Collected Wheels
+    needs: collect_wheels
+    runs-on: ubuntu-24.04-ppc64le-p10
+    steps:
+      - name: Download consolidated package-cache
+        uses: actions/download-artifact@v4
+        with:
+          name: package-cache
+          path: .
+
+      - name: List wheels in package-cache
+        run: |
+          echo "🎯 Verifying contents of package-cache/wheels/"
+          ls -lh package-cache/wheels
+          echo "✅ Done listing all wheels."
+
+      - name: Count number of wheels
+        run: |
+          WHEEL_COUNT=$(find package-cache/wheels -name "*.whl" | wc -l)
+          echo "Total wheels found: $WHEEL_COUNT"
+          if [ "$WHEEL_COUNT" -lt 1 ]; then
+            echo "❌ No wheels found!"
+            exit 1
+          fi
+
+
+
+  # wheel_scanner:
+  #   needs: wheel_build
+  #   #if: ${{ inputs.validate_build_script == 'true' }}
+  #   runs-on: ubuntu-24.04-ppc64le-p10
+  #   strategy:
+  #     matrix:
+  #       python-version: ["3.11"]
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Download wheel artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: wheel-artifact-${{ matrix.python-version }}
+  #         path: package-cache
+
+  #     - name: List downloaded wheels
+  #       run: |
+  #         echo "========= ls package-cache ========="
+  #         ls package-cache
+  #         echo "+++++++++++++++++++++++++++++++++++"
+  #         ls package-cache/wheels
+  #         echo "==================================" 
+  #         ls -lh package-cache/wheels
+
+  #     - name: Run ScanCode Toolkit on Wheels
+  #       run: |
+  #           source package-cache/variable.sh
+  #           source package-cache/scanner-env.sh
+  #           chmod +x ./gha-script/scanner-scripts/scancode_wheel_scan.sh
+  #           bash ./gha-script/scanner-scripts/scancode_wheel_scan.sh
+  #           mkdir wheel_scancode
+  #           mv package-cache/wheels/$PACKAGE_NAME-$VERSION-$python-version_output.json wheel_scancode
+
+  #       # - name: Upload Wheel Scanner Results
+  #       #   env:
+  #       #     GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
+  #       #   run: |
+  #       #     tar cvzf wheel_scanner.tar.gz wheel_scancode
+  #       #     chmod +x ./gha-script/upload-scripts/upload_file.sh
+  #       #     bash ./gha-script/upload-scripts/upload_file.sh wheel_scanner.tar.gz
 
 
       
