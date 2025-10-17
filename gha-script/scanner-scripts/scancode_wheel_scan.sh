@@ -59,12 +59,12 @@ for wheel in *.whl; do
   base_name="${wheel%.whl}"  # Strip .whl extension
   extract_dir="${base_name}_extract"
   output_json="${base_name}_output.json"
-  output_zip="${base_name}_output.zip"
+  #output_zip="${base_name}_output.zip"
 
   echo "base name : $base_name"
   echo "extract_dir : $extract_dir"
   echo "output_json : $output_json"
-  echo "output_zip : $output_zip"
+  #echo "output_zip : $output_zip"
   
 
   # Unzip the wheel
@@ -89,10 +89,10 @@ for wheel in *.whl; do
   echo "------------------------------------------------------------"
   cat $output_json
   echo "------------------------------------------------------------"
-  zip -q "$output_zip" "$output_json"
+  #zip -q "$output_zip" "$output_json"
 
   echo "Finished: $wheel"
-  echo "Output: $output_zip"
+  #echo "Output: $output_zip"
   echo "==========================================="
 done
 
