@@ -359,8 +359,22 @@ jobs:
             echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
             ls package-cache/wheels
             echo "********************************************"
-            mkdir wheel_scancode
-            #mv package-cache/wheels/$PACKAGE_NAME-$VERSION-$python-version_output.json wheel_scancode
+
+
+      - name: Collect wheel scan outputs
+        run: |
+          mkdir -p wheel_scancode
+          echo "Looking for *_output.json files in package-cache/wheels/"
+          find package-cache/wheels -type f -name "*_output.json" -exec mv {} wheel_scancode/ \;
+
+          echo "Contents to be zipped:"
+          ls -lh wheel_scancode
+
+          echo "Creating wheel_scanner.tar.gz"
+          tar -czf wheel_scanner.tar.gz wheel_scancode
+          echo "-------------------------------------"
+          ls
+          echo "-------------------------------------"
 
         # - name: Upload Wheel Scanner Results
         #   env:
