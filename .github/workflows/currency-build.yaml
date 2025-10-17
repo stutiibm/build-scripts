@@ -348,6 +348,8 @@ jobs:
         env:
             GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
         run: |
+            source package-cache/variable.sh
+            source package-cache/scanner-env.sh
             tar cvzf wheel_scanner.tar.gz wheel_scancode
             chmod +x ./gha-script/upload-scripts/upload_file.sh
             bash ./gha-script/upload-scripts/upload_file.sh wheel_scanner.tar.gz
