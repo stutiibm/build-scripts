@@ -329,6 +329,43 @@ jobs:
           fi
 
 
+  wheel_scanner:
+    needs: wheel_build
+    #if: ${{ inputs.validate_build_script == 'true' }}
+    runs-on: ubuntu-24.04-ppc64le-p10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download consolidated package-cache
+        uses: actions/download-artifact@v4
+        with:
+          name: package-cache-consolidated
+          path: package-cache
+
+      - name: List wheels in package-cache
+        run: |
+          echo "Verifying contents of package-cache/wheels/"
+          ls -lh package-cache/wheels
+          echo "Done listing all wheels."
+
+      - name: Run ScanCode Toolkit on Wheels
+        run: |
+            source package-cache/variable.sh
+            source package-cache/scanner-env.sh
+            chmod +x ./gha-script/scanner-scripts/scancode_wheel_scan.sh
+            bash ./gha-script/scanner-scripts/scancode_wheel_scan.sh
+            mkdir wheel_scancode
+            mv package-cache/wheels/$PACKAGE_NAME-$VERSION-$python-version_output.json wheel_scancode
+
+        # - name: Upload Wheel Scanner Results
+        #   env:
+        #     GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
+        #   run: |
+        #     tar cvzf wheel_scanner.tar.gz wheel_scancode
+        #     chmod +x ./gha-script/upload-scripts/upload_file.sh
+        #     bash ./gha-script/upload-scripts/upload_file.sh wheel_scanner.tar.gz
+
+
 
   # wheel_scanner:
   #   needs: wheel_build
