@@ -71,7 +71,6 @@ for wheel in *.whl; do
   echo "------------- unzipping wheel ------------------------------"
   pwd 
   echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-  cd package-cache/wheels
   ls 
   echo "------------- unzippied wheel ------------------------------"
   unzip -q "$wheel" -d "$extract_dir"
