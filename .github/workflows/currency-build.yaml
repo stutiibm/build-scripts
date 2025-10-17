@@ -311,7 +311,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: package-cache-consolidated
-          path: .
+          path: package-cache
 
       - name: List wheels in package-cache
         run: |
