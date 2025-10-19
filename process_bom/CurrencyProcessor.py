@@ -31,7 +31,6 @@ class CurrencyProcessor:
         Returns:
             None
         """
-        os.mkdir(SBOM_CVE_DIR)
         required_package_details = self._get_package_details(package_name, version)
         #required_package_details["wheel_status"] = response["wheel_status"]
         required_package_details["Created"] = str(datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None))
@@ -39,6 +38,7 @@ class CurrencyProcessor:
         result = []
         try:
                 result.append(required_package_details)
+                print("Going into get image Details")
                 #result = self._update_or_append(result, required_package_details, file_path_to_json)
                 self.get_image_details_for_package(result,package_name=package_name,version=version)
         except Exception as e:
@@ -91,7 +91,7 @@ class CurrencyProcessor:
         Returns:
         dict: A dictionary containing the image details for the specified package.
         """
-
+        print("Inside Get Image Details")
         try:
             new_results = self._normalize_json_response(result)    
             final_result = self._process_local_data(new_results, package_name=package_name)
@@ -100,6 +100,7 @@ class CurrencyProcessor:
             cos = COSWrapper(CLOUD_OBJECT_CVE_SBOM_BUCKET)
             artifact_name=f"{package_name}_{version}.json"
             response = cos.push_artifacts_sbomcve(artifact_name=artifact_name)
+            print("This is response for pushing into cos",response)
             if response:
                 print(f"Successfully pushed {package_name}_{version}.json to Cloud Object Storage.")
         except FileExistsError as e:
@@ -177,5 +178,6 @@ class CurrencyProcessor:
         if os.path.exists(filepath):
             os.remove(filepath)
             
+
 
 
