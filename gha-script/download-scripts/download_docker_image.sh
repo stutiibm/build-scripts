@@ -31,28 +31,22 @@ if [ "$SAVE_AS_TAR" = "true" ]; then
 fi
 
 echo "Verifying if image exists locally..."
-docker images
-echo "---------------------------------------------------------"
-    docker images | grep "${image_path}" || {
-      echo "Image not found locally. Download failed or image not loaded."
-      exit 1
-    }
+docker images --format '{{.Repository}}:{{.Tag}}' | grep -q "^${image_path}$" || {
+    echo "❌ Image not found locally. Download failed or image not loaded."
+    docker images
+    exit 1
+}
 
-    echo "Image verified locally: ${image_path}"
-    docker inspect "${image_path}" >/dev/null 2>&1 || {
-      echo "Docker inspect failed. Image may be corrupted."
-      exit 1
-    }
+echo "✅ Image verified locally: ${image_path}"
 
-
-# --- Inspect the image ---
 echo "Inspecting image metadata..."
 if docker inspect "${image_path}" >/dev/null 2>&1; then
-    echo "Docker inspect successful. Image integrity verified."
+    echo "✅ Docker inspect successful. Image integrity verified."
 else
-    echo "Docker inspect failed for ${image_path}."
+    echo "❌ Docker inspect failed for ${image_path}."
     docker images
     exit 1
 fi
+
 
 echo "Image download completed successfully!"
