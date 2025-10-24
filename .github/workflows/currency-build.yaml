@@ -429,8 +429,7 @@ jobs:
   final_summary:
       name: Final Summary Stage
       needs: [build, source_scanner]
-      runs-on: ubuntu-24.04-ppc64le-p10
-      if: always()
+      runs-on: ubuntu-24.04-ppc64le-p10      
       steps:
         - name: Checkout code
           uses: actions/checkout@v4
