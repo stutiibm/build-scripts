@@ -368,6 +368,8 @@ jobs:
           path: package-cache
 
       - name: Load Docker Image
+        env:
+          GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}     
         run: |
           echo "Sourcing variable.sh ..........................................."
           source package-cache/variable.sh
