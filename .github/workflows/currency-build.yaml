@@ -382,16 +382,16 @@ jobs:
           pwd
           echo "---------------------------------------------------------------------"
 
-      # - name: Run Trivy Image Scan
-      #   if: ${{ inputs.enable_trivy == 'true' }}
-      #   run: |
-      #     echo ".................Sourcing variable.sh and scanner-env.sh...................."
-      #     source package-cache/variable.sh
-      #     source package-cache/scanner-env.sh
-      #     chmod +x ./gha-script/scanner-scripts/trivy_image_scan.sh
-      #     bash ./gha-script/scanner-scripts/trivy_image_scan.sh
-      #     mkdir image_trivy
-      #     mv trivy_image_vulnerabilities_results.json trivy_image_sbom_results.cyclonedx image_trivy
+      - name: Run Trivy Image Scan
+        if: ${{ inputs.enable_trivy == 'true' }}
+        run: |
+          echo ".................Sourcing variable.sh and scanner-env.sh...................."
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
+          chmod +x ./gha-script/scanner-scripts/trivy_image_scan.sh
+          bash ./gha-script/scanner-scripts/trivy_image_scan.sh
+          mkdir image_trivy
+          mv trivy_image_vulnerabilities_results.json trivy_image_sbom_results.cyclonedx image_trivy
 
       # - name: Run Syft Image Scan
       #   if: ${{ inputs.enable_syft == 'true' }}
