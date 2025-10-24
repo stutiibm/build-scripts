@@ -361,14 +361,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-
-      # - name: Load Docker Image
-      #   run: |
-      #     echo "Sourcing variable.sh ..........................................."
-      #     source package-cache/variable.sh
-      #     source package-cache/scanner-env.sh
-      #     echo ".......................Loading iamge.tar ............................"
-      #     docker load -i "package-cache/image.tar"
+      - name: Load Docker Image
+        run: |
+          echo "Sourcing variable.sh ..........................................."
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
+          chmod +x ./gha-script/download-scripts/download_docker_image.sh
+          echo ".......................Loading iamge.tar ............................"
+          ls
+          echo "---------------------------------------------------------------------"
+          pwd
+          echo "---------------------------------------------------------------------"
 
       # - name: Run Trivy Image Scan
       #   if: ${{ inputs.enable_trivy == 'true' }}
