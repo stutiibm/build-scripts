@@ -22,6 +22,8 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+
+SAVE_AS_TAR = "true"
 # Save image as tar file
 if [ "$SAVE_AS_TAR" = "true" ]; then
     tar_name="${package_name}_${VERSION}_ppc64le.tar"
