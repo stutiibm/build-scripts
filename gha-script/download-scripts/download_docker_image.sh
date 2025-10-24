@@ -23,14 +23,19 @@ if [ $? -ne 0 ]; then
 fi
 
 
-SAVE_AS_TAR = "true"
-# Save image as tar file
-if [ "$SAVE_AS_TAR" = "true" ]; then
-    tar_name="${package_name}_${VERSION}_ppc64le.tar"
-    echo "Saving image as tar file: $tar_name"
-    docker save -o "$tar_name" "$image_path"
-    echo "Image saved successfully: $tar_name"
-fi
+
+# # Save image as tar file
+# if [ "$SAVE_AS_TAR" = "true" ]; then
+#     tar_name="${package_name}_${VERSION}_ppc64le.tar"
+#     echo "Saving image as tar file: $tar_name"
+#     docker save -o "$tar_name" "$image_path"
+#     echo "Image saved successfully: $tar_name"
+# fi
+
+tar_name="${package_name}_${VERSION}_ppc64le.tar"
+echo "Saving image as tar file: $tar_name"
+docker save -o "$tar_name" "$image_path"
+echo "Image saved successfully: $tar_name"
 
 echo "Verifying if image exists locally..."
 docker images --format '{{.Repository}}:{{.Tag}}' | grep -q "^${image_path}$" || {
