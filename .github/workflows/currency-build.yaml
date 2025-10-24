@@ -373,6 +373,7 @@ jobs:
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
           chmod +x ./gha-script/download-scripts/download_docker_image.sh
+          bash ./gha-script/download-scripts/download_docker_image.sh
           echo ".......................Loading iamge.tar ............................"
           ls
           echo "---------------------------------------------------------------------"
