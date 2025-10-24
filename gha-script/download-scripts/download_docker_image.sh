@@ -33,15 +33,15 @@ fi
 echo "Verifying if image exists locally..."
 docker images
 echo "---------------------------------------------------------"
-    # docker images | grep "${package_name}" || {
-    #   echo "Image not found locally. Download failed or image not loaded."
-    #   exit 1
-    # }
+    docker images | grep "${package_name}" || {
+      echo "Image not found locally. Download failed or image not loaded."
+      exit 1
+    }
 
-    # echo "Image verified locally: ${image_name}"
-    # docker inspect "${image_name}" >/dev/null 2>&1 || {
-    #   echo "Docker inspect failed. Image may be corrupted."
-    #   exit 1
-    # }
+    echo "Image verified locally: ${image_name}"
+    docker inspect "${image_name}" >/dev/null 2>&1 || {
+      echo "Docker inspect failed. Image may be corrupted."
+      exit 1
+    }
 
 echo "Image download completed successfully!"
