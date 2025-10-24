@@ -284,7 +284,20 @@ jobs:
           source package-cache/scanner-env.sh
           mkdir -p package-cache/wheels
           echo "Copying wheels starting with package name: $PACKAGE_NAME"
-          find all-wheels -type f -name "${PACKAGE_NAME}*.whl" -exec cp {} package-cache/wheels/ \;
+          # Convert PACKAGE_NAME to lowercase and store in a new variable
+          PACKAGE_NAME=$(echo "$PACKAGE_NAME" | tr '[:lower:]' '[:upper:]')
+          echo "==============================================================================="
+          echo "PACKAGE_NAME = $PACKAGE_NAME"
+          echo "PACKAGE_NAME_LC = $PACKAGE_NAME_LC"
+          echo "==============================================================================="
+          PACKAGE_NAME_LC=$(echo "$PACKAGE_NAME" | tr '[:upper:]' '[:lower:]')
+          echo "==============================================================================="
+          echo "PACKAGE_NAME = $PACKAGE_NAME"
+          echo "PACKAGE_NAME_LC = $PACKAGE_NAME_LC"
+          echo "==============================================================================="
+          # Use the lowercase variable in your find command
+          find all-wheels -type f -name "${PACKAGE_NAME_LC}*.whl" -exec cp {} package-cache/wheels/ \;
+          #find all-wheels -type f -name "${PACKAGE_NAME}*.whl" -exec cp {} package-cache/wheels/ \;
 
           echo "Final wheel contents for package: $PACKAGE_NAME"
           ls -lh package-cache/wheels
