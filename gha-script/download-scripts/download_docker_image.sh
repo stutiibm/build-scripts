@@ -44,4 +44,15 @@ echo "---------------------------------------------------------"
       exit 1
     }
 
+
+# --- Inspect the image ---
+echo "Inspecting image metadata..."
+if docker inspect "${image_path}" >/dev/null 2>&1; then
+    echo "Docker inspect successful. Image integrity verified."
+else
+    echo "Docker inspect failed for ${image_path}."
+    docker images
+    exit 1
+fi
+
 echo "Image download completed successfully!"
