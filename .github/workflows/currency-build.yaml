@@ -102,6 +102,8 @@ jobs:
         with:
           name: package-cache
           path: package-cache
+        env:
+            ACTIONS_ARTIFACT_UPLOAD_CONCURRENCY: 10
                 
 
   build:
@@ -165,6 +167,8 @@ jobs:
         with:
           name: updated-package-cache
           path: package-cache
+        env:
+            ACTIONS_ARTIFACT_UPLOAD_CONCURRENCY: 10
 
   wheel_build:
     needs: build_info
@@ -405,6 +409,8 @@ jobs:
         with:
           name: package-cache-with-image
           path: package-cache
+        env:
+            ACTIONS_ARTIFACT_UPLOAD_CONCURRENCY: 10
 
   image_scanner:
     needs: build_docker
