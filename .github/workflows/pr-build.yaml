@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - replica-master
+      - container_spawnning_image
 
 jobs:
   validate:
