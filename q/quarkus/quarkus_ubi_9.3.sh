@@ -4,7 +4,7 @@
 # Package	: quarkus
 # Version	: 3.26.3
 # Source repo	: https://github.com/quarkusio/quarkus
-# Tested on	: UBI:9.6
+# Tested on	: UBI:9.3
 # Language      : java
 # Ci-Check     : True
 # Script License: Apache License, Version 2 or later
@@ -28,6 +28,7 @@ echo "Installing dependencies..."
 yum install -y git wget unzip maven java-21-openjdk java-21-openjdk-devel
 
 # Set up Java environment
+
 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
 export PATH=$JAVA_HOME/bin:$PATH
  
