@@ -27,8 +27,23 @@ jobs:
       # - name: Set PR number
       #   run: echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
 
-      - name: Set PR number
-        run: echo "PR_NUMBER=${{ github.event.number }}" >> $GITHUB_ENV
+      - name: Set PR number (fork-safe)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            PR_NUMBER=$(curl -s \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${{ github.repository }}/pulls?head=${{ github.repository_owner }}:${{ github.head_ref }}" \
+              | jq -r '.[0].number')
+
+            echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+            echo "Detected PR number: $PR_NUMBER"
+          else
+            echo "PR_NUMBER=false" >> $GITHUB_ENV
+          fi
+
 
 
       - name: Run validate_builds.py script with live logs
