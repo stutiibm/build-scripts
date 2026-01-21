@@ -1,9 +1,9 @@
-name: Auto-close stale PRs
+name: Auto-close stale PRs (minute test)
 
 on:
-  schedule:
-    - cron: "0 2 * * *"   # Runs daily (UTC)
   workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * *" # every minute (only works in upstream repo)
 
 permissions:
   pull-requests: write
@@ -13,55 +13,81 @@ jobs:
   manage-prs:
     runs-on: ubuntu-latest
     steps:
-      - name: Check PR age
+      - name: Manage stale PRs (minute test)
         uses: actions/github-script@v7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            console.log("===== PR AUTO-CLOSE TEST (MINUTES) START =====");
+
             const owner = context.repo.owner;
             const repo = context.repo.repo;
+            console.log(`Repository: ${owner}/${repo}`);
 
             const prs = await github.paginate(
               github.rest.pulls.list,
-              { owner, repo, state: "open", per_page: 100 }
+              {
+                owner,
+                repo,
+                state: "open",
+                per_page: 100
+              }
             );
+
+            console.log(`Total open PRs found: ${prs.length}`);
+
+            if (prs.length === 0) {
+              console.log("No open PRs. Exiting.");
+              return;
+            }
 
             const now = new Date();
 
+            let reminder3 = 0;
+            let reminder4 = 0;
+            let closed = 0;
+
             for (const pr of prs) {
+              // Skip draft PRs
+              if (pr.draft) continue;
+
               const createdAt = new Date(pr.created_at);
-              const ageDays = Math.floor(
-                (now - createdAt) / (1000 * 60 * 60 * 24)
+              const ageMinutes = Math.floor(
+                (now - createdAt) / (1000 * 60)
               );
 
               const author = pr.user.login;
               const assignees = pr.assignees.map(a => `@${a.login}`).join(" ");
-              const mentions = [`@${author}`, assignees].join(" ");
+              const mentions = [`@${author}`, assignees].join(" ").trim();
 
-              if (ageDays === 3) {
+              if (ageMinutes === 3) {
                 await github.rest.issues.createComment({
                   owner,
                   repo,
                   issue_number: pr.number,
-                  body: `${mentions}\n **Reminder:** Your PR can remain open for **2 more days**. Please take action.`
+                  body: `${mentions}\n⏰ **Reminder:** Your PR can remain open for **2 more minutes**. Please take action.`
                 });
+                reminder3++;
               }
 
-              if (ageDays === 4) {
+              if (ageMinutes === 4) {
                 await github.rest.issues.createComment({
                   owner,
                   repo,
                   issue_number: pr.number,
-                  body: `${mentions}\n **Reminder:** Your PR can remain open for **1 more day**.`
+                  body: `${mentions}\n⚠️ **Reminder:** Your PR can remain open for **1 more minute**.`
                 });
+                reminder4++;
               }
 
-              if (ageDays >= 5) {
+              if (ageMinutes >= 5) {
                 await github.rest.issues.createComment({
                   owner,
                   repo,
                   issue_number: pr.number,
-                  body: `${mentions}\n **Closing PR:** This PR has been open for more than **5 days** without activity. Closing automatically.`
+                  body: `${mentions}\n🚫 **Closing PR:** This PR has been open for more than **5 minutes** without activity. Closing automatically.`
                 });
 
                 await github.rest.pulls.update({
@@ -70,5 +96,12 @@ jobs:
                   pull_number: pr.number,
                   state: "closed"
                 });
+                closed++;
               }
             }
+
+            console.log("===== SUMMARY =====");
+            console.log(`Reminders sent (2 min left): ${reminder3}`);
+            console.log(`Reminders sent (1 min left): ${reminder4}`);
+            console.log(`PRs closed: ${closed}`);
+            console.log("===== PR AUTO-CLOSE TEST END =====");
