@@ -1,9 +1,7 @@
-name: Auto-close inactive PRs (fork test - minutes)
+name: Auto-close inactive PRs (Fork – Minutes)
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "*/1 * * * *"   # Every 1 minute (safe for fork testing)
 
 permissions:
   pull-requests: write
@@ -14,10 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Auto-close inactive PRs (minutes-based)
+      - name: Auto-close inactive PRs (minutes mode)
         uses: actions/github-script@v7
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -28,12 +24,7 @@ jobs:
 
             const prs = await github.paginate(
               github.rest.pulls.list,
-              {
-                owner,
-                repo,
-                state: "open",
-                per_page: 100
-              }
+              { owner, repo, state: "open", per_page: 100 }
             );
 
             console.log(`Total open PRs: ${prs.length}`);
@@ -49,12 +40,7 @@ jobs:
 
               const comments = await github.paginate(
                 github.rest.issues.listComments,
-                {
-                  owner,
-                  repo,
-                  issue_number: pr.number,
-                  per_page: 100
-                }
+                { owner, repo, issue_number: pr.number, per_page: 100 }
               );
 
               const lastActivityDate =
@@ -62,16 +48,15 @@ jobs:
                   ? new Date(comments[comments.length - 1].created_at)
                   : new Date(pr.created_at);
 
-              // ⏱️ Inactivity in MINUTES
               const inactivityMinutes = Math.floor(
                 (now - lastActivityDate) / (1000 * 60)
               );
 
               const reminder1Exists = comments.some(c =>
-                c.body.includes("Reminder 1")
+                c.body.includes("**Reminder 1**")
               );
               const reminder2Exists = comments.some(c =>
-                c.body.includes("Reminder 2")
+                c.body.includes("**Reminder 2**")
               );
               const closeExists = comments.some(c =>
                 c.body.includes("Closing this PR due to inactivity")
@@ -82,54 +67,65 @@ jobs:
                 ...pr.assignees.map(a => `@${a.login}`)
               ].join(" ");
 
-              // 🔔 Reminder after 3 minutes
-              if (inactivityMinutes === 3 && !reminder1Exists) {
+              // Reminder 1: 3–4 minutes
+              if (
+                inactivityMinutes >= 3 &&
+                inactivityMinutes < 4 &&
+                !reminder1Exists
+              ) {
                 await github.rest.issues.createComment({
                   owner,
                   repo,
                   issue_number: pr.number,
                   body: `${mentions}
 
-                  **Reminder 1**
+            ⏰ **Reminder 1**
 
-                  This PR has had **no activity for 3 minutes**.
-                  Please respond to keep it open.`
+            This PR has had **no activity for 3 minutes**.
+            Please respond to keep it open.`
                 });
 
-                console.log(`Reminder 1 sent to PR #${pr.number}`);
                 reminder3Count++;
+                console.log(`Reminder 1 sent to PR #${pr.number}`);
               }
 
-              // 🔔 Reminder after 4 minutes
-              else if (inactivityMinutes === 4 && !reminder2Exists) {
+              // Reminder 2: 4–5 minutes
+              else if (
+                inactivityMinutes >= 4 &&
+                inactivityMinutes < 5 &&
+                !reminder2Exists
+              ) {
                 await github.rest.issues.createComment({
                   owner,
                   repo,
                   issue_number: pr.number,
                   body: `${mentions}
 
-                  **Reminder 2**
+            ⚠️ **Reminder 2**
 
-                  This PR has had **no activity for 4 minutes**.
-                  It will be closed if inactivity continues.`
+            This PR has had **no activity for 4 minutes**.
+            It will be closed if inactivity continues.`
                 });
 
-                console.log(`Reminder 2 sent to PR #${pr.number}`);
                 reminder4Count++;
+                console.log(`Reminder 2 sent to PR #${pr.number}`);
               }
 
-              // ❌ Close after 5+ minutes
-              else if (inactivityMinutes >= 5 && !closeExists) {
+              // Close: ≥5 minutes
+              else if (
+                inactivityMinutes >= 5 &&
+                !closeExists
+              ) {
                 await github.rest.issues.createComment({
                   owner,
                   repo,
                   issue_number: pr.number,
                   body: `${mentions}
 
-                  **Closing this PR due to inactivity**
+            ❌ **Closing this PR due to inactivity**
 
-                  No activity for **5 minutes**.
-                  Please reopen if you wish to continue.`
+            No activity for **5 minutes**.
+            Please reopen if you wish to continue.`
                 });
 
                 await github.rest.pulls.update({
@@ -139,8 +135,8 @@ jobs:
                   state: "closed"
                 });
 
-                console.log(`Closed PR #${pr.number}`);
                 closedCount++;
+                console.log(`Closed PR #${pr.number}`);
               }
             }
 
@@ -149,3 +145,4 @@ jobs:
             console.log(`Reminder 2 sent: ${reminder4Count}`);
             console.log(`PRs closed     : ${closedCount}`);
             console.log("===== PR INACTIVITY CHECK END =====");
+:
