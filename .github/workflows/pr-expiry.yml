@@ -145,4 +145,3 @@ jobs:
             console.log(`Reminder 2 sent: ${reminder4Count}`);
             console.log(`PRs closed     : ${closedCount}`);
             console.log("===== PR INACTIVITY CHECK END =====");
-:
