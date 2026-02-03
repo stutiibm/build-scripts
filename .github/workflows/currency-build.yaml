@@ -226,6 +226,15 @@ jobs:
           sudo apt update -y
           sudo lsb_release -a 2>/dev/null || echo "lsb_release not available"
           sudo uname -a
+
+
+          echo "===== Checking files before log compression ====="
+          pwd
+          ls -lh
+          
+          echo "----- specifically checking for wheel_build_log -----"
+          ls -lh wheel_build_log || echo "⚠️ wheel_build_log NOT found in current directory"
+
           
           gzip wheel_build_log
           LOG_NAME="${PACKAGE_NAME}_${VERSION}_wheel_py${{ matrix.python-version }}_log.gz"
