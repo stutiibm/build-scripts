@@ -227,6 +227,16 @@ jobs:
           sudo lsb_release -a 2>/dev/null || echo "lsb_release not available"
           sudo uname -a
           
+          gzip wheel_build_log
+          LOG_NAME="${PKG_NAME}_${VERSION}_wheel_py${{ matrix.python-version }}_log.gz"
+          mv wheel_build_log.gz "$LOG_NAME"
+          
+          mv wheel_build_log.gz wheel_build_log_py${{ matrix.python-version }}.gz
+          
+          # Upload to COS with unique name
+          chmod +x ./gha-script/upload-scripts/upload_file.sh
+          bash ./gha-script/upload-scripts/upload_file.sh wheel_build_log_py${{ matrix.python-version }}.gz
+          
         continue-on-error: ${{ matrix.allow-failure }}
 
 
