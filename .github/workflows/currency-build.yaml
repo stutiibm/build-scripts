@@ -228,7 +228,7 @@ jobs:
           sudo uname -a
           
           gzip wheel_build_log
-          LOG_NAME="${PKG_NAME}_${VERSION}_wheel_py${{ matrix.python-version }}_log.gz"
+          LOG_NAME="${PACKAGE_NAME}_${VERSION}_wheel_py${{ matrix.python-version }}_log.gz"
           mv wheel_build_log.gz "$LOG_NAME"
           
           mv wheel_build_log.gz wheel_build_log_py${{ matrix.python-version }}.gz
