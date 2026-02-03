@@ -220,9 +220,14 @@ jobs:
           source package-cache/scanner-env.sh
           
           #python${{ matrix.python-version }} -m pip install --upgrade pip setuptools wheel
+          echo "===== Checking files before log compression ====="
+          pwd
+          ls -lh
+          echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 
           chmod +x ./gha-script/build_wheels.sh
           bash ./gha-script/build_wheels.sh
+          echo "===========after execution =================="
           sudo apt update -y
           sudo lsb_release -a 2>/dev/null || echo "lsb_release not available"
           sudo uname -a
@@ -233,18 +238,18 @@ jobs:
           ls -lh
           
           echo "----- specifically checking for wheel_build_log -----"
-          ls -lh wheel_build_log || echo "⚠️ wheel_build_log NOT found in current directory"
+          ls -lh wheel_build_log || echo "wheel_build_log NOT found in current directory"
 
           
-          gzip wheel_build_log
-          LOG_NAME="${PACKAGE_NAME}_${VERSION}_wheel_py${{ matrix.python-version }}_log.gz"
-          mv wheel_build_log.gz "$LOG_NAME"
+          # gzip wheel_build_log
+          # LOG_NAME="${PACKAGE_NAME}_${VERSION}_wheel_py${{ matrix.python-version }}_log.gz"
+          # mv wheel_build_log.gz "$LOG_NAME"
           
-          mv wheel_build_log.gz wheel_build_log_py${{ matrix.python-version }}.gz
+          # mv wheel_build_log.gz wheel_build_log_py${{ matrix.python-version }}.gz
           
-          # Upload to COS with unique name
-          chmod +x ./gha-script/upload-scripts/upload_file.sh
-          bash ./gha-script/upload-scripts/upload_file.sh "$LOG_NAME"
+          # # Upload to COS with unique name
+          # chmod +x ./gha-script/upload-scripts/upload_file.sh
+          # bash ./gha-script/upload-scripts/upload_file.sh "$LOG_NAME"
           
         continue-on-error: ${{ matrix.allow-failure }}
 
