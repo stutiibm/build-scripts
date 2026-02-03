@@ -235,7 +235,7 @@ jobs:
           
           # Upload to COS with unique name
           chmod +x ./gha-script/upload-scripts/upload_file.sh
-          bash ./gha-script/upload-scripts/upload_file.sh wheel_build_log_py${{ matrix.python-version }}.gz
+          bash ./gha-script/upload-scripts/upload_file.sh "$LOG_NAME"
           
         continue-on-error: ${{ matrix.allow-failure }}
 
