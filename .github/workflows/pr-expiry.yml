@@ -1,0 +1,74 @@
+name: Auto-close stale PRs
+
+on:
+  schedule:
+    - cron: "0 2 * * *"   # Runs daily (UTC)
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  manage-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR age
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const prs = await github.paginate(
+              github.rest.pulls.list,
+              { owner, repo, state: "open", per_page: 100 }
+            );
+
+            const now = new Date();
+
+            for (const pr of prs) {
+              const createdAt = new Date(pr.created_at);
+              const ageDays = Math.floor(
+                (now - createdAt) / (1000 * 60 * 60 * 24)
+              );
+
+              const author = pr.user.login;
+              const assignees = pr.assignees.map(a => `@${a.login}`).join(" ");
+              const mentions = [`@${author}`, assignees].join(" ");
+
+              if (ageDays === 3) {
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: pr.number,
+                  body: `${mentions}\n **Reminder:** Your PR can remain open for **2 more days**. Please take action.`
+                });
+              }
+
+              if (ageDays === 4) {
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: pr.number,
+                  body: `${mentions}\n **Reminder:** Your PR can remain open for **1 more day**.`
+                });
+              }
+
+              if (ageDays >= 5) {
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: pr.number,
+                  body: `${mentions}\n **Closing PR:** This PR has been open for more than **5 days** without activity. Closing automatically.`
+                });
+
+                await github.rest.pulls.update({
+                  owner,
+                  repo,
+                  pull_number: pr.number,
+                  state: "closed"
+                });
+              }
+            }
