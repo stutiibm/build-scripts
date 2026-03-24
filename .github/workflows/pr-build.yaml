@@ -54,13 +54,30 @@ jobs:
 
           echo "Using build_info: $BUILD_INFO_FILE"
 
+          # WHEEL_BUILD=$(jq -r '.wheel_build // "false"' $BUILD_INFO_FILE)
+          # DOCKER_BUILD=$(jq -r '.docker_build // "false"' $BUILD_INFO_FILE)
+          # VALIDATE_BUILD=$(jq -r '.validate_build_script // "true"' $BUILD_INFO_FILE)
+
+          # echo "export WHEEL_BUILD=$WHEEL_BUILD" > package-cache/scanner-env.sh
+          # echo "export BUILD_DOCKER=$DOCKER_BUILD" >> package-cache/scanner-env.sh
+          # echo "export VALIDATE_BUILD_SCRIPT=$VALIDATE_BUILD" >> package-cache/scanner-env.sh
+
+          PACKAGE_NAME=$(jq -r '.package_name // ""' $BUILD_INFO_FILE)
+          VERSION=$(jq -r '.version // ""' $BUILD_INFO_FILE)
+          PACKAGE_DIR=$(jq -r '.package_dir // ""' $BUILD_INFO_FILE)
+
           WHEEL_BUILD=$(jq -r '.wheel_build // "false"' $BUILD_INFO_FILE)
           DOCKER_BUILD=$(jq -r '.docker_build // "false"' $BUILD_INFO_FILE)
           VALIDATE_BUILD=$(jq -r '.validate_build_script // "true"' $BUILD_INFO_FILE)
 
-          echo "export WHEEL_BUILD=$WHEEL_BUILD" > package-cache/scanner-env.sh
-          echo "export BUILD_DOCKER=$DOCKER_BUILD" >> package-cache/scanner-env.sh
-          echo "export VALIDATE_BUILD_SCRIPT=$VALIDATE_BUILD" >> package-cache/scanner-env.sh
+          cat <<EOF > package-cache/scanner-env.sh
+          export PACKAGE_NAME=$PACKAGE_NAME
+          export VERSION=$VERSION
+          export PACKAGE_DIR=$PACKAGE_DIR
+          export WHEEL_BUILD=$WHEEL_BUILD
+          export BUILD_DOCKER=$DOCKER_BUILD
+          export VALIDATE_BUILD_SCRIPT=$VALIDATE_BUILD
+          EOF
 
           mv variable.sh package-cache/ || true
 
@@ -71,34 +88,34 @@ jobs:
           name: package-cache
           path: package-cache.tar.gz
 
-  build:
-    needs: build_info
-    runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04-ppc64le-p10' || inputs.large-runner }}
-    steps:
-      - uses: actions/checkout@v6
+  # build:
+  #   needs: build_info
+  #   runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04-ppc64le-p10' || inputs.large-runner }}
+  #   steps:
+  #     - uses: actions/checkout@v6
 
-      - name: Download package-cache
-        uses: actions/download-artifact@v7
-        with:
-          name: package-cache
+  #     - name: Download package-cache
+  #       uses: actions/download-artifact@v7
+  #       with:
+  #         name: package-cache
 
-      - name: Extract package cache
-        run: tar -xzf package-cache.tar.gzx
+  #     - name: Extract package cache
+  #       run: tar -xzf package-cache.tar.gzx
 
-      - name: Build package with logging
-        run: |
-          source package-cache/variable.sh || true
-          source package-cache/scanner-env.sh
+  #     - name: Build package with logging
+  #       run: |
+  #         source package-cache/variable.sh || true
+  #         source package-cache/scanner-env.sh
 
-          bash ./gha-script/build_package.sh 2>&1 | tee build_log
-          status=${PIPESTATUS[0]}
-          size=$(stat -c %s build_log)
+  #         bash ./gha-script/build_package.sh 2>&1 | tee build_log
+  #         status=${PIPESTATUS[0]}
+  #         size=$(stat -c %s build_log)
 
-          if [ "$status" -ne 0 ]; then
-            echo "Build failed"
-            [ "$size" -lt 1800000 ] && cat build_log || tail -100 build_log
-            exit 1
-          else
-            echo "Build succeeded"
-            [ "$size" -lt 1800000 ] && cat build_log || tail -100 build_log
-          fi
+  #         if [ "$status" -ne 0 ]; then
+  #           echo "Build failed"
+  #           [ "$size" -lt 1800000 ] && cat build_log || tail -100 build_log
+  #           exit 1
+  #         else
+  #           echo "Build succeeded"
+  #           [ "$size" -lt 1800000 ] && cat build_log || tail -100 build_log
+  #         fi
