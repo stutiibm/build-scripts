@@ -31,8 +31,15 @@ jobs:
   build_info:
     runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04-ppc64le-p10' || inputs.large-runner }}
     steps:
-      - name: Checkout code
+      - name: Checkout code (Pull Request)
+        if: github.event_name == 'pull_request'
         uses: actions/checkout@v6
+
+      - name: Checkout code (Workflow Dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v6
+        with:
+          ref: refs/pull/${{ inputs.pr_number }}/head
 
       - name: Install system packages
         run: |
@@ -43,6 +50,10 @@ jobs:
         run: |
           pip3 install --force-reinstall -v "requests==2.31.0"
           pip3 install --upgrade docker
+		  
+	  - name: Set PR number
+        run: echo "PR_NUMBER=${{ github.event.pull_request.number || inputs.pr_number }}" >> $GITHUB_ENV
+
 
       - name: Locate and parse build_info.json
         run: |
