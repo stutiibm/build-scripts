@@ -27,55 +27,78 @@ run-name: >
       || github.event.pull_request.title }}
 
 jobs:
-  validate:
+  build_info:
     runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04-ppc64le-p10' || inputs.large-runner }}
-
     steps:
-      - name: Checkout code (Pull Request)
-        if: github.event_name == 'pull_request'
+      - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Checkout code (Workflow Dispatch)
-        if: github.event_name == 'workflow_dispatch'
-        uses: actions/checkout@v6
-        with:
-          ref: refs/pull/${{ inputs.pr_number }}/head
-
-      - name: Install required packages
+      - name: Install system packages
         run: |
           sudo apt update -y
-          sudo apt-get install -y file
+          sudo apt install -y jq file
 
       - name: Install Python dependencies
         run: |
           pip3 install --force-reinstall -v "requests==2.31.0"
           pip3 install --upgrade docker
 
-      - name: Set PR number
-        run: echo "PR_NUMBER=${{ github.event.pull_request.number || inputs.pr_number }}" >> $GITHUB_ENV
-
-      - name: Run validate_builds.py script with live logs
+      - name: Read build_info.json
         run: |
-          python3 -u gha-script/validate_builds.py ${PR_NUMBER:-false} 2>&1 | tee build_log
-          my_pid_status=${PIPESTATUS[0]}
+          chmod +x ./gha-script/read_buildinfo.sh
+          bash ./gha-script/read_buildinfo.sh || true
 
-          build_size=$(stat -c %s build_log)
+          mkdir -p package-cache
 
-          if [ "$my_pid_status" -ne 0 ]; then
-            echo "Script failed for PR #${PR_NUMBER}"
-            if [ "$build_size" -lt 1800000 ]; then
-              cat build_log
-            else
-              echo "Build log too large, showing last 100 lines"
-              tail -100 build_log
-            fi
+          BUILD_INFO_FILE=$(find . -name "build_info.json" | head -n 1)
+
+          echo "Using build_info: $BUILD_INFO_FILE"
+
+          WHEEL_BUILD=$(jq -r '.wheel_build // "false"' $BUILD_INFO_FILE)
+          DOCKER_BUILD=$(jq -r '.docker_build // "false"' $BUILD_INFO_FILE)
+          VALIDATE_BUILD=$(jq -r '.validate_build_script // "true"' $BUILD_INFO_FILE)
+
+          echo "export WHEEL_BUILD=$WHEEL_BUILD" > package-cache/scanner-env.sh
+          echo "export BUILD_DOCKER=$DOCKER_BUILD" >> package-cache/scanner-env.sh
+          echo "export VALIDATE_BUILD_SCRIPT=$VALIDATE_BUILD" >> package-cache/scanner-env.sh
+
+          mv variable.sh package-cache/ || true
+
+      - run: tar -czf package-cache.tar.gz package-cache/
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: package-cache
+          path: package-cache.tar.gz
+
+  build:
+    needs: build_info
+    runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04-ppc64le-p10' || inputs.large-runner }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download package-cache
+        uses: actions/download-artifact@v7
+        with:
+          name: package-cache
+
+      - name: Extract package cache
+        run: tar -xzf package-cache.tar.gzx
+
+      - name: Build package with logging
+        run: |
+          source package-cache/variable.sh || true
+          source package-cache/scanner-env.sh
+
+          bash ./gha-script/build_package.sh 2>&1 | tee build_log
+          status=${PIPESTATUS[0]}
+          size=$(stat -c %s build_log)
+
+          if [ "$status" -ne 0 ]; then
+            echo "Build failed"
+            [ "$size" -lt 1800000 ] && cat build_log || tail -100 build_log
             exit 1
           else
-            echo "Script completed successfully for PR #${PR_NUMBER}"
-            if [ "$build_size" -lt 1800000 ]; then
-              cat build_log
-            else
-              echo "Build log too large, showing last 100 lines"
-              tail -100 build_log
-            fi
+            echo "Build succeeded"
+            [ "$size" -lt 1800000 ] && cat build_log || tail -100 build_log
           fi
