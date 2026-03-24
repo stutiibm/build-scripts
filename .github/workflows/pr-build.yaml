@@ -50,8 +50,8 @@ jobs:
         run: |
           pip3 install --force-reinstall -v "requests==2.31.0"
           pip3 install --upgrade docker
-		  
-	  - name: Set PR number
+  
+      - name: Set PR number
         run: echo "PR_NUMBER=${{ github.event.pull_request.number || inputs.pr_number }}" >> $GITHUB_ENV
 
 
@@ -134,7 +134,7 @@ jobs:
   #         name: package-cache
 
   #     - name: Extract package cache
-  #       run: tar -xzf package-cache.tar.gzx
+  #       run: tar -xzf package-cache.tar.gz
 
   #     - name: Build package with logging
   #       run: |
