@@ -19,6 +19,7 @@
 # ---------------------------------------------------------------------------
 
 # Variables
+
 PACKAGE_NAME=multidict
 PACKAGE_VERSION=${1:-v6.0.2}
 PACKAGE_URL=https://github.com/aio-libs/multidict.git
