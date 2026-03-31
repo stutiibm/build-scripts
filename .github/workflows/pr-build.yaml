@@ -177,7 +177,7 @@ jobs:
 
   wheel_build_py39:
     needs: build_info
-    if: ${{ always() }}
+    if: ${{ success() }}
     runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04-ppc64le-p10' || inputs.large-runner }}
     continue-on-error: true
     env:
@@ -231,7 +231,7 @@ jobs:
 
   wheel_build_py310:
     needs: build_info
-    if: ${{ always() }}
+    if: ${{ success() }}
     runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04-ppc64le-p10' || inputs.large-runner }}
     continue-on-error: false
     env:
@@ -285,7 +285,7 @@ jobs:
 
   wheel_build_py311:
     needs: build_info
-    if: ${{ always() }}
+    if: ${{ success() }}
     runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04-ppc64le-p10' || inputs.large-runner }}
     continue-on-error: false
     env:
@@ -340,7 +340,7 @@ jobs:
 
   wheel_build_py312:
     needs: build_info
-    if: ${{ always() }}
+    if: ${{ success() }}
     runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04-ppc64le-p10' || inputs.large-runner }}
     continue-on-error: false
     env:
@@ -393,7 +393,7 @@ jobs:
 
   wheel_build_py313:
     needs: build_info
-    if: ${{ always() }}
+    if: ${{ success() }}
     runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04-ppc64le-p10' || inputs.large-runner }}
     continue-on-error: true
     env:
@@ -448,7 +448,7 @@ jobs:
 
   build_docker:
     needs: build_info
-    if: ${{ always() }}
+    if: ${{ success() }}
     runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04-ppc64le-p10' || inputs.large-runner }}
 
     steps:
