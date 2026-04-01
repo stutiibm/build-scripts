@@ -2,6 +2,7 @@ FROM registry.access.redhat.com/ubi9/ubi:9.3
 
 MAINTAINER "Mohit Pawar <Mohit.Pawar@ibm.com>"
 
+
 ENV HOME_DIR=${PWD}
 ARG PACKAGE_VERSION=v2.1.0
 
