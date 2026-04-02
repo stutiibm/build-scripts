@@ -225,6 +225,14 @@ jobs:
             exit 0
           fi
 
+          # Check if any .sh build script is modified in this package
+          BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
+
+          if [[ -z "$BUILD_SCRIPT_CHANGED" ]]; then
+            echo "Skipping wheel build as no .sh build script changes detected"
+            exit 0
+          fi
+
           chmod +x ./gha-script/build_wheels.sh
           bash ./gha-script/build_wheels.sh
 
