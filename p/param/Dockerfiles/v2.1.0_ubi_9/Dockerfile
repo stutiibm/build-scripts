@@ -16,4 +16,5 @@ RUN yum update -y && \
 	git checkout $PACKAGE_VERSION && \
 	python3 -m pip install build
 
+
 CMD ["/bin/bash"]
