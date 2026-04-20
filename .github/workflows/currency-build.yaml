@@ -1014,19 +1014,43 @@ jobs:
           chmod +x ./gha-script/upload-scripts/upload_file.sh
           bash ./gha-script/upload-scripts/upload_file.sh image_scanner.tar.gz
 
+
   final_summary:
       name: Final Summary Stage
-      needs: [build, source_scanner]
+      needs:
+        - build
+        - source_scanner
+        - wheel_build_py39
+        - wheel_build_py310
+        - wheel_build_py311
+        - wheel_build_py312 
+        - wheel_build_py313
+        - wheel_build_py314
+      if: |
+        always() &&
+        needs.build.result == 'success' &&
+        needs.source_scanner.result == 'success' &&
+        (
+          inputs.wheel_build != 'true' ||
+          (
+            (needs.wheel_build_py39.result == 'success' || needs.wheel_build_py39.result == 'skipped') &&
+            (needs.wheel_build_py310.result == 'success' || needs.wheel_build_py310.result == 'skipped') &&
+            (needs.wheel_build_py311.result == 'success' || needs.wheel_build_py311.result == 'skipped') &&
+            (needs.wheel_build_py312.result == 'success' || needs.wheel_build_py312.result == 'skipped') &&
+            (needs.wheel_build_py313.result == 'success' || needs.wheel_build_py313.result == 'skipped') &&
+            (needs.wheel_build_py314.result == 'success' || needs.wheel_build_py314.result == 'skipped')
+          )
+        )
       runs-on: ubuntu-24.04-ppc64le-p10
       steps:
         - name: Checkout code
           uses: actions/checkout@v6
-          
+      
         - name: Download package-cache
           uses: actions/download-artifact@v7
           with:
             name: package-cache
-            
+        
         - name: Extract package cache
           run: tar -xzf package-cache.tar.gz
         
@@ -1036,30 +1060,79 @@ jobs:
             source venv/bin/activate
             python -m pip install --upgrade pip
             pip install requests deprecated xlsxwriter packaging
-            
-            # Export environment variables
+         
             export PYTHONPATH=$(pwd):$(pwd)/process_bom/
-
+    
         - name: Summarize build results
-          env : 
+          env: 
             PACKAGE_NAME: ${{ inputs.package_name }}
             VERSION: ${{ inputs.version }}
             IAM_WRITER_API_KEY: ${{ secrets.IAM_WRITER_API_KEY }}
             SERVICE_INSTANCE_ID: ${{ secrets.SERVICE_INSTANCE_ID }}
           run: |
-                echo "Sourcing variable.sh and scanner-env.sh..........................................."
-                chmod +x package-cache/variable.sh
-                chmod +x package-cache/scanner-env.sh
-                source package-cache/variable.sh
-                source package-cache/scanner-env.sh
-                echo "===== variable.sh ====="
-                cat package-cache/variable.sh
-                echo "===== scanner-env.sh ====="
-                cat package-cache/scanner-env.sh
-                echo "-------------package name : ${PACKAGE_NAME}--------------------"
-                echo "-------------version : ${VERSION}--------------------"
-                pwd
-                chmod +x process_bom/*.py || true
-                # Export environment variables
-                export PYTHONPATH="/tmp/_actions-runner-working-dir/build-scripts/build-scripts:/tmp/_actions-runner-working-dir/build-scripts/build-scripts/process_bom"
-                python -m process_bom.run_currency_processor
+            echo "Sourcing variable.sh and scanner-env.sh..........................................."
+            chmod +x package-cache/variable.sh
+            chmod +x package-cache/scanner-env.sh
+            source package-cache/variable.sh
+            source package-cache/scanner-env.sh
+            echo "===== variable.sh ====="
+            cat package-cache/variable.sh
+            echo "===== scanner-env.sh ====="
+            cat package-cache/scanner-env.sh
+            echo "-------------package name : ${PACKAGE_NAME}--------------------"
+            echo "-------------version : ${VERSION}--------------------"
+            pwd
+            chmod +x process_bom/*.py || true
+            export PYTHONPATH="/tmp/_actions-runner-working-dir/build-scripts/build-scripts:/tmp/_actions-runner-working-dir/build-scripts/build-scripts/process_bom"
+            python -m process_bom.run_currency_processor
+
+  # final_summary:
+  #     name: Final Summary Stage
+      
+  #     needs: [build, source_scanner]
+  #     runs-on: ubuntu-24.04-ppc64le-p10
+  #     steps:
+  #       - name: Checkout code
+  #         uses: actions/checkout@v6
+          
+  #       - name: Download package-cache
+  #         uses: actions/download-artifact@v7
+  #         with:
+  #           name: package-cache
+            
+  #       - name: Extract package cache
+  #         run: tar -xzf package-cache.tar.gz
+        
+  #       - name: Create and activate venv
+  #         run: |
+  #           python -m venv venv
+  #           source venv/bin/activate
+  #           python -m pip install --upgrade pip
+  #           pip install requests deprecated xlsxwriter packaging
+            
+  #           # Export environment variables
+  #           export PYTHONPATH=$(pwd):$(pwd)/process_bom/
+
+  #       - name: Summarize build results
+  #         env : 
+  #           PACKAGE_NAME: ${{ inputs.package_name }}
+  #           VERSION: ${{ inputs.version }}
+  #           IAM_WRITER_API_KEY: ${{ secrets.IAM_WRITER_API_KEY }}
+  #           SERVICE_INSTANCE_ID: ${{ secrets.SERVICE_INSTANCE_ID }}
+  #         run: |
+  #               echo "Sourcing variable.sh and scanner-env.sh..........................................."
+  #               chmod +x package-cache/variable.sh
+  #               chmod +x package-cache/scanner-env.sh
+  #               source package-cache/variable.sh
+  #               source package-cache/scanner-env.sh
+  #               echo "===== variable.sh ====="
+  #               cat package-cache/variable.sh
+  #               echo "===== scanner-env.sh ====="
+  #               cat package-cache/scanner-env.sh
+  #               echo "-------------package name : ${PACKAGE_NAME}--------------------"
+  #               echo "-------------version : ${VERSION}--------------------"
+  #               pwd
+  #               chmod +x process_bom/*.py || true
+  #               # Export environment variables
+  #               export PYTHONPATH="/tmp/_actions-runner-working-dir/build-scripts/build-scripts:/tmp/_actions-runner-working-dir/build-scripts/build-scripts/process_bom"
+  #               python -m process_bom.run_currency_processor
