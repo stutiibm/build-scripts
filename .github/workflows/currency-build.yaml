@@ -1026,21 +1026,26 @@ jobs:
         - wheel_build_py312 
         - wheel_build_py313
         - wheel_build_py314
+
       if: |
         always() &&
         needs.build.result == 'success' &&
-        needs.source_scanner.result == 'success' &&
-        (
-          inputs.wheel_build != 'true' ||
-          (
-            (needs.wheel_build_py39.result == 'success' || needs.wheel_build_py39.result == 'skipped') &&
-            (needs.wheel_build_py310.result == 'success' || needs.wheel_build_py310.result == 'skipped') &&
-            (needs.wheel_build_py311.result == 'success' || needs.wheel_build_py311.result == 'skipped') &&
-            (needs.wheel_build_py312.result == 'success' || needs.wheel_build_py312.result == 'skipped') &&
-            (needs.wheel_build_py313.result == 'success' || needs.wheel_build_py313.result == 'skipped') &&
-            (needs.wheel_build_py314.result == 'success' || needs.wheel_build_py314.result == 'skipped')
-          )
-        )
+        needs.source_scanner.result == 'success'
+      # if: |
+      #   always() &&
+      #   needs.build.result == 'success' &&
+      #   needs.source_scanner.result == 'success' &&
+      #   (
+      #     inputs.wheel_build != 'true' ||
+      #     (
+      #       (needs.wheel_build_py39.result == 'success' || needs.wheel_build_py39.result == 'skipped') &&
+      #       (needs.wheel_build_py310.result == 'success' || needs.wheel_build_py310.result == 'skipped') &&
+      #       (needs.wheel_build_py311.result == 'success' || needs.wheel_build_py311.result == 'skipped') &&
+      #       (needs.wheel_build_py312.result == 'success' || needs.wheel_build_py312.result == 'skipped') &&
+      #       (needs.wheel_build_py313.result == 'success' || needs.wheel_build_py313.result == 'skipped') &&
+      #       (needs.wheel_build_py314.result == 'success' || needs.wheel_build_py314.result == 'skipped')
+      #     )
+      #   )
       runs-on: ubuntu-24.04-ppc64le-p10
       steps:
         - name: Checkout code
