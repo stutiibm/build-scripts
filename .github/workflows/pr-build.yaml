@@ -28,7 +28,53 @@ run-name: >
 
 jobs:
 
+  check_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.filter.outputs.should_build }}
+      changed_files: ${{ steps.filter.outputs.changed_files }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check for relevant file changes
+        id: filter
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            echo "Workflow dispatch - proceeding with build"
+            exit 0
+          fi
+
+          git fetch origin ${{ github.base_ref }} --depth=1
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+          
+          # Store changed files for reuse in later jobs
+          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          # Check for build_info.json, .sh scripts, or Dockerfile
+          RELEVANT_CHANGES=$(echo "$CHANGED_FILES" | grep -E '(build_info\.json|\.sh$|Dockerfile)' || true)
+          
+          if [ -n "$RELEVANT_CHANGES" ]; then
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            echo "✅ Found relevant changes:"
+            echo "$RELEVANT_CHANGES"
+          else
+            echo "should_build=false" >> $GITHUB_OUTPUT
+            echo "⏭️ Skipping PR build CI check - no changes related to build_info.json, build scripts (.sh), or Dockerfile"
+          fi
+
+   
   build_info:
+    needs: check_changes
+    if: needs.check_changes.outputs.should_build == 'true'
     runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04-ppc64le-p10' || inputs.large-runner }}
 
     steps:
@@ -77,10 +123,50 @@ jobs:
       - name: Fetch base branch
         run: git fetch origin ${{ github.base_ref }} --depth=1
 
+      # - name: Locate and parse build_info.json
+      #   run: |
+
+      #     CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+
+      #     BUILD_INFO_FILE=$(echo "$CHANGED_FILES" | grep 'build_info.json' | head -n 1)
+
+      #     if [ -z "$BUILD_INFO_FILE" ]; then
+      #         echo "No build_info.json modified, trying to detect from changed files..."
+
+      #         PACKAGE_DIR=$(echo "$CHANGED_FILES" | head -n 1 | cut -d'/' -f1-2)
+
+      #         BUILD_INFO_FILE="$PACKAGE_DIR/build_info.json"
+
+      #         if [ ! -f "$BUILD_INFO_FILE" ]; then
+      #             echo "Could not locate build_info.json!"
+      #             exit 1
+      #         fi
+
+      #         echo "Using fallback build_info: $BUILD_INFO_FILE"
+      #     fi
+
+      #     PACKAGE_NAME=$(jq -r '.package_name // ""' $BUILD_INFO_FILE)
+      #     VERSION=$(jq -r '.version // ""' $BUILD_INFO_FILE)
+
+      #     echo "BUILD_INFO_FILE=$BUILD_INFO_FILE" >> $GITHUB_ENV
+      #     echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
+      #     echo "VERSION=$VERSION" >> $GITHUB_ENV
+      #     echo "CHANGED_FILES<<EOF" >> $GITHUB_ENV
+      #     echo "$CHANGED_FILES" >> $GITHUB_ENV
+      #     echo "EOF" >> $GITHUB_ENV
+
+
+      
       - name: Locate and parse build_info.json
         run: |
-
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          # Reuse changed files from check_changes job
+          CHANGED_FILES="${{ needs.check_changes.outputs.changed_files }}"
+          
+          # If workflow_dispatch, fetch and compute changed files
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            git fetch origin ${{ github.base_ref }} --depth=1
+            CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          fi
 
           BUILD_INFO_FILE=$(echo "$CHANGED_FILES" | grep 'build_info.json' | head -n 1)
 
@@ -108,7 +194,6 @@ jobs:
           echo "CHANGED_FILES<<EOF" >> $GITHUB_ENV
           echo "$CHANGED_FILES" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-
 
       - name: Read build_info.json
         run: |
