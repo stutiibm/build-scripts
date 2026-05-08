@@ -40,6 +40,7 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Check for relevant file changes
         id: filter
@@ -50,7 +51,8 @@ jobs:
             exit 0
           fi
 
-          git fetch origin ${{ github.base_ref }} --depth=1
+          # Fetch base branch with full history
+          git fetch origin ${{ github.base_ref }}
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
           
           echo "Changed files:"
