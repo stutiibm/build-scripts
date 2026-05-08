@@ -2,6 +2,7 @@ import os
 import sys
 from process_bom.CurrencyProcessor import CurrencyProcessor
 
+
 def main():
     # Read arguments passed from command line or environment
     if len(sys.argv) >= 3:
