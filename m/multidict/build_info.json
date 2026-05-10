@@ -13,4 +13,5 @@
   "*": {
     "build_script": "multidict_ubi_9.3.sh"
   }
+  
 }
