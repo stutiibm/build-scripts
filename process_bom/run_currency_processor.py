@@ -21,5 +21,6 @@ def main():
     cp = CurrencyProcessor()
     cp.update_local_build_details_in_database(package_name, version)
 
+
 if __name__ == "__main__":
     main()
