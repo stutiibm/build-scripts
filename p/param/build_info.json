@@ -2,7 +2,7 @@
   "maintainer": "Anumala Rajesh",
   "package_name": "param",
   "github_url": "https://github.com/holoviz/param.git",
-  "version": "v2.1.0",
+  "version": "v2.2.0",
   "wheel_build" : true,
   "default_branch": "main",
   "package_dir": "p/param",
