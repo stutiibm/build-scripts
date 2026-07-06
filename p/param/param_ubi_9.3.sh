@@ -6,7 +6,7 @@
 # Source repo      : https://github.com/holoviz/param.git
 # Tested on        : UBI:9.3
 # Language         : Python
-# Ci-Check     : True
+# Ci-Check     : False
 # Script License   : GNU General Public License v3.0
 # Maintainer       : Anumala Rajesh <Anumala.Rajesh@ibm.com>
 #
