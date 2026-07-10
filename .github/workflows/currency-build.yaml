@@ -324,7 +324,7 @@ jobs:
           source package-cache/scanner-env.sh
 
           mkdir -p wheel_scancode_py310
-          find package-cache/wheels -type f -name "*_output.json" -exec cp {} wheel_scancode_py310/ \;
+          find package-cache/wheels -type f -name "*_output.json" ! -name "*_grype_output.json" -exec cp {} wheel_scancode_py310/ \;
           echo "Scancode outputs:"
           ls -lh wheel_scancode_py310
 
@@ -463,7 +463,7 @@ jobs:
           source package-cache/scanner-env.sh
 
           mkdir -p wheel_scancode_py311
-          find package-cache/wheels -type f -name "*_output.json" -exec cp {} wheel_scancode_py311/ \;
+          find package-cache/wheels -type f -name "*_output.json" ! -name "*_grype_output.json" -exec cp {} wheel_scancode_py311/ \;
           echo "Scancode outputs:"
           ls -lh wheel_scancode_py311
 
@@ -602,7 +602,7 @@ jobs:
           source package-cache/scanner-env.sh
 
           mkdir -p wheel_scancode_py312
-          find package-cache/wheels -type f -name "*_output.json" -exec cp {} wheel_scancode_py312/ \;
+          find package-cache/wheels -type f -name "*_output.json" ! -name "*_grype_output.json" -exec cp {} wheel_scancode_py312/ \;
           echo "Scancode outputs:"
           ls -lh wheel_scancode_py312
 
@@ -742,7 +742,7 @@ jobs:
           source package-cache/scanner-env.sh
 
           mkdir -p wheel_scancode_py313
-          find package-cache/wheels -type f -name "*_output.json" -exec cp {} wheel_scancode_py313/ \;
+          find package-cache/wheels -type f -name "*_output.json" ! -name "*_grype_output.json" -exec cp {} wheel_scancode_py313/ \;
           echo "Scancode outputs:"
           ls -lh wheel_scancode_py313
 
@@ -882,7 +882,7 @@ jobs:
           source package-cache/scanner-env.sh
 
           mkdir -p wheel_scancode_py314
-          find package-cache/wheels -type f -name "*_output.json" -exec cp {} wheel_scancode_py314/ \;
+          find package-cache/wheels -type f -name "*_output.json" ! -name "*_grype_output.json" -exec cp {} wheel_scancode_py314/ \;
           echo "Scancode outputs:"
           ls -lh wheel_scancode_py314
 
