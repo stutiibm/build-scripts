@@ -3,15 +3,17 @@
 validate_build_script=$VALIDATE_BUILD_SCRIPT
 cloned_package=$CLONED_PACKAGE
 
-# Use pre-installed scancode from the cached artifact
-# $SCANCODE_BIN is set by the workflow (points to scan-tools-venv/bin/scancode)
-if [ -z "$SCANCODE_BIN" ]; then
-  echo "Error: SCANCODE_BIN environment variable not set"
+# Use pre-installed grype from the cached artifact
+# $GRYPE_BIN is set by the workflow (points to scan-tools-bin/grype)
+if [ -z "$GRYPE_BIN" ]; then
+  echo "Error: GRYPE_BIN environment variable not set"
   exit 1
 fi
 
-echo "------------- Using cached scancode ---------------"
-$SCANCODE_BIN --version
+sudo apt update -y && sudo apt install -y jq
+
+echo "------------- Using cached grype ---------------"
+$GRYPE_BIN version
 
 echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
 ls 
@@ -23,7 +25,7 @@ for wheel in *.whl; do
   
   base_name="${wheel%.whl}"  # Strip .whl extension
   extract_dir="${base_name}_extract"
-  output_json="${base_name}_output.json"
+  output_json="${base_name}_grype_output.json"
 
   echo "base name : $base_name"
   echo "extract_dir : $extract_dir"
@@ -34,13 +36,13 @@ for wheel in *.whl; do
   echo "------------- unzipped wheel ------------------------------"
   ls
   
-  # Run scancode using the cached binary
+  # Run grype scanner using the cached binary
   echo "------------------------------------------------------------"
-  $SCANCODE_BIN --license --package --json-pp "$output_json" "$extract_dir"
+  $GRYPE_BIN "$extract_dir" -o json | jq . > "$output_json"
 
   # Cleanup extract dir to save space
   rm -rf "$extract_dir"
-  
+
   echo "------------------------- output files ---------------------"
   ls
   echo "------------------------------------------------------------"
