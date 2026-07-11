@@ -157,8 +157,10 @@ jobs:
 
       - name: Install grype
         run: |
-          GRYPE_VERSION=$(curl -s https://api.github.com/repos/anchore/grype/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
-          wget https://github.com/anchore/grype/releases/download/$GRYPE_VERSION/grype_${GRYPE_VERSION#v}_linux_ppc64le.tar.gz
+          sudo apt install -y jq
+          GRYPE_VERSION=$(curl -s --retry 3 https://api.github.com/repos/anchore/grype/releases/latest | jq -r '.tag_name')
+          echo "Installing grype $GRYPE_VERSION for ppc64le..."
+          wget --tries=3 https://github.com/anchore/grype/releases/download/$GRYPE_VERSION/grype_${GRYPE_VERSION#v}_linux_ppc64le.tar.gz
           tar -xzf grype_${GRYPE_VERSION#v}_linux_ppc64le.tar.gz
           mkdir -p scan-tools-bin
           mv grype scan-tools-bin/grype
@@ -342,7 +344,7 @@ jobs:
           source package-cache/scanner-env.sh
 
           mkdir -p wheel_scancode_py310
-          find package-cache/wheels -type f -name "*_output.json" ! -name "*_grype_output.json" -exec cp {} wheel_scancode_py310/ \;
+          find . -maxdepth 1 -type f -name "*_output.json" ! -name "*_grype_output.json" -exec cp {} wheel_scancode_py310/ \;
           echo "Scancode outputs:"
           ls -lh wheel_scancode_py310
 
@@ -351,7 +353,7 @@ jobs:
           bash ./gha-script/upload-scripts/upload_file.sh wheel_scancode_py310.tar.gz
 
           mkdir -p grype_wheel_py310
-          find package-cache/wheels -type f -name "*_grype_output.json" -exec cp {} grype_wheel_py310/ \;
+          find . -maxdepth 1 -type f -name "*_grype_output.json" -exec cp {} grype_wheel_py310/ \;
           echo "Grype outputs:"
           ls -lh grype_wheel_py310
 
@@ -481,7 +483,7 @@ jobs:
           source package-cache/scanner-env.sh
 
           mkdir -p wheel_scancode_py311
-          find package-cache/wheels -type f -name "*_output.json" ! -name "*_grype_output.json" -exec cp {} wheel_scancode_py311/ \;
+          find . -maxdepth 1 -type f -name "*_output.json" ! -name "*_grype_output.json" -exec cp {} wheel_scancode_py311/ \;
           echo "Scancode outputs:"
           ls -lh wheel_scancode_py311
 
@@ -490,7 +492,7 @@ jobs:
           bash ./gha-script/upload-scripts/upload_file.sh wheel_scancode_py311.tar.gz
 
           mkdir -p grype_wheel_py311
-          find package-cache/wheels -type f -name "*_grype_output.json" -exec cp {} grype_wheel_py311/ \;
+          find . -maxdepth 1 -type f -name "*_grype_output.json" -exec cp {} grype_wheel_py311/ \;
           echo "Grype outputs:"
           ls -lh grype_wheel_py311
 
@@ -620,7 +622,7 @@ jobs:
           source package-cache/scanner-env.sh
 
           mkdir -p wheel_scancode_py312
-          find package-cache/wheels -type f -name "*_output.json" ! -name "*_grype_output.json" -exec cp {} wheel_scancode_py312/ \;
+          find . -maxdepth 1 -type f -name "*_output.json" ! -name "*_grype_output.json" -exec cp {} wheel_scancode_py312/ \;
           echo "Scancode outputs:"
           ls -lh wheel_scancode_py312
 
@@ -629,7 +631,7 @@ jobs:
           bash ./gha-script/upload-scripts/upload_file.sh wheel_scancode_py312.tar.gz
 
           mkdir -p grype_wheel_py312
-          find package-cache/wheels -type f -name "*_grype_output.json" -exec cp {} grype_wheel_py312/ \;
+          find . -maxdepth 1 -type f -name "*_grype_output.json" -exec cp {} grype_wheel_py312/ \;
           echo "Grype outputs:"
           ls -lh grype_wheel_py312
 
@@ -760,7 +762,7 @@ jobs:
           source package-cache/scanner-env.sh
 
           mkdir -p wheel_scancode_py313
-          find package-cache/wheels -type f -name "*_output.json" ! -name "*_grype_output.json" -exec cp {} wheel_scancode_py313/ \;
+          find . -maxdepth 1 -type f -name "*_output.json" ! -name "*_grype_output.json" -exec cp {} wheel_scancode_py313/ \;
           echo "Scancode outputs:"
           ls -lh wheel_scancode_py313
 
@@ -769,7 +771,7 @@ jobs:
           bash ./gha-script/upload-scripts/upload_file.sh wheel_scancode_py313.tar.gz
 
           mkdir -p grype_wheel_py313
-          find package-cache/wheels -type f -name "*_grype_output.json" -exec cp {} grype_wheel_py313/ \;
+          find . -maxdepth 1 -type f -name "*_grype_output.json" -exec cp {} grype_wheel_py313/ \;
           echo "Grype outputs:"
           ls -lh grype_wheel_py313
 
@@ -900,7 +902,7 @@ jobs:
           source package-cache/scanner-env.sh
 
           mkdir -p wheel_scancode_py314
-          find package-cache/wheels -type f -name "*_output.json" ! -name "*_grype_output.json" -exec cp {} wheel_scancode_py314/ \;
+          find . -maxdepth 1 -type f -name "*_output.json" ! -name "*_grype_output.json" -exec cp {} wheel_scancode_py314/ \;
           echo "Scancode outputs:"
           ls -lh wheel_scancode_py314
 
@@ -909,7 +911,7 @@ jobs:
           bash ./gha-script/upload-scripts/upload_file.sh wheel_scancode_py314.tar.gz
 
           mkdir -p grype_wheel_py314
-          find package-cache/wheels -type f -name "*_grype_output.json" -exec cp {} grype_wheel_py314/ \;
+          find . -maxdepth 1 -type f -name "*_grype_output.json" -exec cp {} grype_wheel_py314/ \;
           echo "Grype outputs:"
           ls -lh grype_wheel_py314
 
