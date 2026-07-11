@@ -119,46 +119,20 @@ jobs:
           path: package-cache.tar.gz
 
   # ---------------------------------------------------------------------------
-  # install_scan_tools: Install scancode-toolkit and grype ONCE, cache the
-  # result as an artifact so every wheel_build_pyXXX job reuses it without
-  # re-installing from scratch on every runner.
+  # install_scan_tools: Installs grype ONCE (static Go binary — fully portable)
+  # and caches it as an artifact for all wheel_build_pyXXX jobs.
+  # Scancode-toolkit is installed fresh per wheel_build job using pip cache
+  # (Option 1) — pip downloads are cached so reinstall is fast.
   # ---------------------------------------------------------------------------
   install_scan_tools:
     needs: build_info
     if: ${{ inputs.wheel_build == 'true' }}
     runs-on: ubuntu-24.04-ppc64le-p10
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
       - name: Install system dependencies
         run: |
           sudo apt update -y
-          sudo apt install -y file git python3.12 python3-pip python3.12-dev \
-            build-essential unzip patch wget curl tar jq \
-            libffi-dev zlib1g-dev libssl-dev libxml2-dev libxslt1-dev libicu-dev pkg-config
-
-      - name: Install scancode-toolkit into system Python
-        run: |
-          git clone https://github.com/nexB/scancode-toolkit.git
-          cd scancode-toolkit
-          git checkout v32.4.0
-          python3.12 -m pip install --upgrade pip setuptools wheel typecode pyahocorasick
-          sed -i '/typecode\[full\] >= 30\.0\.1/s/^/    # /' setup.cfg
-          sed -i '/extractcode\[full\] >= 31\.0\.0/s/^/    # /' setup.cfg
-          sed -i '/typecode\[full\] >= 30\.0\.0/s/^/    # /' setup.cfg
-          python3.12 -m pip install -e .
-          python3.12 -m pip install click==8.0.4
-          echo "------------- scancode version ---------------"
-          scancode --version
-          cd ..
-          # Copy the scancode entry-point binary into scan-tools-bin
-          # It uses #!/usr/bin/env python3.12 shebang — works on any runner
-          # that has python3.12 installed (all our ppc64le runners do)
-          mkdir -p scan-tools-bin
-          cp $(which scancode) scan-tools-bin/scancode
-          chmod +x scan-tools-bin/scancode
-          echo "Copied scancode binary to scan-tools-bin/"
+          sudo apt install -y wget curl tar jq
 
       - name: Install grype
         run: |
@@ -172,7 +146,7 @@ jobs:
           echo "Grype version:"
           scan-tools-bin/grype version
 
-      - name: Archive scan tools
+      - name: Archive grype binary
         run: tar -czf scan-tools-cache.tar.gz scan-tools-bin/
 
       - name: Upload scan-tools-cache artifact
@@ -249,7 +223,9 @@ jobs:
   # ---------------------------------------------------------------------------
   # wheel_build_pyXXX jobs: build wheel → run scancode scan → run grype scan →
   # upload scan results to COS → upload wheel to COS (only if scans pass).
-  # Scancode-toolkit and grype are reused from the install_scan_tools artifact.
+  # Grype is reused from the install_scan_tools artifact (static binary).
+  # Scancode is installed fresh per job via git clone; pip download cache
+  # (actions/cache on ~/.cache/pip) makes reinstalls fast after the first run.
   # ---------------------------------------------------------------------------
 
   wheel_build_py310:
@@ -293,6 +269,12 @@ jobs:
           tar -xzf scan-tools-cache.tar.gz
           echo "$GITHUB_WORKSPACE/scan-tools-bin" >> $GITHUB_PATH
 
+      - name: Cache pip downloads for scancode-toolkit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: scancode-pip-ppc64le-v32.4.0
+
       - name: Run build_wheels.sh
         run: |
           ls
@@ -326,7 +308,6 @@ jobs:
         run: |
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
-          export SCANCODE_BIN="$GITHUB_WORKSPACE/scan-tools-bin/scancode"
           chmod +x ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           bash ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           echo "-------------------------scancode outputs-----------------------------------------"
@@ -418,6 +399,12 @@ jobs:
           tar -xzf scan-tools-cache.tar.gz
           echo "$GITHUB_WORKSPACE/scan-tools-bin" >> $GITHUB_PATH
 
+      - name: Cache pip downloads for scancode-toolkit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: scancode-pip-ppc64le-v32.4.0
+
       - name: Run build_wheels.sh
         run: |
           ls
@@ -465,7 +452,6 @@ jobs:
         run: |
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
-          export SCANCODE_BIN="$GITHUB_WORKSPACE/scan-tools-bin/scancode"
           chmod +x ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           bash ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           echo "-------------------------scancode outputs-----------------------------------------"
@@ -557,6 +543,12 @@ jobs:
           tar -xzf scan-tools-cache.tar.gz
           echo "$GITHUB_WORKSPACE/scan-tools-bin" >> $GITHUB_PATH
 
+      - name: Cache pip downloads for scancode-toolkit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: scancode-pip-ppc64le-v32.4.0
+
       - name: Run build_wheels.sh
         run: |
           ls
@@ -604,7 +596,6 @@ jobs:
         run: |
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
-          export SCANCODE_BIN="$GITHUB_WORKSPACE/scan-tools-bin/scancode"
           chmod +x ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           bash ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           echo "-------------------------scancode outputs-----------------------------------------"
@@ -697,6 +688,12 @@ jobs:
           tar -xzf scan-tools-cache.tar.gz
           echo "$GITHUB_WORKSPACE/scan-tools-bin" >> $GITHUB_PATH
 
+      - name: Cache pip downloads for scancode-toolkit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: scancode-pip-ppc64le-v32.4.0
+
       - name: Run build_wheels.sh
         run: |
           ls
@@ -744,7 +741,6 @@ jobs:
         run: |
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
-          export SCANCODE_BIN="$GITHUB_WORKSPACE/scan-tools-bin/scancode"
           chmod +x ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           bash ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           echo "-------------------------scancode outputs-----------------------------------------"
@@ -837,6 +833,12 @@ jobs:
           tar -xzf scan-tools-cache.tar.gz
           echo "$GITHUB_WORKSPACE/scan-tools-bin" >> $GITHUB_PATH
 
+      - name: Cache pip downloads for scancode-toolkit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: scancode-pip-ppc64le-v32.4.0
+
       - name: Run build_wheels.sh
         run: |
           ls
@@ -884,7 +886,6 @@ jobs:
         run: |
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
-          export SCANCODE_BIN="$GITHUB_WORKSPACE/scan-tools-bin/scancode"
           chmod +x ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           bash ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           echo "-------------------------scancode outputs-----------------------------------------"
