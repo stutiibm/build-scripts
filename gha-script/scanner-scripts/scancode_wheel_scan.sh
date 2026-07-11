@@ -13,36 +13,39 @@ fi
 echo "------------- Using cached scancode ---------------"
 $SCANCODE_BIN --version
 
-echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
-ls 
-echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
-cd package-cache/wheels
+# Wheels are built into the workspace root by build_wheels.sh
+WHEEL_DIR=$(pwd)
 
-for wheel in *.whl; do
+echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+echo "Looking for wheels in: $WHEEL_DIR"
+ls "$WHEEL_DIR"/*.whl 2>/dev/null || { echo "No .whl files found in $WHEEL_DIR"; exit 1; }
+echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+
+for wheel in "$WHEEL_DIR"/*.whl; do
   echo "Processing: $wheel"
-  
-  base_name="${wheel%.whl}"  # Strip .whl extension
-  extract_dir="${base_name}_extract"
-  output_json="${base_name}_output.json"
+
+  base_name=$(basename "${wheel%.whl}")
+  extract_dir="${WHEEL_DIR}/${base_name}_extract"
+  output_json="${WHEEL_DIR}/${base_name}_output.json"
 
   echo "base name : $base_name"
   echo "extract_dir : $extract_dir"
   echo "output_json : $output_json"
- 
+
   # Unzip the wheel
   unzip -q "$wheel" -d "$extract_dir"
   echo "------------- unzipped wheel ------------------------------"
-  ls
-  
+  ls "$WHEEL_DIR"
+
   # Run scancode using the cached binary
   echo "------------------------------------------------------------"
   $SCANCODE_BIN --license --package --json-pp "$output_json" "$extract_dir"
 
   # Cleanup extract dir to save space
   rm -rf "$extract_dir"
-  
+
   echo "------------------------- output files ---------------------"
-  ls
+  ls "$WHEEL_DIR"
   echo "------------------------------------------------------------"
   echo "Finished: $wheel"
 done
