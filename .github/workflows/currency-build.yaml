@@ -134,17 +134,35 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt update -y
-          sudo apt install -y python3-venv python3-pip curl
+          sudo apt install -y file git python3.12 python3.12-venv python3-pip python3.12-dev \
+            build-essential unzip patch wget curl tar \
+            libffi-dev zlib1g-dev libssl-dev libxml2-dev libxslt1-dev libicu-dev pkg-config
 
       - name: Install scancode-toolkit into venv
         run: |
-          python3 -m venv scan-tools-venv
-          scan-tools-venv/bin/pip install --upgrade pip
-          scan-tools-venv/bin/pip install scancode-toolkit
+          git clone https://github.com/nexB/scancode-toolkit.git
+          cd scancode-toolkit
+          git checkout v32.4.0
+          python3.12 -m venv venv
+          venv/bin/pip install --upgrade pip setuptools wheel typecode pyahocorasick
+          sed -i '/typecode\[full\] >= 30\.0\.1/s/^/    # /' setup.cfg
+          sed -i '/extractcode\[full\] >= 31\.0\.0/s/^/    # /' setup.cfg
+          sed -i '/typecode\[full\] >= 30\.0\.0/s/^/    # /' setup.cfg
+          venv/bin/pip install -e .
+          venv/bin/pip install click==8.0.4
+          echo "------------- scancode version ---------------"
+          venv/bin/scancode --version
+          cd ..
+          mv scancode-toolkit/venv scan-tools-venv
 
       - name: Install grype
         run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b scan-tools-bin
+          GRYPE_VERSION=$(curl -s https://api.github.com/repos/anchore/grype/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+          wget https://github.com/anchore/grype/releases/download/$GRYPE_VERSION/grype_${GRYPE_VERSION#v}_linux_ppc64le.tar.gz
+          tar -xzf grype_${GRYPE_VERSION#v}_linux_ppc64le.tar.gz
+          mkdir -p scan-tools-bin
+          mv grype scan-tools-bin/grype
+          chmod +x scan-tools-bin/grype
           echo "Grype version:"
           scan-tools-bin/grype version
 
@@ -918,7 +936,7 @@ jobs:
   # produce a comma-separated list of SPDX license identifiers.
   # ---------------------------------------------------------------------------
   wheel_license_extract:
-    if: ${{ always() && inputs.wheel_build == 'true' }}
+    if: ${{ inputs.wheel_build == 'true' && (needs.wheel_build_py310.result == 'success' || needs.wheel_build_py311.result == 'success' || needs.wheel_build_py312.result == 'success' || needs.wheel_build_py313.result == 'success' || needs.wheel_build_py314.result == 'success') }}
     needs:
       - wheel_build_py310
       - wheel_build_py311
