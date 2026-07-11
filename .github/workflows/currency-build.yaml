@@ -134,30 +134,34 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt update -y
-          sudo apt install -y file git python3.12 python3.12-venv python3-pip python3.12-dev \
-            build-essential unzip patch wget curl tar \
+          sudo apt install -y file git python3.12 python3-pip python3.12-dev \
+            build-essential unzip patch wget curl tar jq \
             libffi-dev zlib1g-dev libssl-dev libxml2-dev libxslt1-dev libicu-dev pkg-config
 
-      - name: Install scancode-toolkit into venv
+      - name: Install scancode-toolkit into system Python
         run: |
           git clone https://github.com/nexB/scancode-toolkit.git
           cd scancode-toolkit
           git checkout v32.4.0
-          python3.12 -m venv venv
-          venv/bin/pip install --upgrade pip setuptools wheel typecode pyahocorasick
+          python3.12 -m pip install --upgrade pip setuptools wheel typecode pyahocorasick
           sed -i '/typecode\[full\] >= 30\.0\.1/s/^/    # /' setup.cfg
           sed -i '/extractcode\[full\] >= 31\.0\.0/s/^/    # /' setup.cfg
           sed -i '/typecode\[full\] >= 30\.0\.0/s/^/    # /' setup.cfg
-          venv/bin/pip install -e .
-          venv/bin/pip install click==8.0.4
+          python3.12 -m pip install -e .
+          python3.12 -m pip install click==8.0.4
           echo "------------- scancode version ---------------"
-          venv/bin/scancode --version
+          scancode --version
           cd ..
-          mv scancode-toolkit/venv scan-tools-venv
+          # Copy the scancode entry-point binary into scan-tools-bin
+          # It uses #!/usr/bin/env python3.12 shebang — works on any runner
+          # that has python3.12 installed (all our ppc64le runners do)
+          mkdir -p scan-tools-bin
+          cp $(which scancode) scan-tools-bin/scancode
+          chmod +x scan-tools-bin/scancode
+          echo "Copied scancode binary to scan-tools-bin/"
 
       - name: Install grype
         run: |
-          sudo apt install -y jq
           GRYPE_VERSION=$(curl -s --retry 3 https://api.github.com/repos/anchore/grype/releases/latest | jq -r '.tag_name')
           echo "Installing grype $GRYPE_VERSION for ppc64le..."
           wget --tries=3 https://github.com/anchore/grype/releases/download/$GRYPE_VERSION/grype_${GRYPE_VERSION#v}_linux_ppc64le.tar.gz
@@ -169,7 +173,7 @@ jobs:
           scan-tools-bin/grype version
 
       - name: Archive scan tools
-        run: tar -czf scan-tools-cache.tar.gz scan-tools-venv/ scan-tools-bin/
+        run: tar -czf scan-tools-cache.tar.gz scan-tools-bin/
 
       - name: Upload scan-tools-cache artifact
         uses: actions/upload-artifact@v6
@@ -322,11 +326,11 @@ jobs:
         run: |
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
-          export SCANCODE_BIN="$GITHUB_WORKSPACE/scan-tools-venv/bin/scancode"
+          export SCANCODE_BIN="$GITHUB_WORKSPACE/scan-tools-bin/scancode"
           chmod +x ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           bash ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           echo "-------------------------scancode outputs-----------------------------------------"
-          ls package-cache/wheels
+          ls *.json 2>/dev/null || echo "No JSON output files yet"
 
       - name: Run grype scan on wheel
         run: |
@@ -336,7 +340,7 @@ jobs:
           chmod +x ./gha-script/scanner-scripts/grype_wheel_scan.sh
           bash ./gha-script/scanner-scripts/grype_wheel_scan.sh
           echo "-------------------------grype outputs-----------------------------------------"
-          ls package-cache/wheels
+          ls *.json 2>/dev/null || echo "No JSON output files yet"
 
       - name: Collect and upload wheel scan results to COS
         run: |
@@ -461,11 +465,11 @@ jobs:
         run: |
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
-          export SCANCODE_BIN="$GITHUB_WORKSPACE/scan-tools-venv/bin/scancode"
+          export SCANCODE_BIN="$GITHUB_WORKSPACE/scan-tools-bin/scancode"
           chmod +x ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           bash ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           echo "-------------------------scancode outputs-----------------------------------------"
-          ls package-cache/wheels
+          ls *.json 2>/dev/null || echo "No JSON output files yet"
 
       - name: Run grype scan on wheel
         run: |
@@ -475,7 +479,7 @@ jobs:
           chmod +x ./gha-script/scanner-scripts/grype_wheel_scan.sh
           bash ./gha-script/scanner-scripts/grype_wheel_scan.sh
           echo "-------------------------grype outputs-----------------------------------------"
-          ls package-cache/wheels
+          ls *.json 2>/dev/null || echo "No JSON output files yet"
 
       - name: Collect and upload wheel scan results to COS
         run: |
@@ -600,11 +604,11 @@ jobs:
         run: |
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
-          export SCANCODE_BIN="$GITHUB_WORKSPACE/scan-tools-venv/bin/scancode"
+          export SCANCODE_BIN="$GITHUB_WORKSPACE/scan-tools-bin/scancode"
           chmod +x ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           bash ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           echo "-------------------------scancode outputs-----------------------------------------"
-          ls package-cache/wheels
+          ls *.json 2>/dev/null || echo "No JSON output files yet"
 
       - name: Run grype scan on wheel
         run: |
@@ -614,7 +618,7 @@ jobs:
           chmod +x ./gha-script/scanner-scripts/grype_wheel_scan.sh
           bash ./gha-script/scanner-scripts/grype_wheel_scan.sh
           echo "-------------------------grype outputs-----------------------------------------"
-          ls package-cache/wheels
+          ls *.json 2>/dev/null || echo "No JSON output files yet"
 
       - name: Collect and upload wheel scan results to COS
         run: |
@@ -740,11 +744,11 @@ jobs:
         run: |
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
-          export SCANCODE_BIN="$GITHUB_WORKSPACE/scan-tools-venv/bin/scancode"
+          export SCANCODE_BIN="$GITHUB_WORKSPACE/scan-tools-bin/scancode"
           chmod +x ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           bash ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           echo "-------------------------scancode outputs-----------------------------------------"
-          ls package-cache/wheels
+          ls *.json 2>/dev/null || echo "No JSON output files yet"
 
       - name: Run grype scan on wheel
         run: |
@@ -754,7 +758,7 @@ jobs:
           chmod +x ./gha-script/scanner-scripts/grype_wheel_scan.sh
           bash ./gha-script/scanner-scripts/grype_wheel_scan.sh
           echo "-------------------------grype outputs-----------------------------------------"
-          ls package-cache/wheels
+          ls *.json 2>/dev/null || echo "No JSON output files yet"
 
       - name: Collect and upload wheel scan results to COS
         run: |
@@ -880,11 +884,11 @@ jobs:
         run: |
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
-          export SCANCODE_BIN="$GITHUB_WORKSPACE/scan-tools-venv/bin/scancode"
+          export SCANCODE_BIN="$GITHUB_WORKSPACE/scan-tools-bin/scancode"
           chmod +x ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           bash ./gha-script/scanner-scripts/scancode_wheel_scan.sh
           echo "-------------------------scancode outputs-----------------------------------------"
-          ls package-cache/wheels
+          ls *.json 2>/dev/null || echo "No JSON output files yet"
 
       - name: Run grype scan on wheel
         run: |
@@ -894,7 +898,7 @@ jobs:
           chmod +x ./gha-script/scanner-scripts/grype_wheel_scan.sh
           bash ./gha-script/scanner-scripts/grype_wheel_scan.sh
           echo "-------------------------grype outputs-----------------------------------------"
-          ls package-cache/wheels
+          ls *.json 2>/dev/null || echo "No JSON output files yet"
 
       - name: Collect and upload wheel scan results to COS
         run: |
