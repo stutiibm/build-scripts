@@ -18,6 +18,7 @@
 #
 # -----------------------------------------------------------------------------
 
+
 PACKAGE_NAME=duckdb-python
 PACKAGE_VERSION=${1:-v1.5.4}
 PACKAGE_DIR=duckdb-python
