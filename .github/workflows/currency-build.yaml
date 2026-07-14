@@ -996,7 +996,7 @@ jobs:
           for JSON_FILE in all_wheel_scancode/*.json; do
             [ -f "$JSON_FILE" ] || { echo "No JSON files found — skipping."; break; }
             echo "--- $JSON_FILE ---"
-            python3 ./gha-script/python_license_script.py "$JSON_FILE"
+            python3 ./gha-script/licenses_extract_script.py "$JSON_FILE"
           done
           echo "========================================"
 
