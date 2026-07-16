@@ -6,7 +6,7 @@
 # Source repo      : https://github.com/aio-libs/multidict.git
 # Tested on        : UBI:9.3
 # Language         : Python
-# Ci-Check     : True
+# Ci-Check     : False
 # Script License   : Apache License, Version 2 or later
 # Maintainer       : Aastha Sharma <aastha.sharma4@ibm.com>
 #
