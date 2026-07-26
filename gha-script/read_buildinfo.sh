@@ -27,7 +27,7 @@ if [ -f $config_file ]; then
   jsonObj=$config_file
   build_script=$(jq .build_script $jsonObj)
 
-  if $(jq 'has("use_non_root_user")' $jsonObj); then    
+  if $(jq 'has("use_non_root_user")' $jsonObj); then
     nonRootBuild=$(jq .use_non_root_user $jsonObj)
   fi
 
@@ -56,9 +56,9 @@ if [ -f $config_file ]; then
   if [[ $(jq --arg ver "$match_version" '.[$ver]' $config_file) != null ]]; then
     version_block=".[\"$match_version\"]"  # ✅ Properly quoted key for jq
 
-    # version-specific build_script
+    # version-specific build_script (may be a string or a list)
     if [[ $(jq -r "$version_block.build_script" $config_file) != "null" ]]; then
-      build_script=$(jq -r "$version_block.build_script" $config_file)
+      build_script=$(jq -c "$version_block.build_script" $config_file)
     fi
 
     # version-specific base_docker_image
@@ -73,7 +73,7 @@ if [ -f $config_file ]; then
         "rhel") variant=1 ;;
         "ubuntu") variant=2 ;;
         "alpine") variant=3 ;;
-        *) 
+        *)
           echo "No valid distro variant, picking default one"
           variant=1 ;;
       esac
@@ -125,46 +125,156 @@ fi
 #   fi
 # fi
 
-# Below code is used to get the tested on parameter value from the build script
-build_script_with_quotes=$build_script
-stripped_build_script=$(echo "$build_script_with_quotes" | sed 's/"//g')
-echo $stripped_build_script
-
-
-if [ -f "$stripped_build_script" ]; then
-
-  echo "build script found"
-  while IFS= read -r line; do
-      # Check if the line starts with '# Tested on'
+# ---------------------------------------------------------------------------
+# Helper: read "# Tested on" from a single build script file.
+# Normalises the raw value: strip spaces, uppercase, collapse "UBI : 9.3" →
+# "UBI:9.3" so downstream consumers see a consistent format.
+# Usage:  tested_on=$(read_tested_on "path/to/script.sh")
+# ---------------------------------------------------------------------------
+read_tested_on() {
+  local script_file="$1"
+  local value=""
+  if [ -f "$script_file" ]; then
+    while IFS= read -r line; do
       if [[ "$line" == "# Tested on"* ]]; then
-          # Extract the value after the first colon
-          tested_on=$(echo "$line" | cut -d ':' -f 2- | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')
-          break
+        # Extract everything after the first colon, strip outer whitespace,
+        # uppercase, then collapse spaces around colons (e.g. "UBI : 9.3" → "UBI:9.3")
+        value=$(echo "$line" | cut -d ':' -f 2- \
+          | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
+          | tr '[:lower:]' '[:upper:]' \
+          | sed 's/[[:space:]]*:[[:space:]]*/:/g')
+        break
       fi
+    done < "$script_file"
+  fi
+  echo "$value"
+}
 
-  done < "$stripped_build_script"
+# ---------------------------------------------------------------------------
+# Build the BUILD_SCRIPTS_JSON array and set the single-script compat vars.
+#
+# build_script in build_info.json can be:
+#   - a string : "pytorch_ubi_9.3.sh"
+#   - a list   : ["pytorch_ubi_8.3.sh", "pytorch_ubi_9.3.sh", "pytorch_ubi_10.3.sh"]
+#
+# For both cases we produce:
+#   BUILD_SCRIPTS_JSON  — compact JSON array of {script, tested_on} objects,
+#                         consumed by the GHA matrix via fromJson().
+#   BUILD_SCRIPT_IS_LIST — "true" | "false" flag for downstream awareness.
+#   BUILD_SCRIPT        — backward-compat: first (or only) script filename.
+#   TESTED_ON           — backward-compat: first (or only) tested_on value.
+# ---------------------------------------------------------------------------
+
+script_type=$(jq -r '.build_script | type' "$config_file")
+echo "build_script type in build_info.json: $script_type"
+
+BUILD_SCRIPTS_JSON=""
+BUILD_SCRIPT_IS_LIST="false"
+
+if [ "$script_type" = "array" ]; then
+  BUILD_SCRIPT_IS_LIST="true"
+  echo "build_script is a list — iterating each entry to read its '# Tested on' value"
+
+  json_array="["
+  first=true
+  first_script=""
+  first_tested_on=""
+
+  # jq outputs one bare filename per line (no surrounding quotes)
+  while IFS= read -r script_name; do
+    # strip any stray quotes/whitespace that jq might leave
+    script_name=$(echo "$script_name" | tr -d '"' | xargs)
+    [ -z "$script_name" ] && continue
+
+    raw_tested_on=$(read_tested_on "$script_name")
+
+    if [ -z "$raw_tested_on" ]; then
+      echo "⚠️  WARNING: '# Tested on' not found in $script_name — defaulting to UBI:9.3"
+      raw_tested_on="UBI:9.3"
+    fi
+
+    echo "  script='$script_name'  tested_on='$raw_tested_on'"
+
+    # Record first entry for backward-compat single-value exports
+    if [ "$first" = "true" ]; then
+      first_script="$script_name"
+      first_tested_on="$raw_tested_on"
+      first=false
+    fi
+
+    # Append JSON object — jq --arg safely escapes both values
+    entry=$(jq -n \
+      --arg s "$script_name" \
+      --arg t "$raw_tested_on" \
+      '{"script":$s,"tested_on":$t}')
+
+    if [ "$json_array" = "[" ]; then
+      json_array="${json_array}${entry}"
+    else
+      json_array="${json_array},${entry}"
+    fi
+
+  done < <(jq -r '.build_script[]' "$config_file")
+
+  json_array="${json_array}]"
+  BUILD_SCRIPTS_JSON="$json_array"
+
+  # Backward-compat single values — point to the first entry in the list
+  build_script="$first_script"
+  tested_on="$first_tested_on"
+
+else
+  # Single string — existing behaviour
+  build_script_with_quotes=$build_script
+  stripped_build_script=$(echo "$build_script_with_quotes" | sed 's/"//g')
+  echo "build_script (single): $stripped_build_script"
+
+  tested_on=$(read_tested_on "$stripped_build_script")
+
+  if [ -z "$tested_on" ]; then
+    echo "⚠️  WARNING: '# Tested on' not found in $stripped_build_script — defaulting to UBI:9.3"
+    tested_on="UBI:9.3"
+  fi
   echo "Tested on value: $tested_on"
+
+  # Wrap single entry into the same JSON array format for consistency
+  BUILD_SCRIPTS_JSON=$(jq -n \
+    --arg s "$stripped_build_script" \
+    --arg t "$tested_on" \
+    '[{"script":$s,"tested_on":$t}]')
+
+  # Backward-compat: strip quotes from the jq-extracted string value
+  build_script="$stripped_build_script"
 fi
 
-# Extract auditwheel exclusions
+echo "BUILD_SCRIPTS_JSON: $BUILD_SCRIPTS_JSON"
+echo "BUILD_SCRIPT_IS_LIST: $BUILD_SCRIPT_IS_LIST"
+
+# Extract auditwheel exclusions (unchanged — same pattern as before)
 AUDITWHEEL_EXCLUDE=""
 if jq -e 'has("auditwheel_exclude")' "$config_file" >/dev/null; then
   AUDITWHEEL_EXCLUDE=$(jq -r '.auditwheel_exclude | join(" ")' "$config_file")
 fi
 
-# Export variables
-
-echo "export VERSION=$VERSION" > $CUR_DIR/variable.sh
-echo "export BUILD_SCRIPT=$build_script" >> $CUR_DIR/variable.sh
-echo "export PKG_DIR_PATH=$package_dirpath" >> $CUR_DIR/variable.sh
-echo "export IMAGE_NAME=$image_name" >> $CUR_DIR/variable.sh
-#echo "export BUILD_DOCKER=$build_docker" >> $CUR_DIR/variable.sh
+# ---------------------------------------------------------------------------
+# Write variable.sh
+# BUILD_SCRIPTS_JSON is wrapped in single-quotes so embedded double-quotes
+# and spaces inside tested_on values survive the shell write safely.
+# ---------------------------------------------------------------------------
+echo "export VERSION=$VERSION"                              > $CUR_DIR/variable.sh
+echo "export BUILD_SCRIPT=$build_script"                  >> $CUR_DIR/variable.sh
+echo "export PKG_DIR_PATH=$package_dirpath"               >> $CUR_DIR/variable.sh
+echo "export IMAGE_NAME=$image_name"                      >> $CUR_DIR/variable.sh
+#echo "export BUILD_DOCKER=$build_docker"                 >> $CUR_DIR/variable.sh
 #echo "export VALIDATE_BUILD_SCRIPT=$validate_build_script" >> $CUR_DIR/variable.sh
-echo "export VARIANT=$variant" >> $CUR_DIR/variable.sh
-echo "export BASENAME=$basename" >> $CUR_DIR/variable.sh
-echo "export NON_ROOT_BUILD=$nonRootBuild" >> $CUR_DIR/variable.sh
-echo "export TESTED_ON=$tested_on" >> $CUR_DIR/variable.sh
-echo "export AUDITWHEEL_EXCLUDE=\"$AUDITWHEEL_EXCLUDE\"" >> $CUR_DIR/variable.sh
+echo "export VARIANT=$variant"                            >> $CUR_DIR/variable.sh
+echo "export BASENAME=$basename"                          >> $CUR_DIR/variable.sh
+echo "export NON_ROOT_BUILD=$nonRootBuild"                >> $CUR_DIR/variable.sh
+echo "export TESTED_ON=$tested_on"                        >> $CUR_DIR/variable.sh
+echo "export AUDITWHEEL_EXCLUDE=\"$AUDITWHEEL_EXCLUDE\""  >> $CUR_DIR/variable.sh
+echo "export BUILD_SCRIPT_IS_LIST=$BUILD_SCRIPT_IS_LIST"  >> $CUR_DIR/variable.sh
+# Single-quote wrap keeps the JSON intact through the shell write
+echo "export BUILD_SCRIPTS_JSON='$BUILD_SCRIPTS_JSON'"    >> $CUR_DIR/variable.sh
 
 chmod +x $CUR_DIR/variable.sh
 cat $CUR_DIR/variable.sh
