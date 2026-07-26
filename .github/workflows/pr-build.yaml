@@ -83,6 +83,8 @@ jobs:
       has_dockerfile_changes: ${{ steps.set_flags.outputs.has_dockerfile_changes }}
       docker_build_enabled: ${{ steps.set_flags.outputs.docker_build_enabled }}
       build_package_enabled: ${{ steps.set_flags.outputs.build_package_enabled }}
+      # JSON array of {script, tested_on} objects for the build/wheel matrix.
+      build_scripts: ${{ steps.emit_build_scripts.outputs.build_scripts }}
 
     steps:
       - name: Checkout code (Pull Request)
@@ -188,6 +190,13 @@ jobs:
           sudo chown -R $USER:$USER .
           chmod +x ./gha-script/read_buildinfo.sh
           bash ./gha-script/read_buildinfo.sh
+
+      - name: Emit build_scripts output for matrix
+        id: emit_build_scripts
+        run: |
+          source variable.sh
+          echo "BUILD_SCRIPTS_JSON=$BUILD_SCRIPTS_JSON"
+          echo "build_scripts=$BUILD_SCRIPTS_JSON" >> $GITHUB_OUTPUT
 
       - name: Set job control flags
         id: set_flags
@@ -298,6 +307,13 @@ jobs:
     needs: build_info
     if: needs.build_info.outputs.build_package_enabled == 'true'
     runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04-ppc64le-p10' || inputs.large-runner }}
+    # Each element of build_scripts is {"script":"...", "tested_on":"..."}.
+    # For a single-script package this produces exactly one job (no behaviour change).
+    # For a multi-script package each UBI variant runs in parallel.
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.build_info.outputs.build_scripts) }}
 
     steps:
       - uses: actions/checkout@v6
@@ -322,6 +338,12 @@ jobs:
           echo "------------------- scanner-env.sh -----------------------------"
           cat package-cache/scanner-env.sh
 
+          # Override BUILD_SCRIPT and TESTED_ON with the matrix-specific values so
+          # each parallel job targets the correct script and UBI image.
+          export BUILD_SCRIPT="${{ matrix.script }}"
+          export TESTED_ON="${{ matrix.tested_on }}"
+          echo "Matrix: BUILD_SCRIPT=$BUILD_SCRIPT  TESTED_ON=$TESTED_ON"
+
           sudo chown -R $USER:$USER .
           echo "------------------- Executing changed scripts -----------------------------"
           chmod +x ./gha-script/execute_changed_scripts.py
@@ -335,6 +357,10 @@ jobs:
     if: needs.build_info.outputs.wheel_build_enabled == 'true'
     runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04-ppc64le-p10' || inputs.large-runner }}
     continue-on-error: false
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.build_info.outputs.build_scripts) }}
     env:
       GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
       GHA_CURRENCY_SERVICE_ID: ${{ secrets.GHA_CURRENCY_SERVICE_ID }}
@@ -369,6 +395,9 @@ jobs:
           chmod +x package-cache/scanner-env.sh
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
+          export BUILD_SCRIPT="${{ matrix.script }}"
+          export TESTED_ON="${{ matrix.tested_on }}"
+          echo "Matrix: BUILD_SCRIPT=$BUILD_SCRIPT  TESTED_ON=$TESTED_ON"
 
           # CONTROL FLAG HERE
           if [ "$WHEEL_BUILD" != "true" ]; then
@@ -399,6 +428,10 @@ jobs:
     if: needs.build_info.outputs.wheel_build_enabled == 'true'
     runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04-ppc64le-p10' || inputs.large-runner }}
     continue-on-error: false
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.build_info.outputs.build_scripts) }}
     env:
       GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
       GHA_CURRENCY_SERVICE_ID: ${{ secrets.GHA_CURRENCY_SERVICE_ID }}
@@ -433,6 +466,9 @@ jobs:
           chmod +x package-cache/scanner-env.sh
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
+          export BUILD_SCRIPT="${{ matrix.script }}"
+          export TESTED_ON="${{ matrix.tested_on }}"
+          echo "Matrix: BUILD_SCRIPT=$BUILD_SCRIPT  TESTED_ON=$TESTED_ON"
 
           # CONTROL FLAG HERE
           if [ "$WHEEL_BUILD" != "true" ]; then
@@ -463,6 +499,10 @@ jobs:
     if: needs.build_info.outputs.wheel_build_enabled == 'true'
     runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04-ppc64le-p10' || inputs.large-runner }}
     continue-on-error: false
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.build_info.outputs.build_scripts) }}
     env:
       GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
       GHA_CURRENCY_SERVICE_ID: ${{ secrets.GHA_CURRENCY_SERVICE_ID }}
@@ -497,6 +537,9 @@ jobs:
           chmod +x package-cache/scanner-env.sh
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
+          export BUILD_SCRIPT="${{ matrix.script }}"
+          export TESTED_ON="${{ matrix.tested_on }}"
+          echo "Matrix: BUILD_SCRIPT=$BUILD_SCRIPT  TESTED_ON=$TESTED_ON"
 
           # CONTROL FLAG HERE
           if [ "$WHEEL_BUILD" != "true" ]; then
@@ -527,6 +570,10 @@ jobs:
     if: needs.build_info.outputs.wheel_build_enabled == 'true'
     runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04-ppc64le-p10' || inputs.large-runner }}
     continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.build_info.outputs.build_scripts) }}
     env:
       GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
       GHA_CURRENCY_SERVICE_ID: ${{ secrets.GHA_CURRENCY_SERVICE_ID }}
@@ -561,6 +608,9 @@ jobs:
           chmod +x package-cache/scanner-env.sh
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
+          export BUILD_SCRIPT="${{ matrix.script }}"
+          export TESTED_ON="${{ matrix.tested_on }}"
+          echo "Matrix: BUILD_SCRIPT=$BUILD_SCRIPT  TESTED_ON=$TESTED_ON"
 
           # CONTROL FLAG HERE
           if [ "$WHEEL_BUILD" != "true" ]; then
@@ -591,6 +641,10 @@ jobs:
     if: needs.build_info.outputs.wheel_build_enabled == 'true'
     runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-24.04-ppc64le-p10' || inputs.large-runner }}
     continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.build_info.outputs.build_scripts) }}
     env:
       GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
       GHA_CURRENCY_SERVICE_ID: ${{ secrets.GHA_CURRENCY_SERVICE_ID }}
@@ -625,6 +679,9 @@ jobs:
           chmod +x package-cache/scanner-env.sh
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
+          export BUILD_SCRIPT="${{ matrix.script }}"
+          export TESTED_ON="${{ matrix.tested_on }}"
+          echo "Matrix: BUILD_SCRIPT=$BUILD_SCRIPT  TESTED_ON=$TESTED_ON"
 
           # CONTROL FLAG HERE
           if [ "$WHEEL_BUILD" != "true" ]; then
