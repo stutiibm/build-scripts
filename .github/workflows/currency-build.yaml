@@ -68,6 +68,14 @@ jobs:
       ENABLE_TRIVY: ${{ inputs.enable_trivy }}
       ENABLE_SYFT: ${{ inputs.enable_syft }}
       ENABLE_GRYPE: ${{ inputs.enable_grype }}
+    outputs:
+      # JSON array of {script, tested_on} objects — consumed by the build and
+      # wheel_build_py3XX matrix strategies.
+      # Example (single script): [{"script":"numpy_ubi_9.3.sh","tested_on":"UBI:9.3"}]
+      # Example (list):          [{"script":"pytorch_ubi_8.3.sh","tested_on":"UBI:8.3"},
+      #                            {"script":"pytorch_ubi_9.3.sh","tested_on":"UBI:9.3"},
+      #                            {"script":"pytorch_ubi_10.3.sh","tested_on":"UBI:10.3"}]
+      build_scripts: ${{ steps.emit_build_scripts.outputs.build_scripts }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -93,6 +101,13 @@ jobs:
           cat variable.sh
           echo "======================="
 
+      - name: Emit build_scripts output for matrix
+        id: emit_build_scripts
+        run: |
+          source variable.sh
+          echo "BUILD_SCRIPTS_JSON=$BUILD_SCRIPTS_JSON"
+          echo "build_scripts=$BUILD_SCRIPTS_JSON" >> $GITHUB_OUTPUT
+
       - name: Create scanner-env.sh
         run: |
           echo "Creating package-cache........."
@@ -100,7 +115,7 @@ jobs:
           echo "Creating scanner-env.sh ......."
           echo "export VALIDATE_BUILD_SCRIPT='${{ inputs.validate_build_script }}'" > scanner-env.sh
           echo "export BUILD_DOCKER='${{ inputs.build_docker }}'" >> scanner-env.sh
-          echo "export PACKAGE_NAME='${{ inputs.package_name }}'" >> scanner-env.sh         
+          echo "export PACKAGE_NAME='${{ inputs.package_name }}'" >> scanner-env.sh
           echo "===== scanner-env.sh ====="
           cat scanner-env.sh
           echo "=========================="
@@ -122,6 +137,13 @@ jobs:
     needs: build_info
     if: ${{ inputs.validate_build_script == 'true' }}
     runs-on: ${{ inputs.large-runner-label != '' && inputs.large-runner-label || 'ubuntu-24.04-ppc64le-p10' }}
+    # Each element of build_scripts is {"script":"...", "tested_on":"..."}.
+    # For a single-script package this produces exactly one job (no behaviour change).
+    # For a multi-script package (e.g. UBI8 + UBI9 + UBI10) each runs in parallel.
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.build_info.outputs.build_scripts) }}
     steps:
       - uses: actions/checkout@v6
 
@@ -147,6 +169,11 @@ jobs:
           echo "==============LSCPU================"
           lscpu
           echo "==================================="
+          # Override BUILD_SCRIPT and TESTED_ON with the matrix-specific values so
+          # each parallel job targets the correct script and UBI image.
+          export BUILD_SCRIPT="${{ matrix.script }}"
+          export TESTED_ON="${{ matrix.tested_on }}"
+          echo "Matrix: BUILD_SCRIPT=$BUILD_SCRIPT  TESTED_ON=$TESTED_ON"
           chmod +x ./gha-script/build_package.sh
           bash ./gha-script/build_package.sh
           cloned_package=$(ls -td -- */ | head -n 1)
@@ -178,7 +205,9 @@ jobs:
       - name: Upload updated package-cache
         uses: actions/upload-artifact@v6
         with:
-          name: updated-package-cache
+          # Suffix the artifact name with the script name so each matrix job
+          # uploads its own cache without overwriting the others.
+          name: updated-package-cache-${{ matrix.script }}
           path: package-cache.tar.gz
 
           
@@ -186,6 +215,10 @@ jobs:
     needs: build_info
     if: ${{ inputs.wheel_build == 'true' }}
     runs-on: ${{ inputs.large-runner-label != '' && inputs.large-runner-label || 'ubuntu-24.04-ppc64le-p10' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.build_info.outputs.build_scripts) }}
     env:
       GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
       GHA_CURRENCY_SERVICE_ID: ${{ secrets.GHA_CURRENCY_SERVICE_ID }}
@@ -220,6 +253,9 @@ jobs:
           chmod +x package-cache/scanner-env.sh
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
+          export BUILD_SCRIPT="${{ matrix.script }}"
+          export TESTED_ON="${{ matrix.tested_on }}"
+          echo "Matrix: BUILD_SCRIPT=$BUILD_SCRIPT  TESTED_ON=$TESTED_ON"
         
           pwd
           ls -lh
@@ -257,6 +293,10 @@ jobs:
     needs: build_info
     if: ${{ inputs.wheel_build == 'true' }}
     runs-on: ${{ inputs.large-runner-label != '' && inputs.large-runner-label || 'ubuntu-24.04-ppc64le-p10' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.build_info.outputs.build_scripts) }}
     env:
       GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
       GHA_CURRENCY_SERVICE_ID: ${{ secrets.GHA_CURRENCY_SERVICE_ID }}
@@ -291,13 +331,16 @@ jobs:
           chmod +x package-cache/scanner-env.sh
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
+          export BUILD_SCRIPT="${{ matrix.script }}"
+          export TESTED_ON="${{ matrix.tested_on }}"
+          echo "Matrix: BUILD_SCRIPT=$BUILD_SCRIPT  TESTED_ON=$TESTED_ON"
           
           echo "===== Checking files before log compression ====="
           pwd
           ls -lh
           chmod +x ./gha-script/build_wheels.sh
           bash ./gha-script/build_wheels.sh
-  
+   
           echo "===========after execution =================="
           sudo apt update -y
           sudo lsb_release -a 2>/dev/null || echo "lsb_release not available"
@@ -344,6 +387,10 @@ jobs:
     needs: build_info
     if: ${{ inputs.wheel_build == 'true' }}
     runs-on: ${{ inputs.large-runner-label != '' && inputs.large-runner-label || 'ubuntu-24.04-ppc64le-p10' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.build_info.outputs.build_scripts) }}
     env:
       GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
       GHA_CURRENCY_SERVICE_ID: ${{ secrets.GHA_CURRENCY_SERVICE_ID }}
@@ -378,6 +425,9 @@ jobs:
           chmod +x package-cache/scanner-env.sh
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
+          export BUILD_SCRIPT="${{ matrix.script }}"
+          export TESTED_ON="${{ matrix.tested_on }}"
+          echo "Matrix: BUILD_SCRIPT=$BUILD_SCRIPT  TESTED_ON=$TESTED_ON"
         
           echo "===== Checking files before log compression ====="
           pwd
@@ -432,6 +482,10 @@ jobs:
    if: ${{ inputs.wheel_build == 'true' }}
    runs-on: ${{ inputs.large-runner-label != '' && inputs.large-runner-label || 'ubuntu-24.04-ppc64le-p10' }}
    continue-on-error: true
+   strategy:
+     fail-fast: false
+     matrix:
+       include: ${{ fromJson(needs.build_info.outputs.build_scripts) }}
    env:
       GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
       GHA_CURRENCY_SERVICE_ID: ${{ secrets.GHA_CURRENCY_SERVICE_ID }}
@@ -466,6 +520,9 @@ jobs:
           chmod +x package-cache/scanner-env.sh
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
+          export BUILD_SCRIPT="${{ matrix.script }}"
+          export TESTED_ON="${{ matrix.tested_on }}"
+          echo "Matrix: BUILD_SCRIPT=$BUILD_SCRIPT  TESTED_ON=$TESTED_ON"
           
           echo "===== Checking files before log compression ====="
           pwd
@@ -520,6 +577,10 @@ jobs:
    if: ${{ inputs.wheel_build == 'true' }}
    runs-on: ${{ inputs.large-runner-label != '' && inputs.large-runner-label || 'ubuntu-24.04-ppc64le-p10' }}
    continue-on-error: true
+   strategy:
+     fail-fast: false
+     matrix:
+       include: ${{ fromJson(needs.build_info.outputs.build_scripts) }}
    env:
       GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
       GHA_CURRENCY_SERVICE_ID: ${{ secrets.GHA_CURRENCY_SERVICE_ID }}
@@ -554,6 +615,9 @@ jobs:
           chmod +x package-cache/scanner-env.sh
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
+          export BUILD_SCRIPT="${{ matrix.script }}"
+          export TESTED_ON="${{ matrix.tested_on }}"
+          echo "Matrix: BUILD_SCRIPT=$BUILD_SCRIPT  TESTED_ON=$TESTED_ON"
           
           echo "===== Checking files before log compression ====="
           pwd
@@ -725,7 +789,10 @@ jobs:
       - name: Download package-cache
         uses: actions/download-artifact@v7
         with:
-          name: updated-package-cache
+          # The build job now uploads one artifact per matrix script.
+          # For source scanning we use the first script's cache (they share
+          # the same source tree; scanner only needs CLONED_PACKAGE path).
+          name: updated-package-cache-${{ fromJson(needs.build_info.outputs.build_scripts)[0].script }}
 
       - name: Extract package cache
         run: tar -xzf package-cache.tar.gz
