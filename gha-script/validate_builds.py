@@ -11,7 +11,7 @@ import re
 
 
 GITHUB_BUILD_SCRIPT_BASE_REPO = "build-scripts"
-GITHUB_BUILD_SCRIPT_BASE_OWNER = "stutiibm"
+GITHUB_BUILD_SCRIPT_BASE_OWNER = "ppc64le"
 HOME = os.getcwd()
 
 package_data = {}
@@ -232,6 +232,27 @@ def validate_build_info_file(file_name):
         for field in mandatory_fields:
             if field not in data:
                 raise ValueError(error_message.format(field))
+
+        # Validate build_script type: accepts a non-empty string OR a list of
+        # non-empty strings.  Anything else is rejected with a clear message.
+        build_script_val = data['build_script']
+        if isinstance(build_script_val, str):
+            if not build_script_val.strip():
+                raise ValueError(f"'build_script' in {file_name} must not be an empty string.")
+        elif isinstance(build_script_val, list):
+            if len(build_script_val) == 0:
+                raise ValueError(f"'build_script' in {file_name} must not be an empty list.")
+            for idx, entry in enumerate(build_script_val):
+                if not isinstance(entry, str) or not entry.strip():
+                    raise ValueError(
+                        f"'build_script[{idx}]' in {file_name} must be a non-empty string, got: {entry!r}"
+                    )
+            print(f"build_script is a list with {len(build_script_val)} entry/entries: {build_script_val}")
+        else:
+            raise ValueError(
+                f"'build_script' in {file_name} must be a string or a list of strings, "
+                f"got {type(build_script_val).__name__}."
+            )
 
         # Check for valid Github url
         print(str(data['github_url']))
