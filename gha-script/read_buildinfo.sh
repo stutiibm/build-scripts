@@ -167,8 +167,12 @@ read_tested_on() {
 #       abort if it is missing — there is no default fallback.
 # ---------------------------------------------------------------------------
 
-script_type=$(jq -r '.build_script | type' "$config_file")
-echo "build_script type in build_info.json: $script_type"
+# Derive type from the already-resolved $build_script shell variable.
+# This is correct whether build_script came from the top-level field or
+# was overridden by a version block — both paths store the final value in
+# $build_script as either a bare filename string or a compact JSON array.
+script_type=$(echo "$build_script" | jq -r 'type' 2>/dev/null || echo "string")
+echo "build_script type (resolved): $script_type"
 
 BUILD_SCRIPTS_JSON=""
 
