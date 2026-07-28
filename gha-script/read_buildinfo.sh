@@ -209,7 +209,7 @@ if [ "$script_type" = "array" ]; then
     fi
 
     # Append JSON object — jq --arg safely escapes both values
-    entry=$(jq -n \
+    entry=$(jq -cn \
       --arg s "$script_name" \
       --arg t "$raw_tested_on" \
       '{"script":$s,"tested_on":$t}')
@@ -248,7 +248,7 @@ else
   echo "Tested on value: $tested_on"
 
   # Wrap single entry into the same JSON array format for consistency
-  BUILD_SCRIPTS_JSON=$(jq -n \
+  BUILD_SCRIPTS_JSON=$(jq -cn \
     --arg s "$stripped_build_script" \
     --arg t "$tested_on" \
     '[{"script":$s,"tested_on":$t}]')
