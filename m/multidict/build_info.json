@@ -10,9 +10,6 @@
   "docker_build": false,
   "validate_build_script": true,
   "use_non_root_user": "false",
-  "*": {
-    "build_script": "multidict_ubi_9.3.sh"
-  },
   "v6.0.2": {
     "build_script": "multidict_ubi_9.3.sh"
   },
@@ -25,5 +22,8 @@
       "multidict_ubi_9.3.sh",
       "multidict_ubi_10.0.sh"
     ]
+  },
+  "*": {
+    "build_script": "multidict_ubi_9.3.sh"
   }
 }
