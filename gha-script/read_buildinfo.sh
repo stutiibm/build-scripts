@@ -220,7 +220,9 @@ if [ "$script_type" = "array" ]; then
       json_array="${json_array},${entry}"
     fi
 
-  done < <(jq -r '.build_script[]' "$config_file")
+  # Iterate the resolved $build_script variable (not the file) so that
+  # version-block overrides are respected.
+  done < <(echo "$build_script" | jq -r '.[]')
 
   json_array="${json_array}]"
   BUILD_SCRIPTS_JSON="$json_array"
