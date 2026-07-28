@@ -1,0 +1,365 @@
+# build-one-ubi.yaml
+#
+# Reusable workflow: build + wheel-build for ONE UBI version.
+#
+# Called by currency-build.yaml and pr-build.yaml for each slot
+# (ubi_slot_0, ubi_slot_1, ubi_slot_2).  Every slot that has a script
+# assigned calls this workflow; empty slots are skipped via the `if`
+# condition in the caller.
+#
+# Inputs
+# ------
+#   script              — build script filename, e.g. "pytorch_ubi_10.2.sh"
+#   tested_on           — normalised UBI string, e.g. "UBI:10.2"
+#   python_versions     — JSON array string of Python versions to build wheels for,
+#                         e.g. '["3.11","3.12","3.13","3.14"]'
+#                         (callers pass the full list; UBI10 callers omit "3.10")
+#   wheel_build_enabled — "true" / "false"
+#   validate_build_script — "true" / "false"
+#   build_package_enabled — "true" / "false"  (pr-build uses this flag)
+#   package_name        — e.g. "pytorch"
+#   version             — e.g. "v2.5.1"
+#   large_runner        — runner label override (empty = use default p10 runner)
+#   is_pr_build         — "true" if called from pr-build (enables pr-specific steps)
+#   pr_head_sha         — PR head SHA (required when is_pr_build=true)
+#
+# Log naming
+# ----------
+# build log  : build_log_<tested_on_slug>.gz   e.g. build_log_UBI-10.2.gz
+# wheel logs : <wheel_basename>_py3XX_log.gz    (unchanged — wheel filename already unique)
+
+on:
+  workflow_call:
+    inputs:
+      script:
+        required: true
+        type: string
+      tested_on:
+        required: true
+        type: string
+      python_versions:
+        required: true
+        type: string
+      wheel_build_enabled:
+        required: true
+        type: string
+      validate_build_script:
+        required: false
+        type: string
+        default: "false"
+      build_package_enabled:
+        required: false
+        type: string
+        default: "false"
+      package_name:
+        required: false
+        type: string
+        default: ""
+      version:
+        required: false
+        type: string
+        default: ""
+      large_runner:
+        required: false
+        type: string
+        default: ""
+      is_pr_build:
+        required: false
+        type: string
+        default: "false"
+      pr_head_sha:
+        required: false
+        type: string
+        default: ""
+    secrets:
+      GHA_CURRENCY_SERVICE_ID_API_KEY:
+        required: false
+      GHA_CURRENCY_SERVICE_ID:
+        required: false
+
+jobs:
+
+  # ---------------------------------------------------------------------------
+  # build: run the build script inside the correct UBI container
+  # ---------------------------------------------------------------------------
+  build:
+    if: ${{ inputs.validate_build_script == 'true' || inputs.build_package_enabled == 'true' }}
+    runs-on: ${{ inputs.large_runner != '' && inputs.large_runner || 'ubuntu-24.04-ppc64le-p10' }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.pr_head_sha != '' && inputs.pr_head_sha || github.sha }}
+
+      - name: Download package-cache
+        uses: actions/download-artifact@v7
+        with:
+          name: package-cache
+
+      - name: Extract package cache
+        run: tar -xzf package-cache.tar.gz
+
+      - name: Build Package
+        env:
+          GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
+        run: |
+          echo "Sourcing variable.sh and scanner-env.sh..........................................."
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
+          echo "===== variable.sh ====="
+          cat package-cache/variable.sh
+          echo "===== scanner-env.sh ====="
+          cat package-cache/scanner-env.sh
+          echo "==============LSCPU================"
+          lscpu
+          echo "==================================="
+          # Slot-specific overrides — always use the values passed to this workflow
+          export BUILD_SCRIPT="${{ inputs.script }}"
+          export TESTED_ON="${{ inputs.tested_on }}"
+          echo "Slot: BUILD_SCRIPT=$BUILD_SCRIPT  TESTED_ON=$TESTED_ON"
+
+          if [ "${{ inputs.is_pr_build }}" == "true" ]; then
+            sudo chown -R $USER:$USER .
+            echo "------------------- Executing changed scripts -----------------------------"
+            chmod +x ./gha-script/execute_changed_scripts.py
+            python3 -u ./gha-script/execute_changed_scripts.py
+          else
+            chmod +x ./gha-script/build_package.sh
+            bash ./gha-script/build_package.sh
+            cloned_package=$(ls -td -- */ | head -n 1)
+            sudo mv "$cloned_package" package-cache
+            echo "export CLONED_PACKAGE=\"$cloned_package\"" >> package-cache/scanner-env.sh
+            echo "-------------updated scanner-env.sh-----------------------"
+            cat package-cache/scanner-env.sh
+            echo "---------------------------------------------"
+            cd package-cache
+            sudo chown $USER:$USER -R .
+            chmod +x ../gha-script/pre_process.sh
+            bash ../gha-script/pre_process.sh
+            cd $GITHUB_WORKSPACE
+
+            # Build log named with UBI version suffix for clear identification
+            # e.g.  build_log_UBI-10.2.gz
+            UBI_SLUG=$(echo "${{ inputs.tested_on }}" | tr ':' '-')
+            LOG_NAME="build_log_${UBI_SLUG}.gz"
+            gzip build_log
+            mv build_log.gz "$LOG_NAME"
+            chmod +x ./gha-script/upload-scripts/upload_file.sh
+            bash ./gha-script/upload-scripts/upload_file.sh "$LOG_NAME"
+          fi
+
+      - name: Fix permissions on package-cache
+        if: ${{ inputs.is_pr_build != 'true' }}
+        run: |
+          USER=$(whoami)
+          sudo chown -R $USER:$USER package-cache
+          sudo chmod -R u+rwX,go+rX,go-w package-cache
+
+      - name: Archive updated package cache
+        if: ${{ inputs.is_pr_build != 'true' }}
+        run: tar -czf package-cache.tar.gz package-cache/
+
+      - name: Upload updated package-cache
+        if: ${{ inputs.is_pr_build != 'true' }}
+        uses: actions/upload-artifact@v6
+        with:
+          # Suffix with script name so each slot's cache is distinct
+          name: updated-package-cache-${{ inputs.script }}
+          path: package-cache.tar.gz
+
+  # ---------------------------------------------------------------------------
+  # wheel_build: build wheels for every Python version in python_versions.
+  # Runs independently of the build job above — both are parallel.
+  # ---------------------------------------------------------------------------
+  wheel_build:
+    if: ${{ inputs.wheel_build_enabled == 'true' }}
+    runs-on: ${{ inputs.large_runner != '' && inputs.large_runner || 'ubuntu-24.04-ppc64le-p10' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python_version: ${{ fromJson(inputs.python_versions) }}
+    continue-on-error: ${{ matrix.python_version == '3.13' || matrix.python_version == '3.14' }}
+
+    env:
+      GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
+      GHA_CURRENCY_SERVICE_ID: ${{ secrets.GHA_CURRENCY_SERVICE_ID }}
+      PYTHON_VERSION: ${{ matrix.python_version }}
+      PACKAGE_NAME: ${{ inputs.package_name }}
+      VERSION: ${{ inputs.version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.pr_head_sha != '' && inputs.pr_head_sha || github.sha }}
+
+      - name: Install system dependencies
+        run: sudo apt update -y
+
+      - name: Download package-cache
+        uses: actions/download-artifact@v7
+        with:
+          name: package-cache
+
+      - name: Extract package cache
+        run: tar -xzf package-cache.tar.gz
+
+      - name: Download scan-tools-cache
+        if: ${{ inputs.is_pr_build != 'true' }}
+        uses: actions/download-artifact@v7
+        with:
+          name: scan-tools-cache
+
+      - name: Extract scan tools
+        if: ${{ inputs.is_pr_build != 'true' }}
+        run: |
+          tar -xzf scan-tools-cache.tar.gz
+          echo "$GITHUB_WORKSPACE/scan-tools-bin" >> $GITHUB_PATH
+
+      - name: Cache pip downloads for scancode-toolkit
+        if: ${{ inputs.is_pr_build != 'true' }}
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: scancode-pip-ppc64le-v32.4.0
+
+      - name: Download scancode-toolkit-src artifact
+        if: ${{ inputs.is_pr_build != 'true' }}
+        uses: actions/download-artifact@v7
+        with:
+          name: scancode-toolkit-src
+
+      - name: Extract scancode-toolkit source
+        if: ${{ inputs.is_pr_build != 'true' }}
+        run: tar -xzf scancode-toolkit-src.tar.gz
+
+      - name: Run build_wheels.sh
+        run: |
+          ls
+          echo "---------------------updated cache-----------------------"
+          ls package-cache
+          chmod +x package-cache/variable.sh
+          chmod +x package-cache/scanner-env.sh
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
+          # Slot-specific overrides
+          export BUILD_SCRIPT="${{ inputs.script }}"
+          export TESTED_ON="${{ inputs.tested_on }}"
+          echo "Slot: BUILD_SCRIPT=$BUILD_SCRIPT  TESTED_ON=$TESTED_ON  PYTHON_VERSION=$PYTHON_VERSION"
+
+          if [ "${{ inputs.is_pr_build }}" == "true" ]; then
+            # PR build: check flags and changed files before running
+            if [ "$WHEEL_BUILD" != "true" ]; then
+              echo "Skipping wheel build as WHEEL_BUILD=false"
+              exit 0
+            fi
+            BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
+            if [[ -z "$BUILD_SCRIPT_CHANGED" ]]; then
+              echo "Skipping wheel build as no .sh build script changes detected"
+              exit 0
+            fi
+            sudo chown -R $USER:$USER .
+          fi
+
+          echo "===== Checking files before log compression ====="
+          pwd
+          ls -lh
+          chmod +x ./gha-script/build_wheels.sh
+          bash ./gha-script/build_wheels.sh
+
+          echo "===========after execution =================="
+
+          WORKSPACE=$(pwd)
+          ls -lh "$WORKSPACE/wheel_build_log" || echo "wheel_build_log NOT found!"
+
+          # Wheel log: named after wheel filename + python version (unchanged behaviour)
+          WHEEL_FILE=$(ls "$WORKSPACE"/*.whl 2>/dev/null | head -n 1)
+          PY_SLUG="py$(echo "$PYTHON_VERSION" | tr -d '.')"
+          if [ -n "$WHEEL_FILE" ]; then
+            WHEEL_BASE=$(basename "${WHEEL_FILE%.whl}")
+            LOG_NAME="${WHEEL_BASE}_${PY_SLUG}_log.gz"
+          else
+            # Fallback if no wheel found — still name with UBI + python slug
+            UBI_SLUG=$(echo "${{ inputs.tested_on }}" | tr ':' '-')
+            LOG_NAME="wheel_build_log_${UBI_SLUG}_${PY_SLUG}.gz"
+          fi
+
+          gzip "$WORKSPACE/wheel_build_log"
+          mv "$WORKSPACE/wheel_build_log.gz" "$WORKSPACE/$LOG_NAME"
+
+          chmod +x ./gha-script/upload-scripts/upload_file.sh
+          bash ./gha-script/upload-scripts/upload_file.sh "$LOG_NAME"
+
+      - name: Run scancode scan on wheel
+        if: ${{ inputs.is_pr_build != 'true' }}
+        run: |
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
+          export BUILD_SCRIPT="${{ inputs.script }}"
+          export TESTED_ON="${{ inputs.tested_on }}"
+          chmod +x ./gha-script/scanner-scripts/scancode_wheel_scan.sh
+          bash ./gha-script/scanner-scripts/scancode_wheel_scan.sh
+
+      - name: Run grype scan on wheel
+        if: ${{ inputs.is_pr_build != 'true' }}
+        run: |
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
+          export BUILD_SCRIPT="${{ inputs.script }}"
+          export TESTED_ON="${{ inputs.tested_on }}"
+          export GRYPE_BIN="$GITHUB_WORKSPACE/scan-tools-bin/grype"
+          chmod +x ./gha-script/scanner-scripts/grype_wheel_scan.sh
+          bash ./gha-script/scanner-scripts/grype_wheel_scan.sh
+
+      - name: Collect and upload wheel scan results to COS
+        if: ${{ inputs.is_pr_build != 'true' }}
+        run: |
+          source package-cache/variable.sh
+          source package-cache/scanner-env.sh
+          PY_SLUG="py$(echo "$PYTHON_VERSION" | tr -d '.')"
+
+          mkdir -p "wheel_scancode_${PY_SLUG}"
+          find . -maxdepth 1 -type f -name "*_output.json" ! -name "*_grype_output.json" \
+            -exec cp {} "wheel_scancode_${PY_SLUG}/" \;
+          tar cvzf "wheel_scancode_${PY_SLUG}.tar.gz" "wheel_scancode_${PY_SLUG}"
+          chmod +x ./gha-script/upload-scripts/upload_file.sh
+          bash ./gha-script/upload-scripts/upload_file.sh "wheel_scancode_${PY_SLUG}.tar.gz"
+
+          mkdir -p "grype_wheel_${PY_SLUG}"
+          find . -maxdepth 1 -type f -name "*_grype_output.json" \
+            -exec cp {} "grype_wheel_${PY_SLUG}/" \;
+          tar cvzf "grype_wheel_${PY_SLUG}.tar.gz" "grype_wheel_${PY_SLUG}"
+          bash ./gha-script/upload-scripts/upload_file.sh "grype_wheel_${PY_SLUG}.tar.gz"
+
+      - name: Upload wheel to COS
+        run: |
+          if ls *.whl 1> /dev/null 2>&1; then
+            sudo chmod a+r *.whl
+            WHEEL_FILE=$(ls *.whl)
+            SHA256_VALUE=$(cat sha256.sha)
+            chmod +x ./gha-script/upload-scripts/upload_wheel.sh
+            bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE $SHA256_VALUE
+          else
+            echo "No wheel file found!"
+            exit 1
+          fi
+
+      - name: Upload CVE report to COS
+        if: ${{ inputs.is_pr_build != 'true' }}
+        env:
+          GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
+        run: |
+          WHEEL_FILE=$(ls *.whl 2>/dev/null | head -n 1)
+          if [ -n "$WHEEL_FILE" ]; then
+            CVE_REPORT="${WHEEL_FILE%.whl}_cve_report.json"
+            if [ -f "$CVE_REPORT" ]; then
+              source package-cache/variable.sh
+              source package-cache/scanner-env.sh
+              chmod +x ./gha-script/upload-scripts/upload_file.sh
+              bash ./gha-script/upload-scripts/upload_file.sh "$CVE_REPORT"
+            else
+              echo "WARNING: CVE report not found: $CVE_REPORT — skipping upload."
+            fi
+          else
+            echo "WARNING: No wheel found — skipping CVE report upload."
+          fi
