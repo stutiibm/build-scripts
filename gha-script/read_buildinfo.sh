@@ -160,19 +160,19 @@ read_tested_on() {
 # For both cases we produce:
 #   BUILD_SCRIPTS_JSON  — compact JSON array of {script, tested_on} objects,
 #                         consumed by the GHA matrix via fromJson().
-#   BUILD_SCRIPT_IS_LIST — "true" | "false" flag for downstream awareness.
 #   BUILD_SCRIPT        — backward-compat: first (or only) script filename.
 #   TESTED_ON           — backward-compat: first (or only) tested_on value.
+#
+# NOTE: '# Tested on' is MANDATORY in every build script. The pipeline will
+#       abort if it is missing — there is no default fallback.
 # ---------------------------------------------------------------------------
 
 script_type=$(jq -r '.build_script | type' "$config_file")
 echo "build_script type in build_info.json: $script_type"
 
 BUILD_SCRIPTS_JSON=""
-BUILD_SCRIPT_IS_LIST="false"
 
 if [ "$script_type" = "array" ]; then
-  BUILD_SCRIPT_IS_LIST="true"
   echo "build_script is a list — iterating each entry to read its '# Tested on' value"
 
   json_array="["
@@ -189,8 +189,10 @@ if [ "$script_type" = "array" ]; then
     raw_tested_on=$(read_tested_on "$script_name")
 
     if [ -z "$raw_tested_on" ]; then
-      echo "⚠️  WARNING: '# Tested on' not found in $script_name — defaulting to UBI:9.3"
-      raw_tested_on="UBI:9.3"
+      echo "❌ ERROR: '# Tested on' header is missing in '$script_name'."
+      echo "   Every build script must declare the UBI version it targets, e.g.:"
+      echo "   # Tested on UBI:9.3"
+      exit 1
     fi
 
     echo "  script='$script_name'  tested_on='$raw_tested_on'"
@@ -232,8 +234,10 @@ else
   tested_on=$(read_tested_on "$stripped_build_script")
 
   if [ -z "$tested_on" ]; then
-    echo "⚠️  WARNING: '# Tested on' not found in $stripped_build_script — defaulting to UBI:9.3"
-    tested_on="UBI:9.3"
+    echo "❌ ERROR: '# Tested on' header is missing in '$stripped_build_script'."
+    echo "   Every build script must declare the UBI version it targets, e.g.:"
+    echo "   # Tested on UBI:9.3"
+    exit 1
   fi
   echo "Tested on value: $tested_on"
 
@@ -248,7 +252,6 @@ else
 fi
 
 echo "BUILD_SCRIPTS_JSON: $BUILD_SCRIPTS_JSON"
-echo "BUILD_SCRIPT_IS_LIST: $BUILD_SCRIPT_IS_LIST"
 
 # Extract auditwheel exclusions (unchanged — same pattern as before)
 AUDITWHEEL_EXCLUDE=""
@@ -272,7 +275,6 @@ echo "export BASENAME=$basename"                          >> $CUR_DIR/variable.s
 echo "export NON_ROOT_BUILD=$nonRootBuild"                >> $CUR_DIR/variable.sh
 echo "export TESTED_ON=$tested_on"                        >> $CUR_DIR/variable.sh
 echo "export AUDITWHEEL_EXCLUDE=\"$AUDITWHEEL_EXCLUDE\""  >> $CUR_DIR/variable.sh
-echo "export BUILD_SCRIPT_IS_LIST=$BUILD_SCRIPT_IS_LIST"  >> $CUR_DIR/variable.sh
 # Single-quote wrap keeps the JSON intact through the shell write
 echo "export BUILD_SCRIPTS_JSON='$BUILD_SCRIPTS_JSON'"    >> $CUR_DIR/variable.sh
 
