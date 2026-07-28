@@ -259,6 +259,20 @@ fi
 
 echo "BUILD_SCRIPTS_JSON: $BUILD_SCRIPTS_JSON"
 
+# ---------------------------------------------------------------------------
+# Emit individual slot variables: SLOT0, SLOT1, SLOT2.
+# Each slot is a single {script, tested_on} JSON object (or empty string).
+# Callers (currency-build.yaml, pr-build.yaml) use these to drive the three
+# reusable workflow calls without needing fromJson array indexing in `if:`.
+# ---------------------------------------------------------------------------
+SLOT0=$(echo "$BUILD_SCRIPTS_JSON" | jq -c '.[0] // empty' 2>/dev/null || echo "")
+SLOT1=$(echo "$BUILD_SCRIPTS_JSON" | jq -c '.[1] // empty' 2>/dev/null || echo "")
+SLOT2=$(echo "$BUILD_SCRIPTS_JSON" | jq -c '.[2] // empty' 2>/dev/null || echo "")
+
+echo "SLOT0: $SLOT0"
+echo "SLOT1: $SLOT1"
+echo "SLOT2: $SLOT2"
+
 # Extract auditwheel exclusions (unchanged — same pattern as before)
 AUDITWHEEL_EXCLUDE=""
 if jq -e 'has("auditwheel_exclude")' "$config_file" >/dev/null; then
@@ -283,6 +297,10 @@ echo "export TESTED_ON=$tested_on"                        >> $CUR_DIR/variable.s
 echo "export AUDITWHEEL_EXCLUDE=\"$AUDITWHEEL_EXCLUDE\""  >> $CUR_DIR/variable.sh
 # Single-quote wrap keeps the JSON intact through the shell write
 echo "export BUILD_SCRIPTS_JSON='$BUILD_SCRIPTS_JSON'"    >> $CUR_DIR/variable.sh
+# Individual slot exports — empty string when slot has no script
+echo "export SLOT0='$SLOT0'"                              >> $CUR_DIR/variable.sh
+echo "export SLOT1='$SLOT1'"                              >> $CUR_DIR/variable.sh
+echo "export SLOT2='$SLOT2'"                              >> $CUR_DIR/variable.sh
 
 chmod +x $CUR_DIR/variable.sh
 cat $CUR_DIR/variable.sh
