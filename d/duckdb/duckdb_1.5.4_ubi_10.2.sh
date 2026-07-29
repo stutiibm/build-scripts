@@ -22,6 +22,7 @@ PACKAGE_NAME=duckdb-python
 PACKAGE_VERSION=${1:-v1.5.4}
 PACKAGE_DIR=duckdb-python
 PACKAGE_URL=https://github.com/duckdb/duckdb-python.git
+CURRENT_DIR=$(pwd)
 PYTHON_VERSION=3.12
 
 # Install necessary system packages
