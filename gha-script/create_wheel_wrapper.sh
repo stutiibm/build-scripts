@@ -11,11 +11,14 @@ CURRENT_DIR=$(pwd)
 UBI_MAJOR=$(grep -oP '(?<=^VERSION_ID=")[0-9]+' /etc/os-release || grep -oP 'release \K[0-9]+' /etc/redhat-release 2>/dev/null || echo "8")
 if [[ "$UBI_MAJOR" -ge 10 ]]; then
     GCC_TOOLSET="gcc-toolset-15"
+    yum install -y "$GCC_TOOLSET"
+    # On UBI 10, SCL was dropped — enable script lives under /usr/lib/gcc-toolset-<N>/
+    source /usr/lib/${GCC_TOOLSET}/enable
 else
     GCC_TOOLSET="gcc-toolset-13"
+    yum install -y "$GCC_TOOLSET"
+    source /opt/rh/${GCC_TOOLSET}/enable
 fi
-yum install -y "$GCC_TOOLSET"
-source /opt/rh/${GCC_TOOLSET}/enable
 gcc --version
 
 # temporary build script path
