@@ -34,13 +34,14 @@ dnf install -y \
     python3.12-devel \
     python3.12-pip
 
+# On UBI 10, SCL was dropped — activate toolset by prepending its bin to PATH
 export PATH="/opt/rh/gcc-toolset-15/root/usr/bin:$PATH"
 gcc --version
 
 python3.12 -m pip install --upgrade pip setuptools
 
 # -- Build wheel --------------------------------------------------------------
-pip3.12 wheel --no-cache-dir --only-binary :none "duckdb==${PACKAGE_VERSION}" -w "${CURRENT_DIR}/dist/"
+pip3.12 wheel --no-cache-dir --only-binary :none "duckdb==${PACKAGE_VERSION#v}" -w "${CURRENT_DIR}/dist/"
 
 WHEEL=$(find "${CURRENT_DIR}/dist" -name "duckdb-*.whl" | head -1)
 if [ -z "$WHEEL" ]; then
@@ -49,8 +50,10 @@ if [ -z "$WHEEL" ]; then
 fi
 echo "Wheel: $WHEEL"
 
+# Copy wheel up to CURRENT_DIR so create_wheel_wrapper.sh can find it at *.whl
+cp "$WHEEL" "${CURRENT_DIR}/"
+
 # -- Install ------------------------------------------------------------------
-cd dist
 pip3.12 install "$WHEEL"
 
 # Run tests
