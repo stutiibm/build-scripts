@@ -12,8 +12,9 @@ UBI_MAJOR=$(grep -oP '(?<=^VERSION_ID=")[0-9]+' /etc/os-release || grep -oP 'rel
 if [[ "$UBI_MAJOR" -ge 10 ]]; then
     GCC_TOOLSET="gcc-toolset-15"
     yum install -y "$GCC_TOOLSET"
-    # On UBI 10, SCL was dropped — enable script lives under /usr/lib/gcc-toolset-<N>/
-    source /usr/lib/${GCC_TOOLSET}/enable
+    # On UBI 10, SCL (Software Collections) was dropped — there is no enable script.
+    # Activate the toolset by prepending its bin directory to PATH directly.
+    export PATH="/opt/rh/${GCC_TOOLSET}/root/usr/bin:$PATH"
 else
     GCC_TOOLSET="gcc-toolset-13"
     yum install -y "$GCC_TOOLSET"
