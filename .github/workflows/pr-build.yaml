@@ -807,46 +807,7 @@ jobs:
             echo "No wheel produced — skipping upload."
           fi
 
-  # UBI10 wheel jobs (py311–py314 only) ----------------------------------------
-
-  wheel_build_ubi10_py311:
-    needs: build_info
-    if: ${{ needs.build_info.outputs.wheel_build_enabled == 'true' && needs.build_info.outputs.script_ubi10 != '' }}
-    runs-on: ${{ github.event_name == 'workflow_dispatch' && inputs.large-runner || 'ubuntu-24.04-ppc64le-p10' }}
-    env:
-      PYTHON_VERSION: "3.11"
-      BUILD_SCRIPT: ${{ fromJson(needs.build_info.outputs.script_ubi10).script }}
-      TESTED_ON:    ${{ fromJson(needs.build_info.outputs.script_ubi10).tested_on }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
-      - name: Install system dependencies
-        run: sudo apt update -y
-      - name: Download package-cache
-        uses: actions/download-artifact@v4
-        with:
-          name: package-cache
-      - name: Extract package cache
-        run: tar -xzf package-cache.tar.gz
-      - name: Run build_wheels.sh
-        run: |
-          source package-cache/variable.sh; source package-cache/scanner-env.sh
-          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping — WHEEL_BUILD=false"; exit 0; fi
-          BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
-          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
-          sudo chown -R $USER:$USER .
-          chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
-      - name: Upload wheel to COS
-        run: |
-          if ls *.whl 1>/dev/null 2>&1; then
-            sudo chmod a+r *.whl; WHEEL_FILE=$(ls *.whl); SHA256_VALUE=$(cat sha256.sha)
-            chmod +x ./gha-script/upload-scripts/upload_wheel.sh
-            bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE $SHA256_VALUE
-          else
-            echo "No wheel produced — skipping upload."
-          fi
+  # UBI10 wheel jobs (py312–py314 only — py310/py311 not supported on UBI10) ----
 
   wheel_build_ubi10_py312:
     needs: build_info
