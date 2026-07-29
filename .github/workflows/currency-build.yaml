@@ -1908,7 +1908,7 @@ jobs:
   # ---------------------------------------------------------------------------
   # final_summary: runs after all parallel tracks complete.
   # Uses always() so it runs even when optional jobs (ubi8/ubi10) were skipped.
-  # Requires at least build_ubi9 to have succeeded.
+  # Requires at least one of build_ubi8/ubi9/ubi10 to have succeeded.
   # ---------------------------------------------------------------------------
   final_summary:
     name: Final Summary Stage
@@ -1924,7 +1924,9 @@ jobs:
       - source_scanner_ubi10
     if: |
       always() &&
-      needs.build_ubi9.result == 'success'
+      (needs.build_ubi8.result == 'success' ||
+       needs.build_ubi9.result == 'success' ||
+       needs.build_ubi10.result == 'success')
     runs-on: ubuntu-24.04-ppc64le-p10
     steps:
       - uses: actions/checkout@v4
