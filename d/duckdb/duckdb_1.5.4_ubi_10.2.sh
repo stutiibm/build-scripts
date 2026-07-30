@@ -20,9 +20,9 @@
 
 PACKAGE_NAME=duckdb-python
 PACKAGE_VERSION=${1:-v1.5.4}
-CURRENT_DIR=$(pwd)
 PACKAGE_DIR=duckdb-python
 PACKAGE_URL=https://github.com/duckdb/duckdb-python.git
+CURRENT_DIR=$(pwd)
 PYTHON_VERSION=3.12
 
 # Install necessary system packages
@@ -34,15 +34,16 @@ dnf install -y \
     python3.12-devel \
     python3.12-pip
 
+# On UBI 10, SCL was dropped — activate toolset by prepending its bin to PATH
 export PATH="/opt/rh/gcc-toolset-15/root/usr/bin:$PATH"
 gcc --version
 
 python3.12 -m pip install --upgrade pip setuptools
 
-# -- Build wheel --------------------------------------------------------------
-pip3.12 wheel --no-cache-dir --only-binary :none "duckdb==${PACKAGE_VERSION}" -w "${CURRENT_DIR}/dist/"
+# -- Build wheel directly into CURRENT_DIR so create_wheel_wrapper.sh finds it
+pip3.12 wheel --no-cache-dir --only-binary :none "duckdb==${PACKAGE_VERSION#v}" -w "${CURRENT_DIR}"
 
-WHEEL=$(find "${CURRENT_DIR}/dist" -name "duckdb-*.whl" | head -1)
+WHEEL=$(find "${CURRENT_DIR}" -maxdepth 1 -name "duckdb-*.whl" | head -1)
 if [ -z "$WHEEL" ]; then
     echo "ERROR: wheel not found after build"
     exit 1
@@ -50,7 +51,6 @@ fi
 echo "Wheel: $WHEEL"
 
 # -- Install ------------------------------------------------------------------
-cd dist
 pip3.12 install "$WHEEL"
 
 # Run tests
