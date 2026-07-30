@@ -7,6 +7,9 @@ EXTRA_ARGS=${3:-""}
 POST_PROCESS_SCRIPT_PATH=${4:-"post_process_wheel.py"}
 CURRENT_DIR=$(pwd)
 
+# install git — required by generate_sha() for all Python versions and UBI versions
+yum install -y git
+
 # install gcc — select toolset version based on UBI major version
 UBI_MAJOR=$(grep -oP '(?<=^VERSION_ID=")[0-9]+' /etc/os-release || grep -oP 'release \K[0-9]+' /etc/redhat-release 2>/dev/null || echo "8")
 if [[ "$UBI_MAJOR" -ge 10 ]]; then
