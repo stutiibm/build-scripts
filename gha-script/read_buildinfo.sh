@@ -309,15 +309,15 @@ fi
 # Write variable.sh
 # JSON objects are single-quote-wrapped so embedded double-quotes survive.
 # ---------------------------------------------------------------------------
-echo "export VERSION=$VERSION"                                > $CUR_DIR/variable.sh
-echo "export BUILD_SCRIPT=$build_script"                     >> $CUR_DIR/variable.sh
-echo "export PKG_DIR_PATH=$package_dirpath"                  >> $CUR_DIR/variable.sh
-echo "export IMAGE_NAME=$image_name"                         >> $CUR_DIR/variable.sh
-echo "export VARIANT=$variant"                               >> $CUR_DIR/variable.sh
-echo "export BASENAME=$basename"                             >> $CUR_DIR/variable.sh
-echo "export NON_ROOT_BUILD=$nonRootBuild"                   >> $CUR_DIR/variable.sh
-echo "export TESTED_ON=$tested_on"                           >> $CUR_DIR/variable.sh
-echo "export AUDITWHEEL_EXCLUDE=\"$AUDITWHEEL_EXCLUDE\""     >> $CUR_DIR/variable.sh
+echo "export VERSION=\"$VERSION\""                                > $CUR_DIR/variable.sh
+echo "export BUILD_SCRIPT=\"$build_script\""                     >> $CUR_DIR/variable.sh
+echo "export PKG_DIR_PATH=\"$package_dirpath\""                  >> $CUR_DIR/variable.sh
+echo "export IMAGE_NAME=\"$image_name\""                         >> $CUR_DIR/variable.sh
+echo "export VARIANT=\"$variant\""                               >> $CUR_DIR/variable.sh
+echo "export BASENAME=\"$basename\""                             >> $CUR_DIR/variable.sh
+echo "export NON_ROOT_BUILD=\"$nonRootBuild\""                   >> $CUR_DIR/variable.sh
+echo "export TESTED_ON=\"$tested_on\""                           >> $CUR_DIR/variable.sh
+echo "export AUDITWHEEL_EXCLUDE=\"$AUDITWHEEL_EXCLUDE\""         >> $CUR_DIR/variable.sh
 # Full array — kept for any downstream consumer that still needs it
 echo "export BUILD_SCRIPTS_JSON='$BUILD_SCRIPTS_JSON'"       >> $CUR_DIR/variable.sh
 # Per-UBI-major named exports — empty string when that UBI version has no script
