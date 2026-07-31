@@ -1657,6 +1657,14 @@ jobs:
           name: updated-package-cache-ubi8
       - name: Extract package cache
         run: tar -xzf package-cache.tar.gz
+      - name: Download scan-tools-cache
+        if: ${{ inputs.enable_grype == 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: scan-tools-cache
+      - name: Extract scan tools
+        if: ${{ inputs.enable_grype == 'true' }}
+        run: tar -xzf scan-tools-cache.tar.gz
       - name: Prepare scanner environment
         run: |
           source package-cache/variable.sh
@@ -1683,6 +1691,7 @@ jobs:
         if: ${{ inputs.enable_grype == 'true' }}
         run: |
           source package-cache/variable.sh; source package-cache/scanner-env.sh
+          export GRYPE_BIN="$GITHUB_WORKSPACE/scan-tools-bin/grype"
           chmod +x ./gha-script/scanner-scripts/grype_code_scan.sh
           bash ./gha-script/scanner-scripts/grype_code_scan.sh
           mkdir source_grype
@@ -1713,6 +1722,14 @@ jobs:
           name: updated-package-cache-ubi9
       - name: Extract package cache
         run: tar -xzf package-cache.tar.gz
+      - name: Download scan-tools-cache
+        if: ${{ inputs.enable_grype == 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: scan-tools-cache
+      - name: Extract scan tools
+        if: ${{ inputs.enable_grype == 'true' }}
+        run: tar -xzf scan-tools-cache.tar.gz
       - name: Prepare scanner environment
         run: |
           source package-cache/variable.sh
@@ -1739,6 +1756,7 @@ jobs:
         if: ${{ inputs.enable_grype == 'true' }}
         run: |
           source package-cache/variable.sh; source package-cache/scanner-env.sh
+          export GRYPE_BIN="$GITHUB_WORKSPACE/scan-tools-bin/grype"
           chmod +x ./gha-script/scanner-scripts/grype_code_scan.sh
           bash ./gha-script/scanner-scripts/grype_code_scan.sh
           mkdir source_grype
@@ -1769,6 +1787,14 @@ jobs:
           name: updated-package-cache-ubi10
       - name: Extract package cache
         run: tar -xzf package-cache.tar.gz
+      - name: Download scan-tools-cache
+        if: ${{ inputs.enable_grype == 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: scan-tools-cache
+      - name: Extract scan tools
+        if: ${{ inputs.enable_grype == 'true' }}
+        run: tar -xzf scan-tools-cache.tar.gz
       - name: Prepare scanner environment
         run: |
           source package-cache/variable.sh
@@ -1795,6 +1821,7 @@ jobs:
         if: ${{ inputs.enable_grype == 'true' }}
         run: |
           source package-cache/variable.sh; source package-cache/scanner-env.sh
+          export GRYPE_BIN="$GITHUB_WORKSPACE/scan-tools-bin/grype"
           chmod +x ./gha-script/scanner-scripts/grype_code_scan.sh
           bash ./gha-script/scanner-scripts/grype_code_scan.sh
           mkdir source_grype
@@ -1864,6 +1891,14 @@ jobs:
           name: package-cache-with-image
       - name: Extract package cache
         run: tar -xzf package-cache.tar.gz
+      - name: Download scan-tools-cache
+        if: ${{ inputs.enable_grype == 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: scan-tools-cache
+      - name: Extract scan tools
+        if: ${{ inputs.enable_grype == 'true' }}
+        run: tar -xzf scan-tools-cache.tar.gz
       - name: Load Docker Image
         run: |
           source package-cache/variable.sh; source package-cache/scanner-env.sh
@@ -1888,6 +1923,7 @@ jobs:
         if: ${{ inputs.enable_grype == 'true' }}
         run: |
           source package-cache/variable.sh; source package-cache/scanner-env.sh
+          export GRYPE_BIN="$GITHUB_WORKSPACE/scan-tools-bin/grype"
           chmod +x ./gha-script/scanner-scripts/grype_image_scan.sh
           bash ./gha-script/scanner-scripts/grype_image_scan.sh
           mkdir image_grype
