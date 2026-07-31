@@ -25,7 +25,7 @@ PACKAGE_URL=https://github.com/scikit-learn/scikit-learn.git
 yum install -y python3.11 python3.11-pip python3.11-devel gcc gcc-c++ gcc-gfortran gcc-toolset-13 git
 yum install -y openblas-devel --enablerepo=codeready-builder-for-rhel-8-ppc64le-rpms
 
-source /opt/rh/gcc-toolset-10/enable
+source /opt/rh/gcc-toolset-13/enable
 
 OS_NAME=$(cat /etc/os-release | grep ^PRETTY_NAME | cut -d= -f2)
 
