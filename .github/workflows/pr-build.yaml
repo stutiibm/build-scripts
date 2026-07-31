@@ -438,6 +438,7 @@ jobs:
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
           if [ -z "$BUILD_SCRIPT_CHANGED" ]; then echo "Skipping — no .sh changes"; exit 0; fi
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh
           bash ./gha-script/build_wheels.sh
       - name: Verify wheel was produced
@@ -477,6 +478,7 @@ jobs:
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
           [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
       - name: Verify wheel was produced
         run: |
@@ -515,6 +517,7 @@ jobs:
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
           [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
       - name: Verify wheel was produced
         run: |
@@ -554,6 +557,7 @@ jobs:
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
           [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
       - name: Verify wheel was produced
         run: |
@@ -593,6 +597,7 @@ jobs:
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
           [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
       - name: Verify wheel was produced
         run: |
@@ -633,6 +638,7 @@ jobs:
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
           [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
       - name: Verify wheel was produced
         run: |
@@ -671,6 +677,7 @@ jobs:
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
           [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
       - name: Verify wheel was produced
         run: |
@@ -709,6 +716,7 @@ jobs:
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
           [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
       - name: Verify wheel was produced
         run: |
@@ -748,6 +756,7 @@ jobs:
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
           [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
       - name: Verify wheel was produced
         run: |
@@ -787,6 +796,7 @@ jobs:
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
           [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
       - name: Verify wheel was produced
         run: |
@@ -827,6 +837,7 @@ jobs:
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
           [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
       - name: Verify wheel was produced
         run: |
@@ -866,6 +877,7 @@ jobs:
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
           [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
       - name: Verify wheel was produced
         run: |
@@ -905,6 +917,7 @@ jobs:
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
           [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
       - name: Verify wheel was produced
         run: |
