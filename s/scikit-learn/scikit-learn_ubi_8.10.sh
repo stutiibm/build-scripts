@@ -22,7 +22,7 @@ PACKAGE_NAME=scikit-learn
 PACKAGE_VERSION=${1:-1.5.0}
 PACKAGE_URL=https://github.com/scikit-learn/scikit-learn.git
 
-yum install -y python3.11 python3.11-pip python3.11-devel gcc gcc-c++ gcc-gfortran gcc-toolset-10 git
+yum install -y python3.11 python3.11-pip python3.11-devel gcc gcc-c++ gcc-gfortran gcc-toolset-13 git
 yum install -y openblas-devel --enablerepo=codeready-builder-for-rhel-8-ppc64le-rpms
 
 source /opt/rh/gcc-toolset-10/enable
