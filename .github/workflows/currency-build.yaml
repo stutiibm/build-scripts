@@ -412,21 +412,12 @@ jobs:
   # ---------------------------------------------------------------------------
 
   wheel_license_extract_ubi8:
-    needs:
-      - wheel_build_ubi8_py310
-      - wheel_build_ubi8_py311
-      - wheel_build_ubi8_py312
-      - wheel_build_ubi8_py313
-      - wheel_build_ubi8_py314
+    needs: [build_info, wheel_build]
     if: |
       always() &&
       inputs.wheel_build == 'true' &&
       needs.build_info.outputs.script_ubi8 != '' &&
-      (needs.wheel_build_ubi8_py310.result == 'success' ||
-       needs.wheel_build_ubi8_py311.result == 'success' ||
-       needs.wheel_build_ubi8_py312.result == 'success' ||
-       needs.wheel_build_ubi8_py313.result == 'success' ||
-       needs.wheel_build_ubi8_py314.result == 'success')
+      needs.wheel_build.result == 'success'
     runs-on: ubuntu-24.04-ppc64le-p10
     steps:
       - uses: actions/checkout@v4
@@ -462,21 +453,12 @@ jobs:
           done
 
   wheel_license_extract_ubi9:
-    needs:
-      - wheel_build_ubi9_py310
-      - wheel_build_ubi9_py311
-      - wheel_build_ubi9_py312
-      - wheel_build_ubi9_py313
-      - wheel_build_ubi9_py314
+    needs: [build_info, wheel_build]
     if: |
       always() &&
       inputs.wheel_build == 'true' &&
       needs.build_info.outputs.script_ubi9 != '' &&
-      (needs.wheel_build_ubi9_py310.result == 'success' ||
-       needs.wheel_build_ubi9_py311.result == 'success' ||
-       needs.wheel_build_ubi9_py312.result == 'success' ||
-       needs.wheel_build_ubi9_py313.result == 'success' ||
-       needs.wheel_build_ubi9_py314.result == 'success')
+      needs.wheel_build.result == 'success'
     runs-on: ubuntu-24.04-ppc64le-p10
     steps:
       - uses: actions/checkout@v4
@@ -512,17 +494,12 @@ jobs:
           done
 
   wheel_license_extract_ubi10:
-    needs:
-      - wheel_build_ubi10_py312
-      - wheel_build_ubi10_py313
-      - wheel_build_ubi10_py314
+    needs: [build_info, wheel_build]
     if: |
       always() &&
       inputs.wheel_build == 'true' &&
       needs.build_info.outputs.script_ubi10 != '' &&
-      (needs.wheel_build_ubi10_py312.result == 'success' ||
-       needs.wheel_build_ubi10_py313.result == 'success' ||
-       needs.wheel_build_ubi10_py314.result == 'success')
+      needs.wheel_build.result == 'success'
     runs-on: ubuntu-24.04-ppc64le-p10
     steps:
       - uses: actions/checkout@v4
