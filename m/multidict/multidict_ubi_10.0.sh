@@ -2,9 +2,9 @@
 # -----------------------------------------------------------------------------
 #
 # Package          : multidict
-# Version          : 6.0.2
+# Version          : v6.4.0
 # Source repo      : https://github.com/aio-libs/multidict.git
-# Tested on        : UBI:9.3
+# Tested on        : UBI:10.0
 # Language         : Python
 # Ci-Check     : True
 # Script License   : Apache License, Version 2 or later
@@ -16,27 +16,26 @@
 #                    package and/or distribution. In such case, please
 #                    contact "Maintainer" of this script.
 #
-# ---------------------------------------------------------------------------
-
+# -----------------------------------------------------------------------------
 
 # Variables
 PACKAGE_NAME=multidict
-PACKAGE_VERSION=${1:-v6.0.2}
+PACKAGE_VERSION=${1:-v6.4.0}
 PACKAGE_URL=https://github.com/aio-libs/multidict.git
 
 # Install dependencies
-yum install -y git gcc gcc-c++ make wget openssl-devel bzip2-devel libffi-devel zlib-devel python-devel python-pip cmake
+yum install -y git gcc gcc-c++ make wget openssl-devel bzip2-devel libffi-devel zlib-devel python3-devel python3-pip cmake
 
 # Clone the repository
 git clone $PACKAGE_URL
-cd $PACKAGE_NAME  # Change directory to the cloned repository
-git checkout $PACKAGE_VERSION  # Checkout the specified version
+cd $PACKAGE_NAME
+git checkout $PACKAGE_VERSION
 
-# install necessary Python packages
-pip install --upgrade pip setuptools wheel
-pip install "coverage==7.5.4" "pytest-cov==5.0.0" objgraph psutil pytest-codspeed
+# Install necessary Python packages
+pip3 install --upgrade pip setuptools wheel
+pip3 install "coverage==7.5.4" "pytest-cov==5.0.0" objgraph psutil pytest-codspeed
 
-#install
+# Install
 if ! (python3 setup.py install) ; then
     echo "------------------$PACKAGE_NAME:Install_fails-------------------------------------"
     echo "$PACKAGE_URL $PACKAGE_NAME"
