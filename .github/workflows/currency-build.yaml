@@ -205,7 +205,10 @@ jobs:
   # ---------------------------------------------------------------------------
   build_package:
     needs: build_info
-    if: ${{ inputs.validate_build_script == 'true' }}
+    # Job-level if: guards against both the validate flag AND an empty script_json.
+    # This prevents fromJson("") in the env: block from crashing when a package
+    # has no script for a particular UBI version.
+    if: ${{ inputs.validate_build_script == 'true' && matrix.script_json != '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -216,19 +219,12 @@ jobs:
             script_json: ${{ needs.build_info.outputs.script_ubi9 }}
           - ubi: 10
             script_json: ${{ needs.build_info.outputs.script_ubi10 }}
-    # Skip this matrix row when the UBI version has no script for this package
-    # (script_json is an empty string "" in that case).
     runs-on: ${{ inputs.large-runner-label != '' && inputs.large-runner-label || 'ubuntu-24.04-ppc64le-p10' }}
     env:
       BUILD_SCRIPT: ${{ fromJson(matrix.script_json).script }}
       TESTED_ON:    ${{ fromJson(matrix.script_json).tested_on }}
     steps:
       - uses: actions/checkout@v4
-      - name: Skip if no script for this UBI version
-        if: ${{ matrix.script_json == '' }}
-        run: |
-          echo "No script for UBI${{ matrix.ubi }} — skipping."
-          exit 0
       - name: Download package-cache
         uses: actions/download-artifact@v4
         with:
@@ -278,7 +274,9 @@ jobs:
   # ---------------------------------------------------------------------------
   wheel_build:
     needs: [build_info, install_scan_tools]
-    if: ${{ inputs.wheel_build == 'true' }}
+    # Job-level if: guards against an empty script_json for this UBI version,
+    # preventing fromJson("") in the env: block from crashing at job startup.
+    if: ${{ inputs.wheel_build == 'true' && matrix.script_json != '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -313,11 +311,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Skip if no script for this UBI version
-        if: ${{ matrix.script_json == '' }}
-        run: |
-          echo "No script for UBI${{ matrix.ubi }} — skipping."
-          exit 0
       - name: Install system dependencies
         run: sudo apt update -y
       - name: Download package-cache
