@@ -33,10 +33,10 @@ git checkout $PACKAGE_VERSION
 
 # Install necessary Python packages
 pip3 install --upgrade pip setuptools wheel
-pip3 install "coverage==7.5.4" "pytest-cov==5.0.0" objgraph psutil pytest-codspeed
+pip3 install "coverage==7.6.1" "pytest-cov==5.0.0" objgraph psutil pytest-codspeed
 
-# Install
-if ! (python3 setup.py install) ; then
+# Install via pip (setup.py install is not supported by multidict v6.4.0's meson-python build system)
+if ! pip3 install . ; then
     echo "------------------$PACKAGE_NAME:Install_fails-------------------------------------"
     echo "$PACKAGE_URL $PACKAGE_NAME"
     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_Fails"

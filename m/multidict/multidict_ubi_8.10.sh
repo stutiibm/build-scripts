@@ -24,7 +24,8 @@ PACKAGE_VERSION=${1:-v6.4.0}
 PACKAGE_URL=https://github.com/aio-libs/multidict.git
 
 # Install dependencies
-yum install -y git gcc gcc-c++ make wget openssl-devel bzip2-devel libffi-devel zlib-devel python3-devel python3-pip cmake
+# python311 from AppStream is required: multidict v6.4.0 and coverage>=7 both need Python>=3.9
+yum install -y git gcc gcc-c++ make wget openssl-devel bzip2-devel libffi-devel zlib-devel python311 python3.11-devel python3.11-pip cmake
 
 # Clone the repository
 git clone $PACKAGE_URL
@@ -32,11 +33,11 @@ cd $PACKAGE_NAME
 git checkout $PACKAGE_VERSION
 
 # Install necessary Python packages
-pip3 install --upgrade pip setuptools wheel
-pip3 install "coverage==7.5.4" "pytest-cov==5.0.0" objgraph psutil pytest-codspeed
+pip3.11 install --upgrade pip setuptools wheel
+pip3.11 install "coverage==7.5.4" "pytest-cov==5.0.0" objgraph psutil pytest-codspeed
 
-# Install
-if ! (python3 setup.py install) ; then
+# Install via pip (setup.py install is not supported by multidict v6.4.0's meson-python build system)
+if ! pip3.11 install . ; then
     echo "------------------$PACKAGE_NAME:Install_fails-------------------------------------"
     echo "$PACKAGE_URL $PACKAGE_NAME"
     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_Fails"
@@ -44,7 +45,7 @@ if ! (python3 setup.py install) ; then
 fi
 
 # Run tests
-if ! pytest --deselect=tests/test_mutable_multidict.py::TestCIMutableMultiDict::test_add --ignore=tests/test_circular_imports.py; then
+if ! python3.11 -m pytest --deselect=tests/test_mutable_multidict.py::TestCIMutableMultiDict::test_add --ignore=tests/test_circular_imports.py; then
     echo "------------------$PACKAGE_NAME:Install_success_but_test_fails---------------------"
     echo "$PACKAGE_URL $PACKAGE_NAME"
     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_success_but_test_Fails"
