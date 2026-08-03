@@ -321,13 +321,12 @@ jobs:
   # ---------------------------------------------------------------------------
   # build_package: replaces build_ubi8 / build_ubi9 / build_ubi10.
   # One matrix row per UBI major version, all three run in parallel.
-  # Each row carries the pre-resolved script_json so no dynamic key lookup
-  # on needs.outputs is needed at step time.
-  # A skip step exits cleanly when script_json == '' (no script for that UBI).
+  # Job-level if: includes matrix.script_json != '' to prevent fromJson("")
+  # crashing the env: block when a package has no script for a UBI version.
   # ---------------------------------------------------------------------------
   build_package:
     needs: build_info
-    if: ${{ needs.build_info.outputs.build_package_enabled == 'true' }}
+    if: ${{ needs.build_info.outputs.build_package_enabled == 'true' && matrix.script_json != '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -346,11 +345,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      - name: Skip if no script for this UBI version
-        if: ${{ matrix.script_json == '' }}
-        run: |
-          echo "No script for UBI${{ matrix.ubi }} — skipping."
-          exit 0
       - name: Download package-cache
         uses: actions/download-artifact@v4
         with:
@@ -371,11 +365,13 @@ jobs:
   # One matrix row per (ubi, python-version) combination.
   # UBI10 does not support py3.10 / py3.11 — those rows are absent.
   # coe=true on py313/py314 rows preserves continue-on-error: true behaviour.
+  # Job-level if: includes matrix.script_json != '' to prevent fromJson("")
+  # crashing the env: block when a package has no script for that UBI version.
   # PR builds do not run scan or upload steps (ENABLE_CVE_SCAN=false).
   # ---------------------------------------------------------------------------
   wheel_build:
     needs: build_info
-    if: ${{ needs.build_info.outputs.wheel_build_enabled == 'true' }}
+    if: ${{ needs.build_info.outputs.wheel_build_enabled == 'true' && matrix.script_json != '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -407,11 +403,6 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
-      - name: Skip if no script for this UBI version
-        if: ${{ matrix.script_json == '' }}
-        run: |
-          echo "No script for UBI${{ matrix.ubi }} — skipping."
-          exit 0
       - name: Install system dependencies
         run: sudo apt update -y
       - name: Download package-cache
