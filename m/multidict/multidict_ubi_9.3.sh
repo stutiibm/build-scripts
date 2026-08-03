@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 #
 # Package          : multidict
-# Version          : 6.0.2
+# Version          : v6.0.2
 # Source repo      : https://github.com/aio-libs/multidict.git
 # Tested on        : UBI:9.3
 # Language         : Python
