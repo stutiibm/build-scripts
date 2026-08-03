@@ -66,11 +66,11 @@ jobs:
 
           if [ -n "$RELEVANT_CHANGES" ]; then
             echo "should_build=true" >> $GITHUB_OUTPUT
-            echo "✅ Found relevant changes:"
+            echo "Found relevant changes:"
             echo "$RELEVANT_CHANGES"
           else
             echo "should_build=false" >> $GITHUB_OUTPUT
-            echo "⏭️ Skipping PR build CI check - no changes related to build_info.json, build scripts (.sh), or Dockerfile"
+            echo "Skipping PR build CI check - no changes related to build_info.json, build scripts (.sh), or Dockerfile"
           fi
 
   build_info:
@@ -83,7 +83,7 @@ jobs:
       has_dockerfile_changes: ${{ steps.set_flags.outputs.has_dockerfile_changes }}
       docker_build_enabled:   ${{ steps.set_flags.outputs.docker_build_enabled }}
       build_package_enabled:  ${{ steps.set_flags.outputs.build_package_enabled }}
-      # Per-UBI-major named outputs — each is a {script,tested_on} JSON object or ""
+      # Per-UBI-major named outputs  -  each is a {script,tested_on} JSON object or ""
       script_ubi8:  ${{ steps.emit.outputs.script_ubi8 }}
       script_ubi9:  ${{ steps.emit.outputs.script_ubi9 }}
       script_ubi10: ${{ steps.emit.outputs.script_ubi10 }}
@@ -151,7 +151,7 @@ jobs:
           # Reuse changed files from check_changes job
           CHANGED_FILES="${{ needs.check_changes.outputs.changed_files }}"
 
-          # If workflow_dispatch, check_changes did not compute changed_files — fetch them now
+          # If workflow_dispatch, check_changes did not compute changed_files  -  fetch them now
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             git fetch origin ${{ github.base_ref }} --depth=1
             CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
@@ -179,6 +179,37 @@ jobs:
 
           PACKAGE_NAME=$(jq -r '.package_name // ""' $BUILD_INFO_FILE)
           VERSION=$(jq -r '.version // ""' $BUILD_INFO_FILE)
+
+          # If any changed .sh file belongs to a non-default version block, use
+          # that block's version so read_buildinfo.sh loads the correct build_script
+          # array (e.g. PR adds ubi8 + ubi10 scripts for v6.4.0 while the top-level
+          # .version field still points to v6.0.2).
+          CHANGED_SH=$(echo "$CHANGED_FILES" | grep '\.sh$' || true)
+          if [ -n "$CHANGED_SH" ]; then
+            # Iterate every string key in build_info.json that is not a known scalar
+            # field name, then check if its build_script list contains a changed file.
+            SCALAR_KEYS='package_name|version|package_dir|wheel_build|docker_build|validate_build_script|base_docker_image|base_docker_variant|use_non_root_user|auditwheel_exclude'
+            VERSION_KEYS=$(jq -r 'keys[] | select(test("^('"$SCALAR_KEYS"')$") | not)' "$BUILD_INFO_FILE" 2>/dev/null || true)
+            for ver_key in $VERSION_KEYS; do
+              # Get the build_script value for this version block (string or array)
+              bs=$(jq -c --arg k "$ver_key" '.[$k].build_script // empty' "$BUILD_INFO_FILE" 2>/dev/null || true)
+              [ -z "$bs" ] && continue
+              # Normalise to a newline-separated list of bare script names
+              if echo "$bs" | jq -e 'type == "array"' >/dev/null 2>&1; then
+                scripts=$(echo "$bs" | jq -r '.[]')
+              else
+                scripts=$(echo "$bs" | tr -d '"')
+              fi
+              # Check if any changed .sh matches any script in this version block
+              for s in $scripts; do
+                if echo "$CHANGED_SH" | grep -qF "$s"; then
+                  echo "Changed script '$s' belongs to version block '$ver_key' - using that version instead of default '$VERSION'"
+                  VERSION="$ver_key"
+                  break 2
+                fi
+              done
+            done
+          fi
 
           echo "BUILD_INFO_FILE=$BUILD_INFO_FILE" >> $GITHUB_ENV
           echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
@@ -217,16 +248,16 @@ jobs:
         id: set_flags
         run: |
           if [ -z "$BUILD_INFO_FILE" ]; then
-            echo "❌ BUILD_INFO_FILE is not set — cannot determine job control flags"
+            echo "ERROR: BUILD_INFO_FILE is not set  -  cannot determine job control flags"
             exit 1
           fi
           if [ ! -f "$BUILD_INFO_FILE" ]; then
-            echo "❌ BUILD_INFO_FILE does not exist: $BUILD_INFO_FILE"
+            echo "ERROR: BUILD_INFO_FILE does not exist: $BUILD_INFO_FILE"
             exit 1
           fi
 
           PACKAGE_DIR=$(jq -r '.package_dir // ""' $BUILD_INFO_FILE)
-          # Strip trailing slash if present — prevents double-slash in regex (e.g. "m/multidict/" → "m/multidict")
+          # Strip trailing slash if present  -  prevents double-slash in regex (e.g. "m/multidict/" -> "m/multidict")
           PACKAGE_DIR="${PACKAGE_DIR%/}"
           WHEEL_BUILD=$(jq -r '.wheel_build // "false"' $BUILD_INFO_FILE)
 
@@ -246,10 +277,10 @@ jobs:
           # Set outputs for wheel builds
           if [ "$WHEEL_BUILD" == "true" ] && [ -n "$SH_SCRIPT_CHANGED" ]; then
             echo "wheel_build_enabled=true" >> $GITHUB_OUTPUT
-            echo "✅ Wheel builds will run (WHEEL_BUILD=true and .sh scripts changed)"
+            echo "Wheel builds will run (WHEEL_BUILD=true and .sh scripts changed)"
           else
             echo "wheel_build_enabled=false" >> $GITHUB_OUTPUT
-            echo "⏭️ Wheel builds will be skipped (WHEEL_BUILD=$WHEEL_BUILD, .sh changes: ${SH_SCRIPT_CHANGED:-none})"
+            echo "Wheel builds will be skipped (WHEEL_BUILD=$WHEEL_BUILD, .sh changes: ${SH_SCRIPT_CHANGED:-none})"
           fi
 
           # Set output for sh changes
@@ -263,7 +294,7 @@ jobs:
           if [ "$DOCKER_BUILD" == "true" ] && [ -n "$DOCKERFILE_CHANGED" ]; then
             echo "docker_build_enabled=true" >> $GITHUB_OUTPUT
             echo "has_dockerfile_changes=true" >> $GITHUB_OUTPUT
-            echo "✅ Docker build will run (BUILD_DOCKER=true and Dockerfile changed)"
+            echo "Docker build will run (BUILD_DOCKER=true and Dockerfile changed)"
           else
             echo "docker_build_enabled=false" >> $GITHUB_OUTPUT
             if [ -n "$DOCKERFILE_CHANGED" ]; then
@@ -271,17 +302,17 @@ jobs:
             else
               echo "has_dockerfile_changes=false" >> $GITHUB_OUTPUT
             fi
-            echo "⏭️ Docker build will be skipped (BUILD_DOCKER=$DOCKER_BUILD, Dockerfile changes: ${DOCKERFILE_CHANGED:-none})"
+            echo "Docker build will be skipped (BUILD_DOCKER=$DOCKER_BUILD, Dockerfile changes: ${DOCKERFILE_CHANGED:-none})"
           fi
 
           # Set output for build job (runs when build_info.json or .sh scripts change)
           BUILD_INFO_CHANGED=$(echo "$CHANGED_FILES" | grep 'build_info\.json' || true)
           if [ -n "$BUILD_INFO_CHANGED" ] || [ -n "$SH_SCRIPT_CHANGED" ]; then
             echo "build_package_enabled=true" >> $GITHUB_OUTPUT
-            echo "✅ Build package job will run (build_info.json or .sh scripts changed)"
+            echo "Build package job will run (build_info.json or .sh scripts changed)"
           else
             echo "build_package_enabled=false" >> $GITHUB_OUTPUT
-            echo "⏭️ Build package job will be skipped (no build_info.json or .sh script changes)"
+            echo "Build package job will be skipped (no build_info.json or .sh script changes)"
           fi
 
       - name: Create scanner-env.sh
@@ -298,14 +329,16 @@ jobs:
             DOCKER_BUILD="false"
           fi
 
-          cat <<EOF > package-cache/scanner-env.sh
-          export PACKAGE_NAME=$PACKAGE_NAME
-          export VERSION=$VERSION
-          export PACKAGE_DIR=$PACKAGE_DIR
-          export WHEEL_BUILD=$WHEEL_BUILD
-          export BUILD_DOCKER=$DOCKER_BUILD
-          export CHANGED_FILES="$CHANGED_FILES"
-          EOF
+          # Write scanner-env.sh without leading indentation spaces.
+          # CHANGED_FILES is written via a separate heredoc so its newlines are preserved.
+          {
+            echo "export PACKAGE_NAME=$PACKAGE_NAME"
+            echo "export VERSION=$VERSION"
+            echo "export PACKAGE_DIR=$PACKAGE_DIR"
+            echo "export WHEEL_BUILD=$WHEEL_BUILD"
+            echo "export BUILD_DOCKER=$DOCKER_BUILD"
+            printf 'export CHANGED_FILES=%q\n' "$CHANGED_FILES"
+          } > package-cache/scanner-env.sh
 
           mv variable.sh package-cache/
 
@@ -319,10 +352,9 @@ jobs:
            path: package-cache.tar.gz
 
   # ---------------------------------------------------------------------------
-  # ---------------------------------------------------------------------------
-  # BUILD JOBS — one per UBI major version.
+  # BUILD JOBS  -  one per UBI major version.
   # Runs execute_changed_scripts.py inside the correct UBI container.
-  # build_ubi9 always runs; build_ubi8/ubi10 only when script exists for that UBI.
+  # Each job only runs when a script exists for that UBI version.
   # All three are parallel (no inter-dependency).
   # ---------------------------------------------------------------------------
 
@@ -417,8 +449,9 @@ jobs:
           python3 -u ./gha-script/execute_changed_scripts.py
 
   # ---------------------------------------------------------------------------
-  # WHEEL BUILD JOBS — one job per UBI version per Python version.
-  # All parallel. UBI10 skips py310. PR builds do not run scan steps.
+  # WHEEL BUILD JOBS  -  one job per UBI version per Python version.
+  # All parallel. UBI10 supports py312-py314 only (py310/py311 not supported).
+  # PR builds do not run scan steps.
   # ---------------------------------------------------------------------------
 
   wheel_build_ubi8_py310:
@@ -446,20 +479,20 @@ jobs:
         run: |
           source package-cache/variable.sh
           source package-cache/scanner-env.sh
-          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping — WHEEL_BUILD=false"; exit 0; fi
+          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping  -  WHEEL_BUILD=false"; exit 0; fi
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
-          if [ -z "$BUILD_SCRIPT_CHANGED" ]; then echo "Skipping — no .sh changes"; exit 0; fi
+          if [ -z "$BUILD_SCRIPT_CHANGED" ]; then echo "Skipping  -  no .sh changes"; exit 0; fi
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh
           bash ./gha-script/build_wheels.sh
-      - name: Upload wheel to COS
+      - name: Verify wheel was produced
         run: |
           if ls *.whl 1>/dev/null 2>&1; then
-            sudo chmod a+r *.whl; WHEEL_FILE=$(ls *.whl); SHA256_VALUE=$(cat sha256.sha)
-            chmod +x ./gha-script/upload-scripts/upload_wheel.sh
-            bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE $SHA256_VALUE
+            echo "Wheel built successfully: $(ls *.whl)"
           else
-            echo "No wheel produced — skipping upload."
+            echo "No wheel produced."
+            exit 1
           fi
 
   wheel_build_ubi8_py311:
@@ -486,19 +519,19 @@ jobs:
       - name: Run build_wheels.sh
         run: |
           source package-cache/variable.sh; source package-cache/scanner-env.sh
-          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping — WHEEL_BUILD=false"; exit 0; fi
+          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping  -  WHEEL_BUILD=false"; exit 0; fi
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
-          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
+          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping  -  no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
-      - name: Upload wheel to COS
+      - name: Verify wheel was produced
         run: |
           if ls *.whl 1>/dev/null 2>&1; then
-            sudo chmod a+r *.whl; WHEEL_FILE=$(ls *.whl); SHA256_VALUE=$(cat sha256.sha)
-            chmod +x ./gha-script/upload-scripts/upload_wheel.sh
-            bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE $SHA256_VALUE
+            echo "Wheel built successfully: $(ls *.whl)"
           else
-            echo "No wheel produced — skipping upload."
+            echo "No wheel produced."
+            exit 1
           fi
 
   wheel_build_ubi8_py312:
@@ -525,19 +558,19 @@ jobs:
       - name: Run build_wheels.sh
         run: |
           source package-cache/variable.sh; source package-cache/scanner-env.sh
-          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping — WHEEL_BUILD=false"; exit 0; fi
+          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping  -  WHEEL_BUILD=false"; exit 0; fi
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
-          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
+          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping  -  no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
-      - name: Upload wheel to COS
+      - name: Verify wheel was produced
         run: |
           if ls *.whl 1>/dev/null 2>&1; then
-            sudo chmod a+r *.whl; WHEEL_FILE=$(ls *.whl); SHA256_VALUE=$(cat sha256.sha)
-            chmod +x ./gha-script/upload-scripts/upload_wheel.sh
-            bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE $SHA256_VALUE
+            echo "Wheel built successfully: $(ls *.whl)"
           else
-            echo "No wheel produced — skipping upload."
+            echo "No wheel produced."
+            exit 1
           fi
 
   wheel_build_ubi8_py313:
@@ -565,19 +598,19 @@ jobs:
       - name: Run build_wheels.sh
         run: |
           source package-cache/variable.sh; source package-cache/scanner-env.sh
-          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping — WHEEL_BUILD=false"; exit 0; fi
+          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping  -  WHEEL_BUILD=false"; exit 0; fi
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
-          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
+          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping  -  no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
-      - name: Upload wheel to COS
+      - name: Verify wheel was produced
         run: |
           if ls *.whl 1>/dev/null 2>&1; then
-            sudo chmod a+r *.whl; WHEEL_FILE=$(ls *.whl); SHA256_VALUE=$(cat sha256.sha)
-            chmod +x ./gha-script/upload-scripts/upload_wheel.sh
-            bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE $SHA256_VALUE
+            echo "Wheel built successfully: $(ls *.whl)"
           else
-            echo "No wheel produced — skipping upload."
+            echo "No wheel produced."
+            exit 1
           fi
 
   wheel_build_ubi8_py314:
@@ -605,19 +638,19 @@ jobs:
       - name: Run build_wheels.sh
         run: |
           source package-cache/variable.sh; source package-cache/scanner-env.sh
-          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping — WHEEL_BUILD=false"; exit 0; fi
+          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping  -  WHEEL_BUILD=false"; exit 0; fi
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
-          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
+          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping  -  no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
-      - name: Upload wheel to COS
+      - name: Verify wheel was produced
         run: |
           if ls *.whl 1>/dev/null 2>&1; then
-            sudo chmod a+r *.whl; WHEEL_FILE=$(ls *.whl); SHA256_VALUE=$(cat sha256.sha)
-            chmod +x ./gha-script/upload-scripts/upload_wheel.sh
-            bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE $SHA256_VALUE
+            echo "Wheel built successfully: $(ls *.whl)"
           else
-            echo "No wheel produced — skipping upload."
+            echo "No wheel produced."
+            exit 1
           fi
 
   # UBI9 wheel jobs -----------------------------------------------------------
@@ -646,19 +679,19 @@ jobs:
       - name: Run build_wheels.sh
         run: |
           source package-cache/variable.sh; source package-cache/scanner-env.sh
-          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping — WHEEL_BUILD=false"; exit 0; fi
+          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping  -  WHEEL_BUILD=false"; exit 0; fi
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
-          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
+          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping  -  no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
-      - name: Upload wheel to COS
+      - name: Verify wheel was produced
         run: |
           if ls *.whl 1>/dev/null 2>&1; then
-            sudo chmod a+r *.whl; WHEEL_FILE=$(ls *.whl); SHA256_VALUE=$(cat sha256.sha)
-            chmod +x ./gha-script/upload-scripts/upload_wheel.sh
-            bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE $SHA256_VALUE
+            echo "Wheel built successfully: $(ls *.whl)"
           else
-            echo "No wheel produced — skipping upload."
+            echo "No wheel produced."
+            exit 1
           fi
 
   wheel_build_ubi9_py311:
@@ -685,19 +718,19 @@ jobs:
       - name: Run build_wheels.sh
         run: |
           source package-cache/variable.sh; source package-cache/scanner-env.sh
-          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping — WHEEL_BUILD=false"; exit 0; fi
+          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping  -  WHEEL_BUILD=false"; exit 0; fi
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
-          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
+          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping  -  no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
-      - name: Upload wheel to COS
+      - name: Verify wheel was produced
         run: |
           if ls *.whl 1>/dev/null 2>&1; then
-            sudo chmod a+r *.whl; WHEEL_FILE=$(ls *.whl); SHA256_VALUE=$(cat sha256.sha)
-            chmod +x ./gha-script/upload-scripts/upload_wheel.sh
-            bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE $SHA256_VALUE
+            echo "Wheel built successfully: $(ls *.whl)"
           else
-            echo "No wheel produced — skipping upload."
+            echo "No wheel produced."
+            exit 1
           fi
 
   wheel_build_ubi9_py312:
@@ -724,19 +757,19 @@ jobs:
       - name: Run build_wheels.sh
         run: |
           source package-cache/variable.sh; source package-cache/scanner-env.sh
-          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping — WHEEL_BUILD=false"; exit 0; fi
+          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping  -  WHEEL_BUILD=false"; exit 0; fi
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
-          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
+          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping  -  no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
-      - name: Upload wheel to COS
+      - name: Verify wheel was produced
         run: |
           if ls *.whl 1>/dev/null 2>&1; then
-            sudo chmod a+r *.whl; WHEEL_FILE=$(ls *.whl); SHA256_VALUE=$(cat sha256.sha)
-            chmod +x ./gha-script/upload-scripts/upload_wheel.sh
-            bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE $SHA256_VALUE
+            echo "Wheel built successfully: $(ls *.whl)"
           else
-            echo "No wheel produced — skipping upload."
+            echo "No wheel produced."
+            exit 1
           fi
 
   wheel_build_ubi9_py313:
@@ -764,19 +797,19 @@ jobs:
       - name: Run build_wheels.sh
         run: |
           source package-cache/variable.sh; source package-cache/scanner-env.sh
-          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping — WHEEL_BUILD=false"; exit 0; fi
+          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping  -  WHEEL_BUILD=false"; exit 0; fi
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
-          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
+          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping  -  no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
-      - name: Upload wheel to COS
+      - name: Verify wheel was produced
         run: |
           if ls *.whl 1>/dev/null 2>&1; then
-            sudo chmod a+r *.whl; WHEEL_FILE=$(ls *.whl); SHA256_VALUE=$(cat sha256.sha)
-            chmod +x ./gha-script/upload-scripts/upload_wheel.sh
-            bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE $SHA256_VALUE
+            echo "Wheel built successfully: $(ls *.whl)"
           else
-            echo "No wheel produced — skipping upload."
+            echo "No wheel produced."
+            exit 1
           fi
 
   wheel_build_ubi9_py314:
@@ -804,61 +837,22 @@ jobs:
       - name: Run build_wheels.sh
         run: |
           source package-cache/variable.sh; source package-cache/scanner-env.sh
-          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping — WHEEL_BUILD=false"; exit 0; fi
+          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping  -  WHEEL_BUILD=false"; exit 0; fi
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
-          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
+          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping  -  no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
-      - name: Upload wheel to COS
+      - name: Verify wheel was produced
         run: |
           if ls *.whl 1>/dev/null 2>&1; then
-            sudo chmod a+r *.whl; WHEEL_FILE=$(ls *.whl); SHA256_VALUE=$(cat sha256.sha)
-            chmod +x ./gha-script/upload-scripts/upload_wheel.sh
-            bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE $SHA256_VALUE
+            echo "Wheel built successfully: $(ls *.whl)"
           else
-            echo "No wheel produced — skipping upload."
+            echo "No wheel produced."
+            exit 1
           fi
 
-  # UBI10 wheel jobs (py311–py314 only) ----------------------------------------
-
-  wheel_build_ubi10_py311:
-    needs: build_info
-    if: ${{ needs.build_info.outputs.wheel_build_enabled == 'true' && needs.build_info.outputs.script_ubi10 != '' }}
-    runs-on: ${{ github.event_name == 'workflow_dispatch' && inputs.large-runner || 'ubuntu-24.04-ppc64le-p10' }}
-    env:
-      PYTHON_VERSION: "3.11"
-      BUILD_SCRIPT: ${{ fromJson(needs.build_info.outputs.script_ubi10).script }}
-      TESTED_ON:    ${{ fromJson(needs.build_info.outputs.script_ubi10).tested_on }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
-      - name: Install system dependencies
-        run: sudo apt update -y
-      - name: Download package-cache
-        uses: actions/download-artifact@v4
-        with:
-          name: package-cache
-      - name: Extract package cache
-        run: tar -xzf package-cache.tar.gz
-      - name: Run build_wheels.sh
-        run: |
-          source package-cache/variable.sh; source package-cache/scanner-env.sh
-          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping — WHEEL_BUILD=false"; exit 0; fi
-          BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
-          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
-          sudo chown -R $USER:$USER .
-          chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
-      - name: Upload wheel to COS
-        run: |
-          if ls *.whl 1>/dev/null 2>&1; then
-            sudo chmod a+r *.whl; WHEEL_FILE=$(ls *.whl); SHA256_VALUE=$(cat sha256.sha)
-            chmod +x ./gha-script/upload-scripts/upload_wheel.sh
-            bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE $SHA256_VALUE
-          else
-            echo "No wheel produced — skipping upload."
-          fi
+  # UBI10 wheel jobs (py312-py314 only  -  py310/py311 not supported on UBI10) ----
 
   wheel_build_ubi10_py312:
     needs: build_info
@@ -884,19 +878,19 @@ jobs:
       - name: Run build_wheels.sh
         run: |
           source package-cache/variable.sh; source package-cache/scanner-env.sh
-          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping — WHEEL_BUILD=false"; exit 0; fi
+          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping  -  WHEEL_BUILD=false"; exit 0; fi
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
-          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
+          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping  -  no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
-      - name: Upload wheel to COS
+      - name: Verify wheel was produced
         run: |
           if ls *.whl 1>/dev/null 2>&1; then
-            sudo chmod a+r *.whl; WHEEL_FILE=$(ls *.whl); SHA256_VALUE=$(cat sha256.sha)
-            chmod +x ./gha-script/upload-scripts/upload_wheel.sh
-            bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE $SHA256_VALUE
+            echo "Wheel built successfully: $(ls *.whl)"
           else
-            echo "No wheel produced — skipping upload."
+            echo "No wheel produced."
+            exit 1
           fi
 
   wheel_build_ubi10_py313:
@@ -924,19 +918,19 @@ jobs:
       - name: Run build_wheels.sh
         run: |
           source package-cache/variable.sh; source package-cache/scanner-env.sh
-          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping — WHEEL_BUILD=false"; exit 0; fi
+          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping  -  WHEEL_BUILD=false"; exit 0; fi
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
-          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
+          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping  -  no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
-      - name: Upload wheel to COS
+      - name: Verify wheel was produced
         run: |
           if ls *.whl 1>/dev/null 2>&1; then
-            sudo chmod a+r *.whl; WHEEL_FILE=$(ls *.whl); SHA256_VALUE=$(cat sha256.sha)
-            chmod +x ./gha-script/upload-scripts/upload_wheel.sh
-            bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE $SHA256_VALUE
+            echo "Wheel built successfully: $(ls *.whl)"
           else
-            echo "No wheel produced — skipping upload."
+            echo "No wheel produced."
+            exit 1
           fi
 
   wheel_build_ubi10_py314:
@@ -964,23 +958,23 @@ jobs:
       - name: Run build_wheels.sh
         run: |
           source package-cache/variable.sh; source package-cache/scanner-env.sh
-          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping — WHEEL_BUILD=false"; exit 0; fi
+          if [ "$WHEEL_BUILD" != "true" ]; then echo "Skipping  -  WHEEL_BUILD=false"; exit 0; fi
           BUILD_SCRIPT_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^$PACKAGE_DIR/.*\.sh$" || true)
-          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping — no .sh changes" && exit 0
+          [ -z "$BUILD_SCRIPT_CHANGED" ] && echo "Skipping  -  no .sh changes" && exit 0
           sudo chown -R $USER:$USER .
+          export ENABLE_CVE_SCAN=false
           chmod +x ./gha-script/build_wheels.sh; bash ./gha-script/build_wheels.sh
-      - name: Upload wheel to COS
+      - name: Verify wheel was produced
         run: |
           if ls *.whl 1>/dev/null 2>&1; then
-            sudo chmod a+r *.whl; WHEEL_FILE=$(ls *.whl); SHA256_VALUE=$(cat sha256.sha)
-            chmod +x ./gha-script/upload-scripts/upload_wheel.sh
-            bash ./gha-script/upload-scripts/upload_wheel.sh $WHEEL_FILE $SHA256_VALUE
+            echo "Wheel built successfully: $(ls *.whl)"
           else
-            echo "No wheel produced — skipping upload."
+            echo "No wheel produced."
+            exit 1
           fi
 
   # ---------------------------------------------------------------------------
-  # build_docker — only when Dockerfile changed and docker_build=true in build_info
+  # build_docker  -  only when Dockerfile changed and docker_build=true in build_info
   # ---------------------------------------------------------------------------
   build_docker:
     needs: build_info
