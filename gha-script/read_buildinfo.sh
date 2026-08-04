@@ -96,34 +96,7 @@ if [ -f $config_file ]; then
   fi
 fi
 
-#   #Getting specific build_script name for version
-#   if [[ $(jq --arg ver "$match_version" '.[$ver]' $config_file) != null ]]; then
-#     if [[ $(jq -r --arg ver "$match_version" '.[$ver].build_script' $config_file) != null ]]; then
-#       build_script=$(jq -r --arg ver "$match_version" '.[$ver].build_script' $config_file)
-#     fi
-#     if [[ $(jq -r --arg ver "$match_version" '.[$ver].base_docker_image' $config_file) != null ]]; then
-#       basename=$(jq -r --arg ver "$match_version" '.[$ver].base_docker_image' $config_file)
-#     fi
-#     if [[ $(jq -r --arg ver "$match_version" '.[$ver].base_docker_variant' $config_file) != null ]]; then
-#       variant_str=$(jq -r --arg ver "$match_version" '.[$ver].base_docker_variant' $config_file)
-#       case "$variant_str" in
-#         "rhel")
-#           variant=1
-#           ;;
-#         "ubuntu")
-#           variant=2
-#           ;;
-#         "alpine")
-#           variant=3
-#           ;;
-#         *)
-#           echo "No valid distro variant, picking default one"
-#           variant=1
-#           ;;
-#       esac
-#     fi
-#   fi
-# fi
+
 
 # ---------------------------------------------------------------------------
 # Helper: read "# Tested on" from a single build script file.
