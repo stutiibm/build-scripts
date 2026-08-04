@@ -4,9 +4,9 @@
 # Package       : ml_dtypes
 # Version       : v0.5.4
 # Source repo   : https://github.com/jax-ml/ml_dtypes.git
-# Tested on     : UBI:9.6
+# Tested on     : UBI:10.2
 # Language      : Python, C
-# Ci-Check  : True
+# Ci-Check      : True
 # Script License: Apache License, Version 2 or later
 # Maintainer    : Haritha Nagothu <haritha.nagothu2@ibm.com>
 # Disclaimer: This script has been tested in root mode on given
@@ -17,16 +17,38 @@
 #
 # ----------------------------------------------------------------------------
 
-yum install -y python python-pip python-devel git cmake gcc-toolset-13 wget
-export PATH=/opt/rh/gcc-toolset-13/root/usr/bin:$PATH
-
 PACKAGE_NAME=ml_dtypes
 PACKAGE_DIR=ml_dtypes
 PACKAGE_VERSION=${1:-v0.5.4}
 PACKAGE_URL=https://github.com/jax-ml/ml_dtypes.git
+CURRENT_DIR=$(pwd)
 
-#clone and install openblas from source
+# Install system dependencies
+# UBI 10: gcc-toolset-15 replaces gcc-toolset-13; python3.12 replaces python/python-devel
+dnf install -y python3.12 python3.12-devel python3.12-pip \
+    git cmake make wget \
+    gcc-toolset-15 gcc-toolset-15-gcc gcc-toolset-15-gcc-c++ \
+    gcc-toolset-15-gcc-gfortran
 
+# Configure GCC Toolset 15
+# UBI 10 dropped SCL (Software Collections Layer), so there is no 'scl enable'
+# command. Activate the toolset by prepending its bin to PATH directly.
+if [[ -f /opt/rh/gcc-toolset-15/enable ]]; then
+    source /opt/rh/gcc-toolset-15/enable
+elif [[ -d /opt/rh/gcc-toolset-15/root/usr/bin ]]; then
+    export PATH="/opt/rh/gcc-toolset-15/root/usr/bin:$PATH"
+    export LD_LIBRARY_PATH="/opt/rh/gcc-toolset-15/root/usr/lib64:${LD_LIBRARY_PATH}"
+else
+    echo "ERROR: gcc-toolset-15 not found"
+    exit 1
+fi
+
+echo "Using gcc: $(gcc --version | head -1)"
+
+# Upgrade pip and install base build tools
+python3.12 -m pip install --upgrade pip setuptools wheel
+
+# clone and install openblas from source
 git clone https://github.com/OpenMathLib/OpenBLAS
 cd OpenBLAS
 git checkout v0.3.29
@@ -73,10 +95,14 @@ build_opts+=(NUM_THREADS=8)
 build_opts+=(NO_AFFINITY=1)
 
 # Build OpenBLAS
-make -j8 ${build_opts[@]} CFLAGS="${CF}" FFLAGS="${FFLAGS}" prefix=${PREFIX}
+# NO_UTEST=1: skip OpenBLAS's own post-build unit tests.
+# The 'kernel_regress:skx_avx' test is an x86 AVX/SKX-specific kernel regression
+# test that is compiled unconditionally when DYNAMIC_ARCH=1 but can never pass
+# on ppc64le hardware, causing a spurious build failure.
+make -j8 ${build_opts[@]} CFLAGS="${CF}" FFLAGS="${FFLAGS}" prefix=${PREFIX} NO_UTEST=1
 
 # Install OpenBLAS
-CFLAGS="${CF}" FFLAGS="${FFLAGS}" make install PREFIX="${PREFIX}" ${build_opts[@]}
+CFLAGS="${CF}" FFLAGS="${FFLAGS}" make install PREFIX="${PREFIX}" ${build_opts[@]} NO_UTEST=1
 OpenBLASInstallPATH=$(pwd)/$PREFIX
 OpenBLASConfigFile=$(find . -name OpenBLASConfig.cmake)
 OpenBLASPCFile=$(find . -name openblas.pc)
@@ -84,13 +110,13 @@ sed -i "/OpenBLAS_INCLUDE_DIRS/c\SET(OpenBLAS_INCLUDE_DIRS ${OpenBLASInstallPATH
 sed -i "/OpenBLAS_LIBRARIES/c\SET(OpenBLAS_INCLUDE_DIRS ${OpenBLASInstallPATH}/include)" ${OpenBLASConfigFile}
 sed -i "s|libdir=local/openblas/lib|libdir=${OpenBLASInstallPATH}/lib|" ${OpenBLASPCFile}
 sed -i "s|includedir=local/openblas/include|includedir=${OpenBLASInstallPATH}/include|" ${OpenBLASPCFile}
-export LD_LIBRARY_PATH="$OpenBLASInstallPATH/lib"
+export LD_LIBRARY_PATH="$OpenBLASInstallPATH/lib:${LD_LIBRARY_PATH}"
 export PKG_CONFIG_PATH="$OpenBLASInstallPATH/lib/pkgconfig:${PKG_CONFIG_PATH}"
-cd ..
+cd $CURRENT_DIR
 
 echo "--------------------openblas installed-------------------------------"
 
-pip install numpy==2.0.2 pytest absl-py
+python3.12 -m pip install numpy==2.0.2 pytest absl-py
 
 # clone source repository
 git clone $PACKAGE_URL
@@ -100,11 +126,12 @@ git submodule update --init
 
 export CFLAGS=-I/usr/include
 export CXXFLAGS=-I/usr/include
-export CC=/opt/rh/gcc-toolset-13/root/bin/gcc
-export CXX=/opt/rh/gcc-toolset-13/root/bin/g++
+# Point CC/CXX explicitly to gcc-toolset-15 binaries
+export CC=/opt/rh/gcc-toolset-15/root/usr/bin/gcc
+export CXX=/opt/rh/gcc-toolset-15/root/usr/bin/g++
 
 #install
-if ! ( pip install .) ; then
+if ! ( python3.12 -m pip install .) ; then
     echo "------------------$PACKAGE_NAME:Install_fails-------------------------------------"
     echo "$PACKAGE_URL $PACKAGE_NAME"
     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_Fails"
@@ -123,7 +150,7 @@ fi
 #
 # This is a known upstream test bug fixed after v0.5.4 but not backported.
 # Package functionality is correct; only the test assertion is incorrect.
-if ! pytest -k "not testArange_float8_e4m3b11fnuz"; then
+if ! python3.12 -m pytest -k "not testArange_float8_e4m3b11fnuz"; then
     echo "------------------$PACKAGE_NAME:Install_success_but_test_fails---------------------"
     echo "$PACKAGE_URL $PACKAGE_NAME"
     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_success_but_test_Fails"
