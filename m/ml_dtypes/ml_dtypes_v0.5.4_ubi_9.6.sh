@@ -4,7 +4,7 @@
 # Package       : ml_dtypes
 # Version       : v0.5.4
 # Source repo   : https://github.com/jax-ml/ml_dtypes.git
-# Tested on     : UBI:9.3
+# Tested on     : UBI:9.6
 # Language      : Python, C
 # Ci-Check  : True
 # Script License: Apache License, Version 2 or later
@@ -19,6 +19,8 @@
 
 yum install -y python python-pip python-devel git cmake gcc-toolset-13 wget
 export PATH=/opt/rh/gcc-toolset-13/root/usr/bin:$PATH
+
+
 
 PACKAGE_NAME=ml_dtypes
 PACKAGE_DIR=ml_dtypes
