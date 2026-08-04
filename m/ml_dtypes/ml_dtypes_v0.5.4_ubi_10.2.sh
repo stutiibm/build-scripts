@@ -4,9 +4,9 @@
 # Package       : ml_dtypes
 # Version       : v0.5.4
 # Source repo   : https://github.com/jax-ml/ml_dtypes.git
-# Tested on     : UBI:9.3
+# Tested on     : UBI:10.2
 # Language      : Python, C
-# Ci-Check  : True
+# Ci-Check      : True
 # Script License: Apache License, Version 2 or later
 # Maintainer    : Haritha Nagothu <haritha.nagothu2@ibm.com>
 # Disclaimer: This script has been tested in root mode on given
@@ -17,17 +17,38 @@
 #
 # ----------------------------------------------------------------------------
 
-yum install -y python python-pip python-devel git cmake gcc-toolset-13 wget
-export PATH=/opt/rh/gcc-toolset-13/root/usr/bin:$PATH
-
-
 PACKAGE_NAME=ml_dtypes
 PACKAGE_DIR=ml_dtypes
 PACKAGE_VERSION=${1:-v0.5.4}
 PACKAGE_URL=https://github.com/jax-ml/ml_dtypes.git
+CURRENT_DIR=$(pwd)
 
-#clone and install openblas from source
+# Install system dependencies
+# UBI 10: gcc-toolset-15 replaces gcc-toolset-13; python3.12 replaces python/python-devel
+dnf install -y python3.12 python3.12-devel python3.12-pip \
+    git cmake make wget \
+    gcc-toolset-15 gcc-toolset-15-gcc gcc-toolset-15-gcc-c++ \
+    gcc-toolset-15-gcc-gfortran
 
+# Configure GCC Toolset 15
+# UBI 10 dropped SCL (Software Collections Layer), so there is no 'scl enable'
+# command. Activate the toolset by prepending its bin to PATH directly.
+if [[ -f /opt/rh/gcc-toolset-15/enable ]]; then
+    source /opt/rh/gcc-toolset-15/enable
+elif [[ -d /opt/rh/gcc-toolset-15/root/usr/bin ]]; then
+    export PATH="/opt/rh/gcc-toolset-15/root/usr/bin:$PATH"
+    export LD_LIBRARY_PATH="/opt/rh/gcc-toolset-15/root/usr/lib64:${LD_LIBRARY_PATH}"
+else
+    echo "ERROR: gcc-toolset-15 not found"
+    exit 1
+fi
+
+echo "Using gcc: $(gcc --version | head -1)"
+
+# Upgrade pip and install base build tools
+pip3.12 install --upgrade pip setuptools wheel
+
+# clone and install openblas from source
 git clone https://github.com/OpenMathLib/OpenBLAS
 cd OpenBLAS
 git checkout v0.3.29
@@ -85,13 +106,13 @@ sed -i "/OpenBLAS_INCLUDE_DIRS/c\SET(OpenBLAS_INCLUDE_DIRS ${OpenBLASInstallPATH
 sed -i "/OpenBLAS_LIBRARIES/c\SET(OpenBLAS_INCLUDE_DIRS ${OpenBLASInstallPATH}/include)" ${OpenBLASConfigFile}
 sed -i "s|libdir=local/openblas/lib|libdir=${OpenBLASInstallPATH}/lib|" ${OpenBLASPCFile}
 sed -i "s|includedir=local/openblas/include|includedir=${OpenBLASInstallPATH}/include|" ${OpenBLASPCFile}
-export LD_LIBRARY_PATH="$OpenBLASInstallPATH/lib"
+export LD_LIBRARY_PATH="$OpenBLASInstallPATH/lib:${LD_LIBRARY_PATH}"
 export PKG_CONFIG_PATH="$OpenBLASInstallPATH/lib/pkgconfig:${PKG_CONFIG_PATH}"
-cd ..
+cd $CURRENT_DIR
 
 echo "--------------------openblas installed-------------------------------"
 
-pip install numpy==2.0.2 pytest absl-py
+pip3.12 install numpy==2.0.2 pytest absl-py
 
 # clone source repository
 git clone $PACKAGE_URL
@@ -101,11 +122,12 @@ git submodule update --init
 
 export CFLAGS=-I/usr/include
 export CXXFLAGS=-I/usr/include
-export CC=/opt/rh/gcc-toolset-13/root/bin/gcc
-export CXX=/opt/rh/gcc-toolset-13/root/bin/g++
+# Point CC/CXX explicitly to gcc-toolset-15 binaries
+export CC=/opt/rh/gcc-toolset-15/root/usr/bin/gcc
+export CXX=/opt/rh/gcc-toolset-15/root/usr/bin/g++
 
 #install
-if ! ( pip install .) ; then
+if ! ( pip3.12 install .) ; then
     echo "------------------$PACKAGE_NAME:Install_fails-------------------------------------"
     echo "$PACKAGE_URL $PACKAGE_NAME"
     echo "$PACKAGE_NAME  |  $PACKAGE_URL | $PACKAGE_VERSION | GitHub | Fail |  Install_Fails"
