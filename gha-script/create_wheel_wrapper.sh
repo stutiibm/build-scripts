@@ -32,6 +32,39 @@ else
     TEMP_BUILD_SCRIPT_PATH=""
 fi
 
+# function to install Python from a pre-built tarball from IBM/python-versions-pz
+# Usage: install_python_from_tarball <minor_version> <full_version>
+# e.g.   install_python_from_tarball "3.13" "3.13.14"
+install_python_from_tarball() {
+    local minor_ver=$1   # e.g. "3.13"
+    local full_ver=$2    # e.g. "3.13.14"
+
+    # detect architecture: uname -m returns "ppc64le" or "s390x"
+    local arch
+    arch=$(uname -m)
+
+    # The runners are ubuntu-24.04-ppc64le-p10; tarballs are built on Ubuntu 24.04
+    local ubuntu_ver="24.04"
+
+    local tarball="python-${full_ver}-linux-${ubuntu_ver}-${arch}.tar.gz"
+    local url="https://github.com/IBM/python-versions-pz/releases/download/${full_ver}/${tarball}"
+
+    echo
+    echo "==================== Installing Python ${full_ver} from IBM/python-versions-pz tarball ===================="
+    echo "URL: ${url}"
+    echo
+
+    yum install -y wget sudo zlib-devel ncurses openssl-devel xz xz-devel \
+                   libffi libffi-devel sqlite sqlite-devel sqlite-libs bzip2-devel
+    wget --tries=3 "${url}" -O "${tarball}"
+    tar -xzf "${tarball}" -C /usr/local
+    rm -f "${tarball}"
+    echo "/usr/local/lib" > /etc/ld.so.conf.d/python-local.conf && ldconfig
+
+    echo "Completed Python ${full_ver} tarball install."
+    "python${minor_ver}" --version
+}
+
 # function to install a specific Python version
 install_python_version() {
     local version=$1
@@ -44,31 +77,12 @@ install_python_version() {
         ;;
     "3.10")
         if ! python3.10 --version &>/dev/null; then
-            yum install -y sudo zlib-devel wget ncurses git make cmake openssl-devel xz xz-devel
-            yum install -y libffi libffi-devel sqlite sqlite-devel sqlite-libs bzip2-devel
-            wget https://www.python.org/ftp/python/3.10.20/Python-3.10.20.tgz
-            tar xf Python-3.10.20.tgz
-            cd Python-3.10.20
-            ./configure --prefix=/usr/local --enable-optimizations --enable-shared
-            make -j2
-            make altinstall
-            echo "/usr/local/lib" > /etc/ld.so.conf.d/python-local.conf && ldconfig
-            echo "Completed..."
-            cd .. && rm -rf Python-3.10.20.tgz
+            install_python_from_tarball "3.10" "3.10.20"
         fi
         ;;
     "3.13")
         if ! python3.13 --version &>/dev/null; then
-            yum install -y sudo zlib-devel wget ncurses git make cmake openssl-devel xz xz-devel
-            yum install -y libffi libffi-devel sqlite sqlite-devel sqlite-libs bzip2-devel
-            wget https://www.python.org/ftp/python/3.13.10/Python-3.13.10.tgz
-            tar xzf Python-3.13.10.tgz
-            cd Python-3.13.10
-            ./configure --prefix=/usr/local --enable-optimizations --enable-shared
-            make -j2
-            make altinstall
-            echo "/usr/local/lib" > /etc/ld.so.conf.d/python-local.conf && ldconfig
-            cd .. && rm -rf Python-3.13.10.tgz
+            install_python_from_tarball "3.13" "3.13.14"
         fi
         ;;
     "3.14")
@@ -76,16 +90,7 @@ install_python_version() {
             if [[ "$UBI_MAJOR" -ge 10 ]]; then
                 yum install -y python3.14 python3.14-devel python3.14-pip
             else
-                yum install -y sudo zlib-devel wget ncurses git make cmake openssl-devel xz xz-devel
-                yum install -y libffi libffi-devel sqlite sqlite-devel sqlite-libs bzip2-devel
-                wget https://www.python.org/ftp/python/3.14.3/Python-3.14.3.tgz
-                tar xzf Python-3.14.3.tgz
-                cd Python-3.14.3
-                ./configure --prefix=/usr/local --enable-optimizations --enable-shared
-                make -j2
-                make altinstall
-                echo "/usr/local/lib" > /etc/ld.so.conf.d/python-local.conf && ldconfig
-                cd .. && rm -rf Python-3.14.3.tgz
+                install_python_from_tarball "3.14" "3.14.6"
             fi
         fi
         ;;
