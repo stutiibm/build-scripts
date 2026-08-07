@@ -504,7 +504,9 @@ def inject_classifier(dist_info):
 def process_wheel(wheel_path, suffix):
     try:
         logger.info(f"Processing wheel: {wheel_path} with suffix: {suffix}")
-        wheel_dir = os.path.dirname(wheel_path)
+        # os.path.dirname of a bare filename returns ""; normalise to "." so
+        # that "wheel pack -d <dir>" and os.path.join produce consistent paths.
+        wheel_dir = os.path.dirname(wheel_path) or "."
         wheel_name = os.path.basename(wheel_path)
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -579,11 +581,11 @@ def process_wheel(wheel_path, suffix):
                 new_wheel_name = wheel_name.replace(old_version, f"{old_version}+{suffix}", 1)
 
         new_wheel_path = os.path.join(wheel_dir, new_wheel_name)
-        # Only remove the original when the repacked wheel has a different path
-        # (i.e. suffix was added). In PR builds the name is unchanged so
-        # wheel_path == new_wheel_path — the repacked file IS the original
-        # location and must not be deleted.
-        if new_wheel_path != wheel_path:
+        # Only remove the original when the repacked wheel is a genuinely
+        # different file (suffix was added → new filename).  Use abspath so
+        # that "foo.whl" and "./foo.whl" compare as equal and we never
+        # accidentally delete the freshly repacked wheel in PR builds.
+        if os.path.abspath(new_wheel_path) != os.path.abspath(wheel_path):
             os.remove(wheel_path)
         logger.info("Processing wheel completed")
         return new_wheel_path
