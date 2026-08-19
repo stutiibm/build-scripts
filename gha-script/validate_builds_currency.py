@@ -20,10 +20,19 @@ def trigger_script_validation_checks(file_name, version, image_name):
     log_file_path = os.path.join(current_dir, "build_log.txt")
     with open(log_file_path, "w") as log_file:
         try:
+            # For non-root builds the container runs as test_user but the workspace
+            # is bind-mounted as root-owned. Run the build script via sudo bash so
+            # it executes as root (yum/dnf, git clone etc. all work) while still
+            # inside the non-root image environment.
+            # Root builds use the plain UBI image and run as root directly.
+            if image_name == "docker_non_root_image":
+                run_cmd = f"sudo bash ./{file_name} {version}"
+            else:
+                run_cmd = f"./{file_name} {version}"
             command = [
                 "bash",
                 "-c",
-                f"cd /home/tester/ && ./{file_name} {version}"
+                f"cd /home/tester/ && {run_cmd}"
             ]
 
             container = client.containers.run(
