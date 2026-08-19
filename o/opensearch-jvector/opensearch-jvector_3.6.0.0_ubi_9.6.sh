@@ -32,6 +32,9 @@ SCRIPT_PATH=$(dirname $SCRIPT)
 
 sudo yum install -y git wget
 
+
+
+
 # ----------------------------------------------
 # Install java25
 # ----------------------------------------------
