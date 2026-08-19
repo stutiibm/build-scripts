@@ -31,6 +31,7 @@ SCRIPT=$(readlink -f $0)
 SCRIPT_PATH=$(dirname $SCRIPT)
 
 
+
 sudo yum install -y git wget
 
 # ----------------------------------------------
