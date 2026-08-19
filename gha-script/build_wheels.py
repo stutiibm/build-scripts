@@ -29,16 +29,19 @@ def trigger_build_wheel(wrapper_file, python_version, image_name, file_name, ver
     try:
         # For non-root builds the workspace is bind-mounted as root-owned but
         # the container runs as test_user. Prepend a chown so test_user can
-        # write to it and execute the wrapper script.
+        # write to it, then run the wrapper script via sudo bash so that
+        # yum/dnf calls inside it have the required root privileges.
         if image_name == "docker_non_root_image":
             setup = "sudo chown -R test_user:test_user /home/tester && "
+            run_script = f"sudo bash ./{wrapper_file}"
         else:
             setup = ""
+            run_script = f"./{wrapper_file}"
         # Command to run only the main script (which uses the additional file internally)
         command = [
             "bash",
             "-c",
-            f"{setup}cd /home/tester/ && ./{wrapper_file} {python_version} {file_name} {version} {post_process_file}"
+            f"{setup}cd /home/tester/ && {run_script} {python_version} {file_name} {version} {post_process_file}"
         ]
         
         # Run container
