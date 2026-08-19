@@ -26,7 +26,14 @@ def trigger_script_validation_checks(file_name, version, image_name):
             # inside the non-root image environment.
             # Root builds use the plain UBI image and run as root directly.
             if image_name == "docker_non_root_image":
-                run_cmd = f"sudo bash ./{file_name} {version}"
+                # The workspace is bind-mounted as root-owned but the container
+                # starts as test_user. Chown first so test_user can write to it
+                # (git clone, gradle cache, etc.), then run the build script via
+                # sudo bash so yum/dnf calls have the required root privileges.
+                run_cmd = (
+                    "sudo chown -R test_user:test_user /home/tester && "
+                    f"sudo bash ./{file_name} {version}"
+                )
             else:
                 run_cmd = f"./{file_name} {version}"
             command = [
