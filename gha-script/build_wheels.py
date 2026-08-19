@@ -10,11 +10,14 @@ def trigger_build_wheel(wrapper_file, python_version, image_name, file_name, ver
     # Docker client setup
     client = docker.DockerClient(base_url='unix://var/run/docker.sock')
     
-    # Modify permissions for the main script
-    st1 = os.stat(wrapper_file)
     current_dir = os.getcwd()
-    
-    os.chmod(f"{current_dir}/{wrapper_file}", st1.st_mode | stat.S_IEXEC)
+
+    # Make the wrapper script executable by owner, group, and other so that
+    # any user inside the container (e.g. test_user in non-root builds) can
+    # execute it after the workspace is bind-mounted.
+    st1 = os.stat(f"{current_dir}/{wrapper_file}")
+    os.chmod(f"{current_dir}/{wrapper_file}",
+             st1.st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
  
     print(current_dir)
     print(f"Running script: {wrapper_file}")
