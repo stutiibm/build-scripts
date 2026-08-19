@@ -20,10 +20,17 @@ def trigger_script_validation_checks(file_name, version, image_name):
     log_file_path = os.path.join(current_dir, "build_log.txt")
     with open(log_file_path, "w") as log_file:
         try:
+            # For non-root builds the workspace is bind-mounted as root-owned but
+            # the container runs as test_user. Prepend a chown so test_user can
+            # write to it. Root builds use the plain UBI image (no sudo) so skip.
+            if image_name == "docker_non_root_image":
+                setup = "sudo chown -R test_user:test_user /home/tester && "
+            else:
+                setup = ""
             command = [
                 "bash",
                 "-c",
-                f"cd /home/tester/ && ./{file_name} {version}"
+                f"{setup}cd /home/tester/ && ./{file_name} {version}"
             ]
 
             container = client.containers.run(
