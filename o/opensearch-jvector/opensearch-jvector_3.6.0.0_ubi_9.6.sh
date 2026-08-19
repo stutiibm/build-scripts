@@ -7,6 +7,7 @@
 # Tested on        : UBI 9.6
 # Language         : Java
 # Ci-Check     : True
+# Use Non-Root User: True
 # Script License   : Apache License, Version 2 or later
 # Maintainer       : Ethan Choe <ethanchoe@ibm.com>
 #
@@ -38,8 +39,6 @@ sudo dnf install -y java-25-openjdk-devel
 
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk
 export PATH="/usr/local/bin:$HOME/.local/bin:$JAVA_HOME/bin:$PATH"
-
-
 
 # -------------------------------
 # Remove existing repositories (if they exist)
