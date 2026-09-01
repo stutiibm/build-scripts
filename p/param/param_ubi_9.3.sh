@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------------------
 #
 # Package          : param
-# Version          : v2.1.0
+# Version          : v2.4.1
 # Source repo      : https://github.com/holoviz/param.git
 # Tested on        : UBI:9.3
 # Language         : Python
@@ -21,12 +21,11 @@
 set -ex
 
 PACKAGE_NAME=param
-PACKAGE_VERSION=${1:-v2.1.0}
+PACKAGE_VERSION=${1:-v2.4.1}
 PACKAGE_URL=https://github.com/holoviz/param.git
 
 yum install -y git python3.12 python3.12-devel python3.12-pip 
-yum install -y gcc-toolset-13 make 
-yum install -y wget sudo
+yum install -y gcc-toolset-13 make wget sudo
 yum install -y python3-numpy
 python3.12 -m pip install ez_setup nose pytest --ignore-installed
 python3.12 -m pip install pytest tox pytest-asyncio
