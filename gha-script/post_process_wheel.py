@@ -556,7 +556,7 @@ def inject_classifier(dist_info):
         logger.error(f"Failed to inject classifier → {e}")
 
 # Main processing function
-def process_wheel(wheel_path, suffix):
+def process_wheel(wheel_path, suffix, is_pr_build=False):
     try:
         logger.info(f"Processing wheel: {wheel_path} with suffix: {suffix}")
         # os.path.dirname of a bare filename returns ""; normalise to "." so
@@ -609,7 +609,9 @@ def process_wheel(wheel_path, suffix):
                 if existing_license_files:
                     update_record(dist_info, existing_license_files)
 
-                # Version suffix processing — skipped in PR builds (suffix is None).
+                # Version suffix processing.
+                # suffix is None either because no suffix is needed (first upload or SHA match)
+                # or because COS credentials are absent (PR build).
                 if suffix is not None:
                     old_version = read_version_from_metadata(dist_info)
 
@@ -621,8 +623,10 @@ def process_wheel(wheel_path, suffix):
                     update_metadata_version(dist_info, new_version)
                     dist_info = rename_dist_info_dir(extract_path, old_version, new_version)
                     regenerate_record(extract_path, dist_info)
+                elif is_pr_build:
+                    logger.info("Suffix addition skipped — PR build, no COS credentials.")
                 else:
-                    logger.info("Suffix addition skipped (PR build — no COS credentials).")
+                    logger.info("No suffix required — wheel will be published as-is.")
 
             # Pack wheel
             subprocess.run(["wheel", "pack", extract_path, "-d", wheel_dir], check=True)
@@ -677,15 +681,17 @@ def main():
 
     # Create COS client only when credentials are available (currency builds).
     # In PR builds credentials are absent — client stays None and resolve_suffix
-    # will return PR_BUILD_FALLBACK_SUFFIX without contacting COS.
+    # returns None without contacting COS.
     if COS_API_KEY and COS_SERVICE_INSTANCE_ID:
         client = create_cos_client()
         if client is None:
             logger.error("COS client creation failed")
             sys.exit(1)
+        is_pr_build = False
     else:
         logger.info("COS credentials not set — running in PR build mode (suffix resolution skipped)")
         client = None
+        is_pr_build = True
 
     suffix = resolve_suffix(
         client,
@@ -695,7 +701,7 @@ def main():
         wheel_sha256
     )
 
-    new_wheel = process_wheel(wheel_path, suffix)
+    new_wheel = process_wheel(wheel_path, suffix, is_pr_build)
     if not new_wheel:
         logger.error("Wheel processing failed")
         sys.exit(1)
