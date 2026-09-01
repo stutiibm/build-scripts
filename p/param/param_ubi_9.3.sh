@@ -26,7 +26,7 @@ PACKAGE_URL=https://github.com/holoviz/param.git
 
 yum install -y git python3.12 python3.12-devel python3.12-pip 
 yum install -y gcc-toolset-13 make 
-yum install -y wget
+yum install -y wget sudo
 yum install -y python3-numpy
 python3.12 -m pip install ez_setup nose pytest --ignore-installed
 python3.12 -m pip install pytest tox pytest-asyncio
