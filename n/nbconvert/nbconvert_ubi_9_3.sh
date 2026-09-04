@@ -23,6 +23,7 @@ set -ex
 PACKAGE_NAME=nbconvert
 PACKAGE_VERSION=${1:-v7.16.4}
 PACKAGE_URL=https://github.com/jupyter/nbconvert
+CURRENT_DIR=$(pwd)
 
 yum install -y git python3.12 python3.12-devel python3.12-pip wget gcc-toolset-13
 export PATH=/opt/rh/gcc-toolset-13/root/usr/bin:$PATH 
@@ -40,6 +41,10 @@ if ! python3.12 -m pip install .; then
 	echo "$PACKAGE_NAME  | $PACKAGE_VERSION | $OS_NAME | GitHub | Fail |  Build_Fails"
 	exit 1
 fi 
+
+python3.12 -m install build wheel
+python3.12 -m install build --wheel
+cp dist/*.whl "$CURRENT_DIR"
 
 # Test
 python3.12 -m pip install ".[test]" 
