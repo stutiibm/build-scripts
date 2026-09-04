@@ -42,8 +42,8 @@ if ! python3.12 -m pip install .; then
 	exit 1
 fi 
 
-python3.12 -m install build wheel
-python3.12 -m install build --wheel
+python3.12 -m pip install build wheel
+python3.12 -m build --wheel
 cp dist/*.whl "$CURRENT_DIR"
 
 # Test
