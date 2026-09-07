@@ -32,6 +32,10 @@ export PATH=/opt/rh/gcc-toolset-13/root/usr/bin:$PATH
 git clone $PACKAGE_URL
 cd $PACKAGE_NAME
 git checkout $PACKAGE_VERSION
+
+sed -i 's|osp.join(here, "..", ".git")|osp.join(here, ".git")|; s/if in_checkout:/if not in_checkout:/' hatch_build.py
+
+
 python3.12 -m pip install pytest
 
 # Install
@@ -41,32 +45,6 @@ if ! python3.12 -m pip install .; then
 	echo "$PACKAGE_NAME  | $PACKAGE_VERSION | $OS_NAME | GitHub | Fail |  Build_Fails"
 	exit 1
 fi 
-
-echo "===== DEBUG ====="
-echo "PWD=$(pwd)"
-echo "GIT_ROOT=$(git rev-parse --show-toplevel)"
-echo "GIT_DIR=$(git rev-parse --git-dir)"
-
-HATCH_FILE=$(find "$(pwd)" -name hatch_build.py -print -quit)
-echo "HATCH_FILE=$HATCH_FILE"
-
-HATCH_DIR=$(dirname "$(realpath "$HATCH_FILE")")
-echo "HATCH_DIR=$HATCH_DIR"
-
-EXPECTED_GIT="$(dirname "$HATCH_DIR")/.git"
-echo "EXPECTED_GIT=$EXPECTED_GIT"
-echo "EXPECTED_GIT_EXISTS=$(test -e "$EXPECTED_GIT" && echo yes || echo no)"
-
-echo "ACTUAL_GIT=$(git rev-parse --git-dir)"
-
-find share/templates -name '*.css' -print
-
-echo "================="
-
-
-python3.12 -m pip install build wheel
-python3.12 -m build --wheel
-cp dist/*.whl "$CURRENT_DIR"
 
 # Test
 python3.12 -m pip install ".[test]" 
