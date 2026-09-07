@@ -42,6 +42,28 @@ if ! python3.12 -m pip install .; then
 	exit 1
 fi 
 
+echo "===== DEBUG ====="
+echo "PWD=$(pwd)"
+echo "GIT_ROOT=$(git rev-parse --show-toplevel)"
+echo "GIT_DIR=$(git rev-parse --git-dir)"
+
+HATCH_FILE=$(find "$(pwd)" -name hatch_build.py -print -quit)
+echo "HATCH_FILE=$HATCH_FILE"
+
+HATCH_DIR=$(dirname "$(realpath "$HATCH_FILE")")
+echo "HATCH_DIR=$HATCH_DIR"
+
+EXPECTED_GIT="$(dirname "$HATCH_DIR")/.git"
+echo "EXPECTED_GIT=$EXPECTED_GIT"
+echo "EXPECTED_GIT_EXISTS=$(test -e "$EXPECTED_GIT" && echo yes || echo no)"
+
+echo "ACTUAL_GIT=$(git rev-parse --git-dir)"
+
+find share/templates -name '*.css' -print
+
+echo "================="
+
+
 python3.12 -m pip install build wheel
 python3.12 -m build --wheel
 cp dist/*.whl "$CURRENT_DIR"
