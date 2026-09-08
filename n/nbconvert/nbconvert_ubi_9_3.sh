@@ -20,6 +20,7 @@
 
 set -ex
 
+
 PACKAGE_NAME=nbconvert
 PACKAGE_VERSION=${1:-v7.16.4}
 PACKAGE_URL=https://github.com/jupyter/nbconvert
