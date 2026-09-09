@@ -37,7 +37,7 @@ git checkout $PACKAGE_VERSION
 pip install codacy-coverage tox
 
 #To get proper wheel naming
-export SETUPTOOLS_SCM_PRETEND_VERSION=${PACKAGE_VERSION#v}
+#export SETUPTOOLS_SCM_PRETEND_VERSION=${PACKAGE_VERSION#v}
 
 #Build package
 if ! pip install . ; then
