@@ -51,8 +51,8 @@ git submodule update --init --depth 1
 
 # setuptools_scm derives the version from git tags.
 # Export the version explicitly so shallow/detached checkouts work correctly.
-SEMVER="${PACKAGE_VERSION#v}"
-export SETUPTOOLS_SCM_PRETEND_VERSION="${SEMVER}"
+#SEMVER="${PACKAGE_VERSION#v}"
+#export SETUPTOOLS_SCM_PRETEND_VERSION="${SEMVER}"
 
 # Build wheel (all lz4 C sources are bundled in lz4libs/ — no system liblz4 needed)
 python3.12 -m build --wheel --outdir "${SOURCE_ROOT}/dist/"
