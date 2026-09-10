@@ -2,7 +2,7 @@
 update_wheel_mapping.py
 
 Checks and updates the wheel_mapping.json file in IBM Cloud Object Storage (COS)
-bucket 'ose-power-artifacts-stag'.
+bucket 'ose-power-artifacts-production'.
 
 If WHEEL_NAME is present and differs from PACKAGE_NAME:
 1. Downloads wheel_mapping.json from IBM COS.
@@ -108,12 +108,19 @@ def main() -> None:
     current_val = mapping.get(package_name)
     if current_val == wheel_name:
         print(f"Mapping '{package_name}': '{wheel_name}' already exists and is up to date in COS.")
+        print("\n--- Current wheel_mapping.json ---")
+        print(json.dumps(mapping, indent=2))
+        print("----------------------------------\n")
         return
 
     print(f"Updating mapping: '{package_name}': '{wheel_name}' (was: '{current_val}')")
     mapping[package_name] = wheel_name
 
     sorted_mapping = {k: mapping[k] for k in sorted(mapping.keys())}
+
+    print("\n--- Updated wheel_mapping.json ---")
+    print(json.dumps(sorted_mapping, indent=2))
+    print("----------------------------------\n")
 
     print("Uploading updated wheel_mapping.json to COS...")
     upload_wheel_mapping(token, sorted_mapping)
