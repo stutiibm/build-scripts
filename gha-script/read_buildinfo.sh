@@ -44,6 +44,12 @@ if [ -f $config_file ]; then
     validate_build_script=$(jq .validate_build_script $jsonObj)
   fi
 
+  # extract wheel_name if present
+  wheel_name=""
+  if $(jq 'has("wheel_name")' $jsonObj); then
+    wheel_name=$(jq -r .wheel_name $jsonObj)
+  fi
+
   echo "Checking for string/pattern match for version in build_info.json"
 
   if [[ $(jq --arg ver "$VERSION" '.[$ver]' $config_file) == null ]]; then
@@ -92,6 +98,11 @@ if [ -f $config_file ]; then
     # version-specific docker_build
     if [[ $(jq "$version_block | has(\"docker_build\")" $config_file) == "true" ]]; then
       build_docker=$(jq "$version_block.docker_build" $config_file)
+    fi
+
+    # version-specific wheel_name
+    if [[ $(jq "$version_block | has(\"wheel_name\")" $config_file) == "true" ]]; then
+      wheel_name=$(jq -r "$version_block.wheel_name" $config_file)
     fi
   fi
 fi
@@ -278,6 +289,13 @@ if jq -e 'has("auditwheel_exclude")' "$config_file" >/dev/null; then
   AUDITWHEEL_EXCLUDE=$(jq -r '.auditwheel_exclude | join(" ")' "$config_file")
 fi
 
+# Extract optional skip_python_versions list (e.g. ["3.12","3.14"]).
+# When absent the variable stays empty and all Python versions are built.
+SKIP_PYTHON_VERSIONS=""
+if jq -e 'has("skip_python_versions")' "$config_file" >/dev/null; then
+  SKIP_PYTHON_VERSIONS=$(jq -r '.skip_python_versions | join(",")' "$config_file")
+fi
+
 # ---------------------------------------------------------------------------
 # Write variable.sh
 # JSON objects are single-quote-wrapped so embedded double-quotes survive.
@@ -291,6 +309,8 @@ echo "export BASENAME=\"$basename\""                             >> $CUR_DIR/var
 echo "export NON_ROOT_BUILD=\"$nonRootBuild\""                   >> $CUR_DIR/variable.sh
 echo "export TESTED_ON=\"$tested_on\""                           >> $CUR_DIR/variable.sh
 echo "export AUDITWHEEL_EXCLUDE=\"$AUDITWHEEL_EXCLUDE\""         >> $CUR_DIR/variable.sh
+echo "export SKIP_PYTHON_VERSIONS=\"$SKIP_PYTHON_VERSIONS\""     >> $CUR_DIR/variable.sh
+echo "export WHEEL_NAME=\"$wheel_name\""                         >> $CUR_DIR/variable.sh
 # Full array  -  kept for any downstream consumer that still needs it
 echo "export BUILD_SCRIPTS_JSON='$BUILD_SCRIPTS_JSON'"       >> $CUR_DIR/variable.sh
 # Per-UBI-major named exports  -  empty string when that UBI version has no script
