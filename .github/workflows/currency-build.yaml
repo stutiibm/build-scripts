@@ -93,6 +93,13 @@ jobs:
           chmod +x ./gha-script/read_buildinfo.sh
           bash ./gha-script/read_buildinfo.sh
 
+      - name: Update wheel mapping in COS
+        env:
+          GHA_CURRENCY_SERVICE_ID_API_KEY: ${{ secrets.GHA_CURRENCY_SERVICE_ID_API_KEY }}
+        run: |
+          source variable.sh
+          python3 ./gha-script/upload-scripts/update_wheel_mapping.py
+
       - name: Show contents of variable.sh
         run: |
           echo "===== variable.sh ====="
