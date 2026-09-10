@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 update_wheel_mapping.py
 
@@ -7,7 +6,7 @@ bucket 'ose-power-artifacts-stag'.
 
 If WHEEL_NAME is present and differs from PACKAGE_NAME:
 1. Downloads wheel_mapping.json from IBM COS.
-2. Checks if mapping[WHEEL_NAME] == PACKAGE_NAME.
+2. Checks if mapping[PACKAGE_NAME] == WHEEL_NAME.
 3. If not present or different, updates it and uploads it back to COS.
 """
 
@@ -23,7 +22,6 @@ IAM_TOKEN_URL = "https://iam.cloud.ibm.com/identity/token"
 
 
 def get_iam_token(api_key: str) -> str:
-    """Retrieve IAM Bearer access token using IBM Cloud API key."""
     payload = {
         "grant_type": "urn:ibm:params:oauth:grant-type:apikey",
         "apikey": api_key,
@@ -41,7 +39,6 @@ def get_iam_token(api_key: str) -> str:
 
 
 def get_wheel_mapping(token: str) -> dict:
-    """Download wheel_mapping.json from IBM COS."""
     url = f"{COS_ENDPOINT}/{COS_BUCKET}/{MAPPING_FILE_KEY}"
     headers = {
         "Authorization": f"Bearer {token}",
@@ -62,7 +59,6 @@ def get_wheel_mapping(token: str) -> dict:
 
 
 def upload_wheel_mapping(token: str, mapping_data: dict) -> None:
-    """Upload updated wheel_mapping.json to IBM COS."""
     url = f"{COS_ENDPOINT}/{COS_BUCKET}/{MAPPING_FILE_KEY}"
     headers = {
         "Authorization": f"Bearer {token}",
@@ -77,8 +73,8 @@ def upload_wheel_mapping(token: str, mapping_data: dict) -> None:
 
 
 def main() -> None:
-    package_name = os.environ.get("PACKAGE_NAME", "").strip()
-    wheel_name = os.environ.get("WHEEL_NAME", "").strip()
+    package_name = os.environ.get("PACKAGE_NAME", "").strip().lower()
+    wheel_name = os.environ.get("WHEEL_NAME", "").strip().lower()
     api_key = os.environ.get("GHA_CURRENCY_SERVICE_ID_API_KEY", "").strip()
 
     print(f"Package Name: {package_name}")
@@ -92,7 +88,7 @@ def main() -> None:
         print("WHEEL_NAME is not set or empty. Skipping wheel mapping update.")
         return
 
-    if wheel_name.lower() == package_name.lower():
+    if wheel_name == package_name:
         print(f"WHEEL_NAME '{wheel_name}' matches PACKAGE_NAME '{package_name}'. No mapping update needed.")
         return
 
@@ -105,18 +101,19 @@ def main() -> None:
     token = get_iam_token(api_key)
 
     print("Fetching current wheel_mapping.json from COS...")
-    mapping = get_wheel_mapping(token)
+    raw_mapping = get_wheel_mapping(token)
+    # Ensure existing mapping keys and values are normalized to lowercase
+    mapping = {k.strip().lower(): v.strip().lower() for k, v in raw_mapping.items()}
 
-    current_val = mapping.get(wheel_name)
-    if current_val == package_name:
-        print(f"Mapping '{wheel_name}': '{package_name}' already exists and is up to date in COS.")
+    current_val = mapping.get(package_name)
+    if current_val == wheel_name:
+        print(f"Mapping '{package_name}': '{wheel_name}' already exists and is up to date in COS.")
         return
 
-    print(f"Updating mapping: '{wheel_name}': '{package_name}' (was: '{current_val}')")
-    mapping[wheel_name] = package_name
+    print(f"Updating mapping: '{package_name}': '{wheel_name}' (was: '{current_val}')")
+    mapping[package_name] = wheel_name
 
-    # Sort keys alphabetically
-    sorted_mapping = {k: mapping[k] for k in sorted(mapping.keys(), key=lambda s: s.lower())}
+    sorted_mapping = {k: mapping[k] for k in sorted(mapping.keys())}
 
     print("Uploading updated wheel_mapping.json to COS...")
     upload_wheel_mapping(token, sorted_mapping)
