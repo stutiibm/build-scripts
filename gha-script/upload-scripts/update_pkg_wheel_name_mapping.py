@@ -3,7 +3,7 @@
 update_pkg_wheel_name_mapping.py
 
 Checks and updates the pkg_wheel_name_mapping.json file in IBM Cloud Object Storage (COS)
-bucket 'ose-power-artifacts-production'.
+bucket 'ose-power-artifacts-stag'.
 
 If WHEEL_NAME is present and differs from PACKAGE_NAME:
 1. Downloads pkg_wheel_name_mapping.json from IBM COS.
@@ -17,7 +17,7 @@ import sys
 import requests
 
 COS_ENDPOINT = "https://s3.us.cloud-object-storage.appdomain.cloud"
-COS_BUCKET = "ose-power-artifacts-production"
+COS_BUCKET = "ose-power-artifacts-stag"
 MAPPING_FILE_KEY = "pkg_wheel_name_mapping.json"
 IAM_TOKEN_URL = "https://iam.cloud.ibm.com/identity/token"
 
