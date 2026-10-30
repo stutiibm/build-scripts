@@ -84,9 +84,10 @@ jobs:
       docker_build_enabled:   ${{ steps.set_flags.outputs.docker_build_enabled }}
       build_package_enabled:  ${{ steps.set_flags.outputs.build_package_enabled }}
       # Per-UBI-major named outputs  -  each is a {script,tested_on} JSON object or ""
-      script_ubi8:  ${{ steps.emit.outputs.script_ubi8 }}
-      script_ubi9:  ${{ steps.emit.outputs.script_ubi9 }}
-      script_ubi10: ${{ steps.emit.outputs.script_ubi10 }}
+      script_ubi8:            ${{ steps.emit.outputs.script_ubi8 }}
+      script_ubi9:            ${{ steps.emit.outputs.script_ubi9 }}
+      script_ubi10:           ${{ steps.emit.outputs.script_ubi10 }}
+      skip_python_versions:   ${{ steps.emit.outputs.skip_python_versions }}
 
     steps:
       - name: Checkout code (Pull Request)
@@ -329,6 +330,7 @@ jobs:
           echo "SCRIPT_UBI8=$SCRIPT_UBI8"
           echo "SCRIPT_UBI9=$SCRIPT_UBI9"
           echo "SCRIPT_UBI10=$SCRIPT_UBI10"
+          echo "SKIP_PYTHON_VERSIONS=$SKIP_PYTHON_VERSIONS"
           # Use multiline delimiter syntax so JSON double-quotes are not truncated
           {
             echo "script_ubi8<<__EOF__"
@@ -339,6 +341,9 @@ jobs:
             echo "__EOF__"
             echo "script_ubi10<<__EOF__"
             echo "$SCRIPT_UBI10"
+            echo "__EOF__"
+            echo "skip_python_versions<<__EOF__"
+            echo "$SKIP_PYTHON_VERSIONS"
             echo "__EOF__"
           } >> $GITHUB_OUTPUT
 
@@ -646,7 +651,7 @@ jobs:
 
   wheel_build_ubi9_py310:
     needs: build_info
-    if: ${{ needs.build_info.outputs.wheel_build_enabled == 'true' && needs.build_info.outputs.script_ubi9 != '' }}
+    if: ${{ needs.build_info.outputs.wheel_build_enabled == 'true' && needs.build_info.outputs.script_ubi9 != '' && !contains(needs.build_info.outputs.skip_python_versions, '3.10') }}
     runs-on: ${{ github.event_name == 'workflow_dispatch' && inputs.large-runner || 'ubuntu-24.04-ppc64le-p10' }}
     env:
       PYTHON_VERSION: "3.10"
