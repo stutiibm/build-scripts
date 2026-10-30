@@ -288,10 +288,29 @@ if jq -e 'has("auditwheel_exclude")' "$config_file" >/dev/null; then
 fi
 
 # Extract optional skip_python_versions list (e.g. ["3.12","3.14"]).
-# When absent the variable stays empty and all Python versions are built.
-SKIP_PYTHON_VERSIONS=""
+# Python 3.10 is skipped by default (support dropped). A package may still
+# produce a cp310-abi3 wheel by explicitly listing "3.10" in a new
+# "build_python_versions" allowlist field — but the default is to skip it.
+SKIP_PYTHON_VERSIONS="3.10"
 if jq -e 'has("skip_python_versions")' "$config_file" >/dev/null; then
-  SKIP_PYTHON_VERSIONS=$(jq -r '.skip_python_versions | join(",")' "$config_file")
+  EXISTING=$(jq -r '.skip_python_versions | join(",")' "$config_file")
+  # Merge: keep 3.10 in the skip list unless the package explicitly opts in
+  # via build_python_versions containing "3.10".
+  if jq -e 'has("build_python_versions")' "$config_file" >/dev/null; then
+    if jq -e '[.build_python_versions[] | select(. == "3.10")] | length > 0' "$config_file" >/dev/null; then
+      # Package explicitly opts 3.10 back in (abi3 package) — remove 3.10 from skip list
+      SKIP_PYTHON_VERSIONS=$(echo "$EXISTING" | tr ',' '\n' | grep -v '^3\.10$' | tr '\n' ',' | sed 's/,$//')
+    else
+      SKIP_PYTHON_VERSIONS=$(echo "3.10,$EXISTING" | tr ',' '\n' | sort -u | tr '\n' ',' | sed 's/,$//')
+    fi
+  else
+    SKIP_PYTHON_VERSIONS=$(echo "3.10,$EXISTING" | tr ',' '\n' | sort -u | tr '\n' ',' | sed 's/,$//')
+  fi
+elif jq -e 'has("build_python_versions")' "$config_file" >/dev/null; then
+  if jq -e '[.build_python_versions[] | select(. == "3.10")] | length > 0' "$config_file" >/dev/null; then
+    # Package explicitly opts 3.10 back in (abi3 package)
+    SKIP_PYTHON_VERSIONS=""
+  fi
 fi
 
 # ---------------------------------------------------------------------------
