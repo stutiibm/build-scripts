@@ -454,8 +454,23 @@ generate_sha() {
     local cur_dir="${3:-$PWD}"
     local wheel="${4:-}"
 
+    # --- Debug Logging ---
+    echo "[DEBUG] cur_dir: $cur_dir"
+    echo "[DEBUG] PWD: $PWD"
+    echo "[DEBUG] build_script: $build_script"
+    if [[ -n "$build_script" ]]; then
+        local b_dir_debug="$(dirname "$build_script")"
+        echo "[DEBUG] b_dir: $b_dir_debug"
+        echo "[DEBUG] git repo root of b_dir: $(git -C "$b_dir_debug" rev-parse --show-toplevel 2>&1 || echo 'failed to detect')"
+    fi
+    # ---------------------
+    
+     
     # Mark repo as safe (to avoid dubious ownership issue in containers)
     git config --global --add safe.directory "$cur_dir" 2>/dev/null || true
+
+    # Mark all mounted workspace/build-script paths or b_dir as safe
+    git config --global --add safe.directory '*' 2>/dev/null || true
 
     if [[ -z "$build_script" && -n "${SCRIPT_DIR:-}" ]]; then
         local pkg_name="${PACKAGE_NAME:-}"
